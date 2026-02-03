@@ -3,7 +3,25 @@
 
 <h1>Restaurants</h1>
 
+<div class="filters">
+    <form method="get">
+        <fieldset>
+            <legend>Dietary Preferences</legend>
 
+            @foreach (var tag in new[] { "Vegetarian", "Vegan", "Halal", "Gluten-Free" })
+            {
+                <label>
+                    <input type="checkbox" name="SelectedDietaryFilters" value="@tag" checked="@Model.SelectedDietaryFilters.Contains(tag)" />
+                    @tag
+                </label>
+            }
+
+            <button type="submit" class="btn btn-primary mt-2">
+                Apply Filters
+            </button>
+        </fieldset>
+    </form>
+</div>
 
 <ul>
     @foreach (var r in Model.Restaurants)

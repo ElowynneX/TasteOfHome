@@ -12,6 +12,8 @@ namespace TasteOfHome.Pages.Restaurants
         [BindProperty(SupportsGet = true)]
         public List<String> SelectedDietaryFilters{ get; set; } = new();
 
+        //public List<string> DietaryTagList = new List<string> { "Vegetarian", "Vegan", "Halal", "Gluten-Free" };
+
         public void OnGet()
         {
             var allRestaurants = RestaurantSeed.GetRestaurants();

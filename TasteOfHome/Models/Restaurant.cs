@@ -7,8 +7,5 @@
         public string Cuisine { get; set; } = "";
         public string Location { get; set; } = "";
         public List<string> DietaryTags { get; set; } = new();
-
-        public List<string> DietaryTagList = 
-            new List<string> {"Vegetarian", "Vegan", "Halal", "Gluten-Free"};
     }
 }
