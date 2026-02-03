@@ -1,0 +1,15 @@
+﻿@page
+@model TasteOfHome.Pages.RegisterModel
+
+<h1>Register</h1>
+
+@if (Model.Message != "")
+{
+    <p>@Model.Message</p>
+}
+
+<form method="post">
+    <input name="Email" placeholder="Email" /><br /><br />
+    <input name="Password" type="password" placeholder="Password" /><br /><br />
+    <button type="submit">Register</button>
+</form>

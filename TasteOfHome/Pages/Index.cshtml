@@ -4,6 +4,21 @@
     ViewData["Title"] = "TasteOfHome";
 }
 
+@using TasteOfHome.Data
+
+@if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+{
+    <p><strong>Logged in as:</strong> @FakeUsers.LoggedInEmail</p>
+}
+
+
+@if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+{
+    <form method="post" asp-page="/Logout">
+        <button type="submit">Logout</button>
+    </form>
+}
+
 <div class="text-center">
     <h1 class="display-4">TasteOfHome</h1>
     <p>Discover authentic restaurants by cuisine, culture, and dietary needs.</p>

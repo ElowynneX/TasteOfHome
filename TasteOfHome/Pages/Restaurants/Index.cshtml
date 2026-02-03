@@ -3,6 +3,14 @@
 
 <h1>Restaurants</h1>
 
+@using TasteOfHome.Data
+
+@if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+{
+    <p><strong>Logged in as:</strong> @FakeUsers.LoggedInEmail</p>
+}
+
+
 <div class="filters">
     <form method="get">
         <fieldset>
