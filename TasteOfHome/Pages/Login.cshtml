@@ -1,15 +1,31 @@
 ﻿@page
 @model TasteOfHome.Pages.LoginModel
-
-<h1>Login</h1>
-
-@if (Model.Error != "")
-{
-    <p style="color:red;">@Model.Error</p>
+@{
+    ViewData["Title"] = "Login";
 }
 
-<form method="post">
-    <input name="Email" placeholder="Email" /><br /><br />
-    <input name="Password" type="password" placeholder="Password" /><br /><br />
-    <button type="submit">Login</button>
-</form>
+<div class="auth-wrapper">
+    <div class="auth-card-lg">
+        <div class="auth-title">Login</div>
+
+        @if (!string.IsNullOrEmpty(Model.Error))
+        {
+            <div class="auth-error">@Model.Error</div>
+        }
+
+        <form method="post">
+            <input class="form-control auth-input mb-3"
+                   name="Email"
+                   placeholder="Email" />
+
+            <input class="form-control auth-input mb-4"
+                   name="Password"
+                   type="password"
+                   placeholder="Password" />
+
+            <button class="btn btn-toh w-100 auth-btn">
+                Login
+            </button>
+        </form>
+    </div>
+</div>

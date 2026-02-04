@@ -1,0 +1,38 @@
+﻿@page
+@using TasteOfHome.Data
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="content">
+
+    @if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+    {
+        <div class="profile-card">
+
+            <div class="profile-avatar">
+                <i class="bi bi-person"></i>
+            </div>
+
+            <div class="profile-info">
+                <h2 class="profile-name">
+                    @FakeUsers.LoggedInEmail.Split('@')[0]
+                </h2>
+
+                <p class="profile-email">
+                    <i class="bi bi-envelope"></i>
+                    @FakeUsers.LoggedInEmail
+                </p>
+
+                <span class="profile-badge">
+                    Food Explorer
+                </span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>You are not logged in.</p>
+    }
+
+</div>

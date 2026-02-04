@@ -1,78 +1,104 @@
 ﻿@page
 @model TasteOfHome.Pages.Restaurants.IndexModel
 
-<h1>Restaurants</h1>
-
 <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar">
+
         <div class="sidebar-header">
-            <span class="sidebar-title">Filters</span>
+            <i class="bi bi-funnel"></i>
+            <span>Filters</span>
         </div>
 
-        <a href="/Restaurants" class="clear-filters">
+        <a href="/Restaurants" class="clear-filters-btn">
             Clear All Filters
         </a>
 
-        <form method="get" onchange="this.submit()">
-            <div class="filter-section">
-                <h4>Dietary Preferences</h4>
+        <hr />
+
+        <form method="get" onchange="this.submit()" class="filters-body">
+
+            <div class="filter-group">
+                <div class="filter-title orange-dot">
+                    Dietary Preferences
+                </div>
 
                 @foreach (var tag in new[] { "Vegetarian", "Vegan", "Halal", "Gluten-Free" })
                 {
-                    <label class="checkbox-item">
+                    <label class="filter-item">
                         <input type="checkbox"
                                name="SelectedDietaryFilters"
                                value="@tag"
                                checked="@Model.SelectedDietaryFilters.Contains(tag)" />
-                        <span>@tag</span>
+
+                        <span class="diet-label @tag.Replace("-", "").ToLower()">
+                            @tag
+                        </span>
                     </label>
                 }
             </div>
 
-            <div class="filter-section">
-                <h4>Cuisine Type</h4>
+            <hr />
+
+            <div class="filter-group">
+                <div class="filter-title yellow-dot">
+                    Cuisine Type
+                </div>
 
                 @foreach (var tag in new[] { "Indian", "Chinese", "Middle Eastern", "Italian", "Vietnamese", "Ethiopian" })
                 {
-                    <label class="checkbox-item">
+                    <label class="filter-item">
                         <input type="checkbox"
                                name="SelectedCuisineFilter"
                                value="@tag"
                                checked="@Model.SelectedCuisineFilter.Contains(tag)" />
-                        <span>@tag</span>
+
+                        <span class="cuisine-label">
+                            @tag
+                        </span>
                     </label>
                 }
             </div>
         </form>
     </aside>
 
-    <!-- Main content -->
-    <main class="content">
-        <ul>
+    <main class="content w-100">
+        <h2 class="page-title">Discover Restaurants</h2>
+
+        <div class="restaurant-grid">
             @foreach (var r in Model.Restaurants)
             {
-                <li>
-                    <strong>@r.Name</strong>
-                    (@r.Cuisine) - @r.Location
-                    <br />
-                    <small>
-                        Dietary:
-                        @if (r.DietaryTags != null && r.DietaryTags.Any())
-                        {
-                            @string.Join(", ", r.DietaryTags)
-                        }
-                        else
-                        {
-                            <span>None</span>
-                        }
-                    </small>
-                </li>
-            }
-        </ul>
+                <div class="card-toh food-card">
+                    <div class="food-image">
+                        <span class="food-cuisine">@r.Cuisine</span>
+                    </div>
 
+                    <div class="food-body">
+                        <h5 class="food-title">@r.Name</h5>
+
+                        <p class="food-location">
+                            <i class="bi bi-geo-alt"></i> @r.Location
+                        </p>
+
+                        <div class="food-tags">
+                            @if (r.DietaryTags.Any())
+                            {
+                                @foreach (var tag in r.DietaryTags)
+                                {
+                                    <span class="diet-chip @tag.Replace("-", "").ToLower()">
+                                        @tag.ToLower()
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="diet-chip neutral">none</span>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
     </main>
 </div>
-
-
-

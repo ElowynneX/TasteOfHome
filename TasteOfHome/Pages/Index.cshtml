@@ -4,26 +4,26 @@
     ViewData["Title"] = "TasteOfHome";
 }
 
-@using TasteOfHome.Data
+<div class="home-hero">
+    <div class="home-hero-inner">
+        <h1 class="home-title">
+            TasteOfHome
+            <span class="title-accent"></span>
+        </h1>
 
-@if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
-{
-    <p><strong>Logged in as:</strong> @FakeUsers.LoggedInEmail</p>
-}
+        <p class="home-subtitle">
+            Discover authentic restaurants by cuisine, culture,
+            and dietary needs — all in one place.
+        </p>
 
+        <div class="home-cta">
+            <a class="btn btn-toh btn-lg" href="/Restaurants">
+                Browse Restaurants
+            </a>
 
-@if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
-{
-    <form method="post" asp-page="/Logout">
-        <button type="submit">Logout</button>
-    </form>
-}
-
-<div class="text-center">
-    <h1 class="display-4">TasteOfHome</h1>
-    <p>Discover authentic restaurants by cuisine, culture, and dietary needs.</p>
-
-    <a class="btn btn-primary" href="/Restaurants">
-        Browse Restaurants
-    </a>
+            <p class="home-helper">
+                Filter by cuisine • dietary preferences • culture
+            </p>
+        </div>
+    </div>
 </div>
