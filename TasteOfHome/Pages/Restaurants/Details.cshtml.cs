@@ -8,12 +8,13 @@ namespace TasteOfHome.Pages.Restaurants
     public class DetailsModel : PageModel
     {
         private readonly HttpClient _httpClient;
-        public Restaurant Restaurant { get; set; }
-
         public DetailsModel(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
         }
+
+        //Variable used in the page view
+        public Restaurant Restaurant { get; set; }
 
 
         //--------------//
@@ -27,7 +28,7 @@ namespace TasteOfHome.Pages.Restaurants
             //If the API call fails, redirect to ERROR page
             if (!response.IsSuccessStatusCode)
             {
-
+                RedirectToPage("Error", "Pages");
             }
 
             //If the API call succeeds, get the body content from the API response

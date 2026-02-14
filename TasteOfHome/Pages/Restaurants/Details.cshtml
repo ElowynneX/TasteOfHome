@@ -5,4 +5,14 @@
     <h1>
         @Model.Restaurant.Name
     </h1>
+
+    <h2>
+        @Model.Restaurant.Location
+        <br />
+        @Model.Restaurant.Cuisine
+    </h2>
+
+    <a ="/Restaurants/Feedback" asp-route-id="@Model.Restaurant.Id>
+            Submit Authenticity Feedback
+    </a>
 </body>
