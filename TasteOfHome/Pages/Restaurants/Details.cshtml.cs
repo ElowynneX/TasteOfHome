@@ -34,7 +34,6 @@ namespace TasteOfHome.Pages.Restaurants
             //If the API call succeeds, get the body content from the API response
             Restaurant = await response.Content.ReadFromJsonAsync<Restaurant>();
             return Page();
-
         }
     }
 }

@@ -12,7 +12,13 @@
         @Model.Restaurant.Cuisine
     </h2>
 
-    <a ="/Restaurants/Feedback" asp-route-id="@Model.Restaurant.Id>
+    <p>
+        Current Restaurant Rating: @Model.Restaurant.Rating
+        <br />
+        Current Restaurant Authenticity: @Model.Restaurant.Authenticity
+    </p>
+
+    <a asp-page="/Restaurants/Feedback" asp-route-id="@Model.Restaurant.Id">
             Submit Authenticity Feedback
     </a>
 </body>
