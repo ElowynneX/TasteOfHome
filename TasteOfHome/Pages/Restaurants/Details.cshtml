@@ -10,6 +10,8 @@
         @Model.Restaurant.Location
         <br />
         @Model.Restaurant.Cuisine
+        <br />
+        @Model.Restaurant.Address
     </h2>
 
     <p>
@@ -17,6 +19,18 @@
         <br />
         Current Restaurant Authenticity: @Model.Restaurant.Authenticity
     </p>
+
+    @if(Model.Restaurant.NumberOfReviews < 20)
+    {
+        <p>
+            Current Authenticity Status: False
+        </p>
+    }
+    else{
+        <p>
+            Current Authenticity Status: True
+        </p>
+    }
 
     <a asp-page="/Restaurants/Feedback" asp-route-id="@Model.Restaurant.Id">
             Submit Authenticity Feedback
