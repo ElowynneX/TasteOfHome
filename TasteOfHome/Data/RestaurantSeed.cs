@@ -14,7 +14,8 @@ namespace TasteOfHome.Data
                     Name = "Spice Garden",
                     Cuisine = "Indian",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Halal", "Vegetarian" }
+                    DietaryTags = new List<string> { "Halal", "Vegetarian" },
+                    Address = "123 Queen St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -22,7 +23,8 @@ namespace TasteOfHome.Data
                     Name = "Green Bowl",
                     Cuisine = "Vegan",
                     Location = "Waterloo",
-                    DietaryTags = new List<string> { "Vegan", "Gluten-Free" }
+                    DietaryTags = new List<string> { "Vegan", "Gluten-Free" },
+                    Address = "45 King St N, Waterloo, ON"
                 },
                 new Restaurant
                 {
@@ -30,7 +32,8 @@ namespace TasteOfHome.Data
                     Name = "Golden Wok",
                     Cuisine = "Chinese",
                     Location = "Markham",
-                    DietaryTags = new List<string> { "Vegetarian" }
+                    DietaryTags = new List<string> { "Vegetarian" },
+                    Address = "789 Highway 7, Markham, ON"
                 },
                 new Restaurant
                 {
@@ -38,7 +41,8 @@ namespace TasteOfHome.Data
                     Name = "Istanbul Grill",
                     Cuisine = "Turkish",
                     Location = "Mississauga",
-                    DietaryTags = new List<string> { "Halal" }
+                    DietaryTags = new List<string> { "Halal" },
+                    Address = "310 Burnhamthorpe Rd, Mississauga, ON"
                 },
                 new Restaurant
                 {
@@ -46,7 +50,8 @@ namespace TasteOfHome.Data
                     Name = "Nonna’s Kitchen",
                     Cuisine = "Italian",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Vegetarian" }
+                    DietaryTags = new List<string> { "Vegetarian" },
+                    Address = "88 College St, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -54,7 +59,8 @@ namespace TasteOfHome.Data
                     Name = "Seoul Street",
                     Cuisine = "Korean",
                     Location = "North York",
-                    DietaryTags = new List<string> { }
+                    DietaryTags = new List<string> { },
+                    Address = "512 Yonge St, North York, ON"
                 },
                 new Restaurant
                 {
@@ -62,7 +68,8 @@ namespace TasteOfHome.Data
                     Name = "Pho Saigon",
                     Cuisine = "Vietnamese",
                     Location = "Scarborough",
-                    DietaryTags = new List<string> { "Halal", "Gluten-Free" }
+                    DietaryTags = new List<string> { "Halal", "Gluten-Free" },
+                    Address = "401 Lawrence Ave E, Scarborough, ON"
                 },
                 new Restaurant
                 {
@@ -70,7 +77,8 @@ namespace TasteOfHome.Data
                     Name = "Tokyo Bento",
                     Cuisine = "Japanese",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { }
+                    DietaryTags = new List<string> { },
+                    Address = "210 Dundas St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -78,7 +86,8 @@ namespace TasteOfHome.Data
                     Name = "El Mariachi",
                     Cuisine = "Mexican",
                     Location = "Brampton",
-                    DietaryTags = new List<string> { "Gluten-Free" }
+                    DietaryTags = new List<string> { "Gluten-Free" },
+                    Address = "90 Main St S, Brampton, ON"
                 },
                 new Restaurant
                 {
@@ -86,7 +95,8 @@ namespace TasteOfHome.Data
                     Name = "Falafel House",
                     Cuisine = "Middle Eastern",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Halal", "Vegetarian", "Vegan" }
+                    DietaryTags = new List<string> { "Halal", "Vegetarian", "Vegan" },
+                    Address = "670 Bloor St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -94,7 +104,8 @@ namespace TasteOfHome.Data
                     Name = "Taste of Punjab",
                     Cuisine = "Indian",
                     Location = "Brampton",
-                    DietaryTags = new List<string> { "Vegetarian" }
+                    DietaryTags = new List<string> { "Vegetarian" },
+                    Address = "188 Queen St E, Brampton, ON"
                 },
                 new Restaurant
                 {
@@ -102,7 +113,8 @@ namespace TasteOfHome.Data
                     Name = "Bangkok Express",
                     Cuisine = "Thai",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Gluten-Free" }
+                    DietaryTags = new List<string> { "Gluten-Free" },
+                    Address = "455 Spadina Ave, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -110,7 +122,8 @@ namespace TasteOfHome.Data
                     Name = "Habesha Table",
                     Cuisine = "Ethiopian",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Vegetarian", "Vegan" }
+                    DietaryTags = new List<string> { "Vegetarian", "Vegan" },
+                    Address = "337 Bloor St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -118,7 +131,8 @@ namespace TasteOfHome.Data
                     Name = "Casa Latina",
                     Cuisine = "Latin American",
                     Location = "Mississauga",
-                    DietaryTags = new List<string> { }
+                    DietaryTags = new List<string> { },
+                    Address = "205 Lakeshore Rd E, Mississauga, ON"
                 },
                 new Restaurant
                 {
@@ -126,7 +140,8 @@ namespace TasteOfHome.Data
                     Name = "Mediterraneo",
                     Cuisine = "Greek",
                     Location = "Oakville",
-                    DietaryTags = new List<string> { "Vegetarian" }
+                    DietaryTags = new List<string> { "Vegetarian" },
+                    Address = "135 Kerr St, Oakville, ON"
                 },
                 new Restaurant
                 {
@@ -134,7 +149,8 @@ namespace TasteOfHome.Data
                     Name = "Karachi BBQ",
                     Cuisine = "Pakistani",
                     Location = "Scarborough",
-                    DietaryTags = new List<string> { "Halal" }
+                    DietaryTags = new List<string> { "Halal" },
+                    Address = "925 Warden Ave, Scarborough, ON"
                 },
                 new Restaurant
                 {
@@ -142,7 +158,8 @@ namespace TasteOfHome.Data
                     Name = "Plant Power",
                     Cuisine = "Vegan",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Vegan", "Gluten-Free" }
+                    DietaryTags = new List<string> { "Vegan", "Gluten-Free" },
+                    Address = "410 Queen St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -150,7 +167,8 @@ namespace TasteOfHome.Data
                     Name = "La Crêperie",
                     Cuisine = "French",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Vegetarian" }
+                    DietaryTags = new List<string> { "Vegetarian" },
+                    Address = "260 King St W, Toronto, ON"
                 },
                 new Restaurant
                 {
@@ -158,7 +176,8 @@ namespace TasteOfHome.Data
                     Name = "Caribbean Flavors",
                     Cuisine = "Caribbean",
                     Location = "Ajax",
-                    DietaryTags = new List<string> { "Gluten-Free" }
+                    DietaryTags = new List<string> { "Gluten-Free" },
+                    Address = "50 Bayly St W, Ajax, ON"
                 },
                 new Restaurant
                 {
@@ -166,7 +185,8 @@ namespace TasteOfHome.Data
                     Name = "Mama Africa",
                     Cuisine = "African",
                     Location = "Toronto",
-                    DietaryTags = new List<string> { "Halal" }
+                    DietaryTags = new List<string> { "Halal" },
+                    Address = "777 Dundas St E, Toronto, ON"
                 }
             };
         }
