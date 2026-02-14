@@ -19,7 +19,7 @@ namespace TasteOfHome.Pages.Restaurants
         //--------------//
         //Page Function
         //--------------//
-        public async Task OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
             //Start by retrieving information from DB VIA API call
             var response = await _httpClient.GetAsync($"https://localhost:7024/api/Restaurants/{id}");
@@ -27,11 +27,12 @@ namespace TasteOfHome.Pages.Restaurants
             //If the API call fails, redirect to ERROR page
             if (!response.IsSuccessStatusCode)
             {
-
+                return Redirect("/Error");
             }
 
             //If the API call succeeds, get the body content from the API response
             Restaurant = await response.Content.ReadFromJsonAsync<Restaurant>();
+            return Page();
 
         }
     }
