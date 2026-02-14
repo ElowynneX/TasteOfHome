@@ -8,7 +8,7 @@
         public string Location { get; set; } = "";
         public string Address { get; set; } = "";
         public int Authenticity { get; set; } = 0;
-        public int Rating { get; set; } = 0;
+        public float Rating { get; set; } = 0;
         public int NumberOfReviews { get; set; } = 0;
 
         
