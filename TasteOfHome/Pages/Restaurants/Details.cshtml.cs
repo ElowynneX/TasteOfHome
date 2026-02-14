@@ -8,12 +8,13 @@ namespace TasteOfHome.Pages.Restaurants
     public class DetailsModel : PageModel
     {
         private readonly HttpClient _httpClient;
-        public Restaurant Restaurant { get; set; }
-
         public DetailsModel(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
         }
+
+        //Variable used in the page view
+        public Restaurant Restaurant { get; set; }
 
 
         //--------------//
