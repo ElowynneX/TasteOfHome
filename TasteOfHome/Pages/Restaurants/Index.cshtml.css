@@ -84,3 +84,12 @@
     padding: 2rem;
     background-color: #fafafa;
 }
+
+
+/*Class related to the link that encapsulates each restaurant card*/
+/*This should probably be adjusted*/
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}

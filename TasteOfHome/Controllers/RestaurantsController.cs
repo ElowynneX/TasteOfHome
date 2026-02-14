@@ -21,5 +21,17 @@ namespace TasteOfHome.Controllers
         {
             return await _db.Restaurants.ToListAsync();
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRestaurantById(int id)
+        {
+            var restaurant = await _db.Restaurants.FirstOrDefaultAsync(r => r.Id == id);
+
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+            return Ok(restaurant);
+        }
     }
 }
