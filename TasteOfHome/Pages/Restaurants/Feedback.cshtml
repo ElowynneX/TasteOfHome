@@ -1,0 +1,31 @@
+﻿@page
+@model TasteOfHome.Pages.Restaurants.FeedbackModel
+
+<body>
+    <h1>@Model.Restaurant.Name</h1>
+
+    <form method="post">
+        <div>
+            <label asp-for="Feedback.Rating">Rating:</label>
+            <input asp-for="Feedback.Rating" type="number" min="0" max="5" />
+            <span asp-validation-for="Feedback.Rating"></span>
+            <br />
+
+            <label asp-for="Feedback.Authenticity">Authenticity: </label>
+            <input asp-for="Feedback.Authenticity" type="number" min="0" max=100 />
+            <span asp-validation-for="Feedback.Authenticity"></span>
+            <br />
+
+            <label asp-for="Feedback.Review">Review: </label>
+            <textarea asp-for="Feedback.Review" rows="5"></textarea>
+            <span asp-validation-for="Feedback.Review"></span>
+            <br />
+
+            <input type="hidden" asp-for="Feedback.RestaurantId" value="@Model.Restaurant.Id"/>
+
+        </div>
+
+        <button type="submit">Submit</button>
+        <a href="/Restaurants">Cancel</a>
+    </form>
+</body>

@@ -68,36 +68,39 @@
         <div class="restaurant-grid">
             @foreach (var r in Model.Restaurants)
             {
-                <div class="card-toh food-card">
-                    <div class="food-image">
-                        <span class="food-cuisine">@r.Cuisine</span>
-                    </div>
-
-                    <div class="food-body">
-                        <h5 class="food-title">@r.Name</h5>
-
-                        <p class="food-location">
-                            <i class="bi bi-geo-alt"></i> @r.Location
-                        </p>
-
-                        <div class="food-tags">
-                            @if (r.DietaryTags.Any())
-                            {
-                                @foreach (var tag in r.DietaryTags)
-                                {
-                                    <span class="diet-chip @tag.Replace("-", "").ToLower()">
-                                        @tag.ToLower()
-                                    </span>
-                                }
-                            }
-                            else
-                            {
-                                <span class="diet-chip neutral">none</span>
-                            }
+                <a class="card-link" asp-page="/Restaurants/Details" asp-route-id="@r.Id">
+                
+                    <div class="card-toh food-card">
+                        <div class="food-image">
+                            <span class="food-cuisine">@r.Cuisine</span>
                         </div>
 
+                        <div class="food-body">
+                            <h5 class="food-title">@r.Name</h5>
+
+                            <p class="food-location">
+                                <i class="bi bi-geo-alt"></i> @r.Location
+                            </p>
+
+                            <div class="food-tags">
+                                @if (r.DietaryTags.Any())
+                                {
+                                    @foreach (var tag in r.DietaryTags)
+                                    {
+                                        <span class="diet-chip @tag.Replace("-", "").ToLower()">
+                                            @tag.ToLower()
+                                        </span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="diet-chip neutral">none</span>
+                                }
+                            </div>
+
+                        </div>
                     </div>
-                </div>
+                </a>
             }
         </div>
     </main>

@@ -26,6 +26,10 @@ namespace TasteOfHome.Pages.Restaurants
         [BindProperty(SupportsGet = true)]
         public List<string> SelectedCuisineFilter { get; set; } = new();
 
+
+        //--------------//
+        //Page Function
+        //--------------//
         public async Task OnGetAsync()
         {
             //Start with DB query instead of RestaurantSeed

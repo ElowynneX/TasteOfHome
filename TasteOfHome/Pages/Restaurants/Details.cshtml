@@ -1,0 +1,24 @@
+﻿@page
+@model TasteOfHome.Pages.Restaurants.DetailsModel
+
+<body>
+    <h1>
+        @Model.Restaurant.Name
+    </h1>
+
+    <h2>
+        @Model.Restaurant.Location
+        <br />
+        @Model.Restaurant.Cuisine
+    </h2>
+
+    <p>
+        Current Restaurant Rating: @Model.Restaurant.Rating
+        <br />
+        Current Restaurant Authenticity: @Model.Restaurant.Authenticity
+    </p>
+
+    <a asp-page="/Restaurants/Feedback" asp-route-id="@Model.Restaurant.Id">
+            Submit Authenticity Feedback
+    </a>
+</body>
