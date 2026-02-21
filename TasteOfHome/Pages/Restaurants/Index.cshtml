@@ -62,16 +62,7 @@
             </div>
         </form>
     </aside>
-    @if (User.Identity?.IsAuthenticated ?? false)
-    {
-        <p>✅ Logged in as: @User.Identity.Name</p>
-        <a href="/logout">Logout</a>
-    }
-    else
-    {
-        <p>❌ Not logged in</p>
-        <a href="/login-google">Login with Google</a>
-    }
+    
 
     <main class="content w-100">
         <h2 class="page-title">Discover Restaurants</h2>
@@ -79,38 +70,74 @@
         <div class="restaurant-grid">
             @foreach (var r in Model.Restaurants)
             {
-                <a class="card-link" asp-page="/Restaurants/Details" asp-route-id="@r.Id">
-                
-                    <div class="card-toh food-card">
-                        <div class="food-image">
-                            <span class="food-cuisine">@r.Cuisine</span>
+                <a class="card-link"
+                   asp-page="/Restaurants/Details"
+                   asp-route-id="@r.Id">
+
+                    <div class="restaurant-card">
+
+                        <!-- Image Section -->
+                        <div class="restaurant-image">
+
+                            <div class="badge-left">
+                                <span class="auth-badge">
+                                    <i class="bi bi-award"></i> @r.Authenticity%
+                                </span>
+                            </div>
+
+                            @if (r.Rating >= 4.5)
+                            {
+                                <div class="badge-right">
+                                    <span class="hidden-badge">
+                                        <i class="bi bi-stars"></i> Hidden Gem
+                                    </span>
+                                </div>
+                            }
+
                         </div>
 
-                        <div class="food-body">
-                            <h5 class="food-title">@r.Name</h5>
+                        <!-- Body -->
+                        <div class="restaurant-body">
 
-                            <p class="food-location">
-                                <i class="bi bi-geo-alt"></i> @r.Location
+                            <div class="title-row">
+                                <h3 class="restaurant-title">@r.Name</h3>
+
+                                <div class="rating-badge">
+                                    <i class="bi bi-star-fill"></i> @r.Rating
+                                </div>
+                            </div>
+
+                            <div class="meta-row">
+                                <span class="cuisine-pill">@r.Cuisine</span>
+                                <span class="price-range">$$</span>
+                            </div>
+
+                            <p class="restaurant-desc">
+                                Authentic home-style @r.Cuisine cuisine located in @r.Location.
                             </p>
 
-                            <div class="food-tags">
-                                @if (r.DietaryTags.Any())
+                            <div class="dietary-row">
+                                @foreach (var tag in r.DietaryTags)
                                 {
-                                    @foreach (var tag in r.DietaryTags)
-                                    {
-                                        <span class="diet-chip @tag.Replace("-", "").ToLower()">
-                                            @tag.ToLower()
-                                        </span>
-                                    }
-                                }
-                                else
-                                {
-                                    <span class="diet-chip neutral">none</span>
+                                    <span class="diet-pill @tag.Replace("-", "").ToLower()">
+                                        @tag.ToLower()
+                                    </span>
                                 }
                             </div>
 
+                            <div class="special-button">
+                                🎉 Special Menu Available
+                            </div>
+
+                            <div class="location-row">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>@r.Location</span>
+                            </div>
+
                         </div>
+
                     </div>
+
                 </a>
             }
         </div>

@@ -1,95 +1,187 @@
-﻿.layout {
+﻿.restaurant-card {
+    background: white;
+    border-radius: 26px;
+    overflow: hidden;
+    border: 2px solid #f3cfc3;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     display: flex;
-    min-height: 100vh;
+    flex-direction: column;
+    height: 100%;
 }
 
-/* Sidebar container */
-.sidebar {
-    width: 260px;
-    background-color: #fff;
-    border-right: 1px solid #eee;
-    padding: 1.25rem;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
+
+.restaurant-image {
+    height: 240px;
+    background: #d9d9d9;
+    position: relative;
 }
 
-/* Header */
-.sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.badge-left,
+.badge-right {
+    position: absolute;
+    top: 18px;
+    z-index: 2;
+}
+
+.badge-left {
+    left: 18px;
+}
+
+.badge-right {
+    right: 18px;
+}
+
+.auth-badge {
+    background: #14b86a;
+    color: white;
+    padding: 8px 18px;
+    border-radius: 999px;
     font-weight: 600;
-    color: #ff6f3d;
+    font-size: 0.85rem;
+}
+
+.hidden-badge {
+    background: #ffbf00;
+    color: #7a4b00;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+
+.restaurant-body {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
 }
 
-.filter-icon {
-    font-size: 1.1rem;
+.restaurant-title {
+    font-size: 1.45rem;
+    font-weight: 600;
+    color: #3b3b3b;
 }
 
-.sidebar-title {
-    font-size: 1rem;
-}
-
-/* Clear button */
-.clear-filters {
-    display: block;
-    text-align: center;
-    padding: 0.5rem;
-    border: 1px solid #ffd2c2;
-    border-radius: 6px;
-    color: #ff6f3d;
-    text-decoration: none;
+.rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #fff5d6, #ffe9b3);
+    color: #b77900;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 700;
     font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
 }
 
-    .clear-filters:hover {
-        background-color: #fff4ef;
+
+.meta-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 1.2rem;
+}
+
+.cuisine-pill {
+    border: 1.5px solid #ff6f3d;
+    color: #ff6f3d;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 0.8rem;
+    background: #fff4ef;
+}
+
+.price-range {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+
+.restaurant-desc {
+    font-size: 0.95rem;
+    color: #6b6b6b;
+    margin-bottom: 1.3rem;
+    line-height: 1.6;
+}
+
+
+
+.dietary-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+}
+
+.diet-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1.5px solid;
+    display: inline-block;
+}
+
+   
+    .diet-pill.vegetarian {
+        color: #2ecc71;
+        border-color: #2ecc71;
+        background: #eaf9f0;
     }
 
-/* Filter sections */
-.filter-section {
-    margin-bottom: 1.5rem;
-}
-
-    .filter-section h4 {
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: #444;
+ 
+    .diet-pill.vegan {
+        color: #27ae60;
+        border-color: #27ae60;
+        background: #e4f7ec;
     }
 
-.filterLabel {
+   
+    .diet-pill.halal {
+        color: #e74c3c;
+        border-color: #e74c3c;
+        background: #fdecea;
+    }
+
+    .diet-pill.glutenfree {
+        color: #ff7a00;
+        border-color: #ff7a00;
+        background: #fff4e6;
+    }
+
+
+.special-button {
+    background: #e7dff1;
+    border: 2px solid #cdb7e8;
+    padding: 14px;
+    border-radius: 18px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #6f42c1;
+    text-align: center;
+    margin-bottom: 1.4rem;
 }
-/* Checkbox items */
-.checkbox-item {
+
+
+.restaurant-body hr {
+    border: none;
+    border-top: 1px solid #e3d6cf;
+    margin: 1.2rem 0;
+}
+
+.location-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-}
-
-    .checkbox-item input {
-        accent-color: #ff6f3d;
-    }
-
-/* Main content */
-.content {
-    flex: 1;
-    padding: 2rem;
-    background-color: #fafafa;
-}
-
-
-/*Class related to the link that encapsulates each restaurant card*/
-/*This should probably be adjusted*/
-.card-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
+    color: #7a7a7a;
 }

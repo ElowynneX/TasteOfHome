@@ -3,30 +3,64 @@
 @{
     ViewData["Title"] = "Login";
 }
-<a class="btn btn-danger" href="/login-google">Login with Google</a>
 
 <div class="auth-wrapper">
-    <div class="auth-card-lg">
-        <div class="auth-title">Login</div>
+
+    <div class="auth-card">
+
+        <div class="auth-logo">
+            🍴
+        </div>
+
+        <h2 class="auth-title">Welcome Back</h2>
+        <p class="auth-subtitle">
+            Login to continue discovering authentic food.
+        </p>
 
         @if (!string.IsNullOrEmpty(Model.Error))
         {
-            <div class="auth-error">@Model.Error</div>
+            <div class="auth-error">
+                @Model.Error
+            </div>
         }
 
+
+
         <form method="post">
-            <input class="form-control auth-input mb-3"
-                   name="Email"
-                   placeholder="Email" />
 
-            <input class="form-control auth-input mb-4"
-                   name="Password"
-                   type="password"
-                   placeholder="Password" />
+            <div class="form-group">
+                <input class="form-control auth-input"
+                       asp-for="Email"
+                       placeholder="Email" />
+            </div>
 
-            <button class="btn btn-toh w-100 auth-btn">
+            <div class="form-group">
+                <input class="form-control auth-input"
+                       asp-for="Password"
+                       type="password"
+                       placeholder="Password" />
+            </div>
+
+            <button type="submit" class="btn btn-toh w-100">
                 Login
             </button>
+
         </form>
+
+        <div class="auth-divider">
+            <span>OR</span>
+        </div>
+
+        <a class="btn-google" href="/login-google">
+            <i class="bi bi-google"></i>
+            Continue with Google
+        </a>
+
+        <div class="auth-footer">
+            Don’t have an account?
+            <a asp-page="/Register">Register</a>
+        </div>
+
     </div>
+
 </div>

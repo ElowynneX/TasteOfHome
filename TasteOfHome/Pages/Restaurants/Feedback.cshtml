@@ -1,31 +1,69 @@
 ﻿@page
 @model TasteOfHome.Pages.Restaurants.FeedbackModel
 
-<body>
-    <h1>@Model.Restaurant.Name</h1>
+<div class="feedback-wrapper">
 
-    <form method="post">
-        <div>
-            <label asp-for="Feedback.Rating">Rating:</label>
-            <input asp-for="Feedback.Rating" type="number" min="0" max="5" />
-            <span asp-validation-for="Feedback.Rating"></span>
-            <br />
+    <a asp-page="/Restaurants/Details"
+       asp-route-id="@Model.Restaurant.Id"
+       class="back-link">
+        <i class="bi bi-arrow-left"></i> Back to Restaurant
+    </a>
 
-            <label asp-for="Feedback.Authenticity">Authenticity: </label>
-            <input asp-for="Feedback.Authenticity" type="number" min="0" max=100 />
-            <span asp-validation-for="Feedback.Authenticity"></span>
-            <br />
+    <div class="feedback-header">
+        <h1>@Model.Restaurant.Name</h1>
+        <p>Share your experience and help others discover authentic dining.</p>
+    </div>
 
-            <label asp-for="Feedback.Review">Review: </label>
-            <textarea asp-for="Feedback.Review" rows="5"></textarea>
-            <span asp-validation-for="Feedback.Review"></span>
-            <br />
+    <div class="feedback-card">
 
-            <input type="hidden" asp-for="Feedback.RestaurantId" value="@Model.Restaurant.Id"/>
+        <form method="post">
 
-        </div>
+            <input type="hidden" asp-for="Feedback.RestaurantId" value="@Model.Restaurant.Id" />
 
-        <button type="submit">Submit</button>
-        <a href="/Restaurants">Cancel</a>
-    </form>
-</body>
+            <!-- Rating -->
+            <div class="form-group">
+                <label asp-for="Feedback.Rating">Rating (0 - 5)</label>
+                <input asp-for="Feedback.Rating"
+                       type="number"
+                       min="0"
+                       max="5"
+                       class="form-control feedback-input" />
+                <span asp-validation-for="Feedback.Rating" class="text-danger"></span>
+            </div>
+
+            <!-- Authenticity -->
+            <div class="form-group">
+                <label asp-for="Feedback.Authenticity">Authenticity (%)</label>
+                <input asp-for="Feedback.Authenticity"
+                       type="number"
+                       min="0"
+                       max="100"
+                       class="form-control feedback-input" />
+                <span asp-validation-for="Feedback.Authenticity" class="text-danger"></span>
+            </div>
+
+            <!-- Review -->
+            <div class="form-group">
+                <label asp-for="Feedback.Review">Your Review</label>
+                <textarea asp-for="Feedback.Review"
+                          rows="4"
+                          class="form-control feedback-input"
+                          placeholder="Tell us about your experience..."></textarea>
+                <span asp-validation-for="Feedback.Review" class="text-danger"></span>
+            </div>
+
+            <div class="feedback-actions">
+                <button type="submit" class="btn btn-toh">
+                    Submit Feedback
+                </button>
+
+                <a href="/Restaurants" class="btn-cancel">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

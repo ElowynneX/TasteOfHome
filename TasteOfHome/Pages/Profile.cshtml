@@ -2,11 +2,22 @@
 @using TasteOfHome.Data
 @{
     ViewData["Title"] = "Profile";
+
+    string? email = null;
+
+    if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        email = User.Identity.Name;
+    }
+    else if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+    {
+        email = FakeUsers.LoggedInEmail;
+    }
 }
 
 <div class="content">
 
-    @if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
+    @if (!string.IsNullOrEmpty(email))
     {
         <div class="profile-card">
 
@@ -16,12 +27,12 @@
 
             <div class="profile-info">
                 <h2 class="profile-name">
-                    @FakeUsers.LoggedInEmail.Split('@')[0]
+                    @email.Split('@')[0]
                 </h2>
 
                 <p class="profile-email">
                     <i class="bi bi-envelope"></i>
-                    @FakeUsers.LoggedInEmail
+                    @email
                 </p>
 
                 <span class="profile-badge">

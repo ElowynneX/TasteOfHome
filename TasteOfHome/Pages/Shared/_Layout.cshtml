@@ -24,17 +24,16 @@
                 <i class="bi bi-house"></i> Home
             </a>
 
-            @if (!string.IsNullOrEmpty(TasteOfHome.Data.FakeUsers.LoggedInEmail))
+            @if ((User.Identity != null && User.Identity.IsAuthenticated)
+                        || !string.IsNullOrEmpty(TasteOfHome.Data.FakeUsers.LoggedInEmail))
             {
                 <a class="toh-nav-link" asp-page="/Profile">
                     <i class="bi bi-person"></i> Profile
                 </a>
 
-                <form method="post" asp-page="/Logout" class="nav-logout-form">
-                    <button type="submit" class="toh-nav-logout">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
-                </form>
+                <a class="toh-nav-link" href="/logout">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
             }
             else
             {
