@@ -17,6 +17,7 @@
             Login to continue discovering authentic food.
         </p>
 
+        
         @if (!string.IsNullOrEmpty(Model.Error))
         {
             <div class="auth-error">
@@ -24,13 +25,13 @@
             </div>
         }
 
-
-
+        
         <form method="post">
 
             <div class="form-group">
                 <input class="form-control auth-input"
                        asp-for="Email"
+                       autocomplete="email"
                        placeholder="Email" />
             </div>
 
@@ -38,7 +39,20 @@
                 <input class="form-control auth-input"
                        asp-for="Password"
                        type="password"
+                       autocomplete="current-password"
                        placeholder="Password" />
+            </div>
+
+            
+            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+
+             
+               
+            <div class="form-group" style="margin-top: 8px;">
+                <label style="display:flex; gap:8px; align-items:center;">
+                    <input type="checkbox" asp-for="RememberMe" />
+                    <span>Remember me</span>
+                </label>
             </div>
 
             <button type="submit" class="btn btn-toh w-100">
@@ -47,15 +61,18 @@
 
         </form>
 
+       
         <div class="auth-divider">
             <span>OR</span>
         </div>
 
-        <a class="btn-google" href="/login-google">
+        
+        <a class="btn-google" href="/login-google?returnUrl=@Model.ReturnUrl">
             <i class="bi bi-google"></i>
             Continue with Google
         </a>
 
+       
         <div class="auth-footer">
             Don’t have an account?
             <a asp-page="/Register">Register</a>
