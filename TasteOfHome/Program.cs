@@ -15,6 +15,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
+builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<PasswordResetService>();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=tasteofhome.db"));
 
@@ -44,7 +48,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
     DbSeeder.Seed(db);
 }
 

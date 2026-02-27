@@ -7,6 +7,7 @@ namespace TasteOfHome.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
         public DbSet<Restaurant> Restaurants => Set<Restaurant>();
         public DbSet<AppUser> Users => Set<AppUser>();
         public DbSet<Feedback> Feedback => Set<Feedback>();
