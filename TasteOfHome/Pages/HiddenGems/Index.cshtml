@@ -1,0 +1,53 @@
+﻿@page
+@model TasteOfHome.Pages.HiddenGems.IndexModel
+@{
+    ViewData["Title"] = "Hidden Gems";
+}
+
+<h2>Hidden Gems</h2>
+<p>Small home-based authentic food providers (family-run kitchens, couple-run services, home chefs, tiffin).</p>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+
+<a class="btn btn-success mb-3" href="/HiddenGems/Submit">+ Submit Hidden Gem</a>
+
+@if (!Model.HiddenGems.Any())
+{
+    <p>No Hidden Gems yet.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Provider</th>
+                <th>Location</th>
+                <th>Food Type</th>
+                <th>Status</th>
+                <th>Authenticity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var h in Model.HiddenGems)
+            {
+                <tr>
+                    <td>
+                        <strong>@h.ProviderName</strong><br />
+                        <small>@h.Description</small><br />
+                        @if (!string.IsNullOrWhiteSpace(h.ContactInfo))
+                        {
+                            <small><b>Contact:</b> @h.ContactInfo</small>
+                        }
+                    </td>
+                    <td>@h.Location</td>
+                    <td>@h.FoodType</td>
+                    <td>@h.Status</td>
+                    <td>@h.AuthenticityHint%</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

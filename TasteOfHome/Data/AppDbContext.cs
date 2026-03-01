@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Models;
-
+using TasteOfHome.Models;
 namespace TasteOfHome.Data
 {
     public class AppDbContext : DbContext
@@ -12,6 +12,8 @@ namespace TasteOfHome.Data
         public DbSet<AppUser> Users => Set<AppUser>();
         public DbSet<Feedback> Feedback => Set<Feedback>();
 
+        public DbSet<HiddenGem> HiddenGems { get; set; }
+
         //Creating the feedback DB table so that the feedback ID is auto-generated
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,5 +24,7 @@ namespace TasteOfHome.Data
                 .Property(f => f.Id)
                 .ValueGeneratedOnAdd();
         }
+
+
     }
 }

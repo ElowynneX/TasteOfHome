@@ -1,0 +1,60 @@
+﻿@page
+@model TasteOfHome.Pages.HiddenGems.SubmitModel
+@{
+    ViewData["Title"] = "Submit Hidden Gem";
+}
+
+
+
+<h2>Submit a Hidden Gem</h2>
+<p>
+    Hidden Gems are small home-based food providers (family-run kitchens, couple-run services, home chefs, tiffin).
+    They often have higher authenticity than restaurants.
+</p>
+
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.ProviderName" class="form-label">Provider Name</label>
+        <input asp-for="HiddenGem.ProviderName" class="form-control" />
+        <span asp-validation-for="HiddenGem.ProviderName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.Location" class="form-label"></label>
+        <input asp-for="HiddenGem.Location" class="form-control" />
+        <span asp-validation-for="HiddenGem.Location" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.FoodType" class="form-label">Food Type</label>
+        <input asp-for="HiddenGem.FoodType" class="form-control" placeholder="e.g., Gujarati Tiffin / Punjabi Home Chef" />
+        <span asp-validation-for="HiddenGem.FoodType" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.Description" class="form-label"></label>
+        <textarea asp-for="HiddenGem.Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="HiddenGem.Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.ContactInfo" class="form-label">Contact / Order method (optional)</label>
+        <input asp-for="HiddenGem.ContactInfo" class="form-control" placeholder="Phone / WhatsApp / Instagram / Email" />
+        <span asp-validation-for="HiddenGem.ContactInfo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="HiddenGem.AuthenticityHint" class="form-label">Authenticity (0–100)</label>
+        <input asp-for="HiddenGem.AuthenticityHint" class="form-control" type="number" min="0" max="100" />
+        <span asp-validation-for="HiddenGem.AuthenticityHint" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a class="btn btn-secondary" href="/HiddenGems/Index">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
