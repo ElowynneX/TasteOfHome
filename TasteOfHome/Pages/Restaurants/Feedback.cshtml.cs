@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using TasteOfHome.Models;
 
 namespace TasteOfHome.Pages.Restaurants
 {
+    [Authorize]
     public class FeedbackModel : PageModel
     {
         private readonly HttpClient _httpClient;

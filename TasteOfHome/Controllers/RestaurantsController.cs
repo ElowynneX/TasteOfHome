@@ -35,6 +35,12 @@ namespace TasteOfHome.Controllers
         }
 
         //--------THIS ENDPOINT MIGHT GET MOVED TO ANOTHER CONTROLLER--------//
+        [HttpGet("Feedback/{restaurantId}")]
+        public async Task<List<Feedback>> GetListOfFeedback(int restaurantId)
+        {
+            return await _db.Feedback.Where(f => f.RestaurantId == restaurantId).ToListAsync();
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateFeedback([FromBody] FeedbackDTO dto)
         {
