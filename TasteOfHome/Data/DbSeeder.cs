@@ -35,11 +35,18 @@ namespace TasteOfHome.Data
                     Name = r.Name,
                     Cuisine = r.Cuisine,
                     Location = r.Location,
-                    DietaryTags = r.DietaryTags,
                     Address = r.Address,
+                    DietaryTags = r.DietaryTags,
+
+                    CulturalStory = r.CulturalStory,
+                    CulturalTraditions = r.CulturalTraditions,
+                    SignatureDishesCsv = r.SignatureDishesCsv,
+
                     Rating = MathF.Round(aveRating / relevantFeedback.Count, 1),
                     Authenticity = aveAuth / relevantFeedback.Count,
                     NumberOfReviews = relevantFeedback.Count
+
+
                 });
             }
 
