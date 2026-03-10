@@ -43,6 +43,7 @@ namespace TasteOfHome.Pages.Restaurants
 
         //Variable used in the page view
         public Restaurant Restaurant { get; set; }
+        public List<Feedback> RestaurantFeedback { get; set; } = new List<Feedback>();
 
 
         //--------------//
@@ -57,6 +58,19 @@ namespace TasteOfHome.Pages.Restaurants
             if (!response.IsSuccessStatusCode)
             {
                 return Redirect("/Error");
+            }
+
+            //FUNCTION IS CURRENTLY UNFINISHED - COME BACK TO ME LATER
+            var getFeedbackAttempt = await _httpClient.GetAsync($"https://localhost:7024/api/Restaurants/Feedback/{id}");
+
+            if (!getFeedbackAttempt.IsSuccessStatusCode)
+            {
+                RestaurantFeedback = new List<Feedback>();
+            }
+            else
+            {
+                RestaurantFeedback = await getFeedbackAttempt.Content.ReadFromJsonAsync<List<Feedback>>()
+                                     ?? new List<Feedback>();
             }
 
             //If the API call succeeds, get the body content from the API response

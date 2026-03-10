@@ -26,7 +26,7 @@
 
     <!-- INFO CARDS -->
     <div class="details-top-grid">
-
+ 
         <!-- LEFT CARD -->
         <div class="info-card">
             <div class="info-badges">
@@ -43,11 +43,21 @@
                 Authentic home-style @Model.Restaurant.Cuisine cuisine located in @Model.Restaurant.Location.
             </p>
 
-            <a asp-page="/Restaurants/Feedback"
-               asp-route-id="@Model.Restaurant.Id"
-               class="btn btn-toh">
-                Submit Authenticity Feedback
-            </a>
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                <a asp-page="/Restaurants/Feedback"
+                   asp-route-id="@Model.Restaurant.Id"
+                   class="btn btn-toh">
+                    Submit Authenticity Feedback
+                </a>
+            }
+            else
+            {
+                <a asp-page="/Login"
+                   class="btn btn-toh">
+                    Sign in to Leave Feedback
+                </a>
+            }
         </div>
 
         <!-- RIGHT CARD -->
@@ -116,6 +126,23 @@
     <!-- REVIEWS -->
     <div class="reviews-section">
         <h5>Community Reviews</h5>
+
+        @* THIS CODE SHOWS ALL REVIEWS RATHER THAN JUST PRESET ONES
+            HOWEVER, FEEDBACK CLASS NEEDS TO BE ADJUSTED SO THAT THE FEEDBACK HAS NAMES ATTACHED
+            @foreach (var review in Model.RestaurantFeedback)
+        {
+            <div class="review-card">
+
+                <div class="stars">
+                    @for (int i = 0; i < review.Rating; i++)
+                    {
+                        <span>⭐</span>
+                    }
+                </div>
+
+                <p>@review.Review</p>
+            </div>
+        } *@
 
         <div class="review-card">
             ⭐⭐⭐⭐⭐ by Sarah M.
