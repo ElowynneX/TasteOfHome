@@ -3,12 +3,16 @@
 
 <div class="details-wrapper">
     <h2>@Model.Restaurant?.Name</h2>
-    <!-- BACK LINK -->
+
     <a asp-page="/Restaurants/Index" class="back-link">
         <i class="bi bi-arrow-left"></i> Back to Restaurants
     </a>
 
-    <!-- HERO IMAGE -->
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["StatusMessage"]</div>
+    }
+
     <div class="details-hero-img">
         <img src="/images/restaurants/@Model.GetImageFileName(Model.Restaurant.Id)"
              alt="@Model.Restaurant.Name"
@@ -24,10 +28,8 @@
         </div>
     </div>
 
-    <!-- INFO CARDS -->
     <div class="details-top-grid">
- 
-        <!-- LEFT CARD -->
+
         <div class="info-card">
             <div class="info-badges">
                 <span class="badge-rating">
@@ -60,7 +62,6 @@
             }
         </div>
 
-        <!-- RIGHT CARD -->
         <div class="location-card">
             <h5><i class="bi bi-geo-alt"></i> Location</h5>
             <p>@Model.Restaurant.Address</p>
@@ -72,10 +73,8 @@
 
     </div>
 
-    <!-- SECOND GRID -->
     <div class="details-second-grid">
 
-        <!-- STORY -->
         <div class="story-card">
             <div class="section-title">
                 <div class="icon-circle">📖</div>
@@ -94,7 +93,6 @@
             </p>
         </div>
 
-        <!-- DIETARY -->
         <div class="diet-card">
             <h5>Dietary Options</h5>
 
@@ -108,7 +106,6 @@
 
     </div>
 
-    <!-- SIGNATURE -->
     <div class="signature-section">
         <div class="section-title">
             <div class="icon-circle">🍽</div>
@@ -123,36 +120,31 @@
         </div>
     </div>
 
-    <!-- REVIEWS -->
     <div class="reviews-section">
         <h5>Community Reviews</h5>
 
-        @* THIS CODE SHOWS ALL REVIEWS RATHER THAN JUST PRESET ONES
-            HOWEVER, FEEDBACK CLASS NEEDS TO BE ADJUSTED SO THAT THE FEEDBACK HAS NAMES ATTACHED
+        @if (Model.RestaurantFeedback != null && Model.RestaurantFeedback.Any())
+        {
             @foreach (var review in Model.RestaurantFeedback)
+            {
+                <div class="review-card">
+                    <div class="stars">
+                        @for (int i = 0; i < review.Rating; i++)
+                        {
+                            <span>⭐</span>
+                        }
+                    </div>
+
+                    <p><strong>Authenticity:</strong> @review.Authenticity%</p>
+                    <p>@review.Review</p>
+                </div>
+            }
+        }
+        else
         {
             <div class="review-card">
-
-                <div class="stars">
-                    @for (int i = 0; i < review.Rating; i++)
-                    {
-                        <span>⭐</span>
-                    }
-                </div>
-
-                <p>@review.Review</p>
+                <p>No approved reviews yet.</p>
             </div>
-        } *@
-
-        <div class="review-card">
-            ⭐⭐⭐⭐⭐ by Sarah M.
-            <p>Absolutely authentic! The flavors remind me of home cooking.</p>
-        </div>
-
-        <div class="review-card">
-            ⭐⭐⭐⭐⭐ by James K.
-            <p>A hidden gem! Cultural atmosphere makes this place special.</p>
-        </div>
+        }
     </div>
-
 </div>

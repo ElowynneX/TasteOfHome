@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Json;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
 
@@ -8,9 +10,12 @@ namespace TasteOfHome.Pages.Restaurants
     public class DetailsModel : PageModel
     {
         private readonly HttpClient _httpClient;
-        public DetailsModel(IHttpClientFactory httpClientFactory)
+        private readonly AppDbContext _db;
+
+        public DetailsModel(IHttpClientFactory httpClientFactory, AppDbContext db)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _db = db;
         }
 
         public string GetImageFileName(int id)
@@ -41,40 +46,26 @@ namespace TasteOfHome.Pages.Restaurants
             };
         }
 
-        //Variable used in the page view
-        public Restaurant Restaurant { get; set; }
+        public Restaurant Restaurant { get; set; } = new Restaurant();
         public List<Feedback> RestaurantFeedback { get; set; } = new List<Feedback>();
 
-
-        //--------------//
-        //Page Function
-        //--------------//
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            //Start by retrieving information from DB VIA API call
             var response = await _httpClient.GetAsync($"https://localhost:7024/api/Restaurants/{id}");
 
-            //If the API call fails, redirect to ERROR page
             if (!response.IsSuccessStatusCode)
             {
                 return Redirect("/Error");
             }
 
-            //FUNCTION IS CURRENTLY UNFINISHED - COME BACK TO ME LATER
-            var getFeedbackAttempt = await _httpClient.GetAsync($"https://localhost:7024/api/Restaurants/Feedback/{id}");
+            Restaurant = await response.Content.ReadFromJsonAsync<Restaurant>() ?? new Restaurant();
 
-            if (!getFeedbackAttempt.IsSuccessStatusCode)
-            {
-                RestaurantFeedback = new List<Feedback>();
-            }
-            else
-            {
-                RestaurantFeedback = await getFeedbackAttempt.Content.ReadFromJsonAsync<List<Feedback>>()
-                                     ?? new List<Feedback>();
-            }
+            RestaurantFeedback = await _db.Feedback
+                .Where(f => f.RestaurantId == id &&
+                           (f.Status == "Approved" || f.Status == null || f.Status == ""))
+                .OrderByDescending(f => f.Id)
+                .ToListAsync();
 
-            //If the API call succeeds, get the body content from the API response
-            Restaurant = await response.Content.ReadFromJsonAsync<Restaurant>();
             return Page();
         }
     }

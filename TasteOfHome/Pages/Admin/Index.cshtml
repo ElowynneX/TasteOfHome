@@ -1,0 +1,65 @@
+﻿@page
+@model TasteOfHome.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Admin Dashboard</h2>
+    <p class="text-muted">Review user feedback and approve or deny it.</p>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["StatusMessage"]</div>
+    }
+
+    @if (Model.FeedbackList.Count == 0)
+    {
+        <div class="alert alert-info">No feedback found.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Restaurant</th>
+                        <th>Rating</th>
+                        <th>Authenticity</th>
+                        <th>Review</th>
+                        <th>Status</th>
+                        <th style="width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.FeedbackList)
+                    {
+                        <tr>
+                            <td>@item.RestaurantName</td>
+                            <td>@item.Rating / 5</td>
+                            <td>@item.Authenticity%</td>
+                            <td>@item.Review</td>
+                            <td>@item.Status</td>
+                            <td>
+                                @if (item.Status == "Pending")
+                                {
+                                    <form method="post" asp-page-handler="Approve" asp-route-id="@item.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+
+                                    <form method="post" asp-page-handler="Deny" asp-route-id="@item.Id" style="display:inline; margin-left:6px;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Deny</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No action</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
