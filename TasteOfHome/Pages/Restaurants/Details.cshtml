@@ -10,6 +10,11 @@
 
     <!-- HERO IMAGE -->
     <div class="details-hero-img">
+        <img src="/images/restaurants/@Model.GetImageFileName(Model.Restaurant.Id)"
+             alt="@Model.Restaurant.Name"
+             loading="lazy"
+             onerror="this.src='/images/restaurants/default.jpg'" />
+
         <div class="hero-overlay">
             <h1>@Model.Restaurant.Name</h1>
             <div class="hero-tags">

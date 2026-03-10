@@ -1,5 +1,4 @@
-﻿
-@page
+﻿@page
 @model TasteOfHome.Pages.Restaurants.IndexModel
 
 <div class="layout">
@@ -65,7 +64,13 @@
     
 
     <main class="content w-100">
-        <h2 class="page-title">Discover Restaurants</h2>
+        <div class="restaurants-header">
+            <h2 class="page-title">Discover Restaurants</h2>
+
+            <a asp-page="/HiddenGems/Index" class="hidden-gem-nav-btn">
+                 Hidden Gems
+            </a>
+        </div>
 
         <div class="restaurant-grid">
             @foreach (var r in Model.Restaurants)
@@ -78,6 +83,11 @@
 
                         <!-- Image Section -->
                         <div class="restaurant-image">
+
+                            <img src="/images/restaurants/@Model.GetImageFileName(r.Id)"
+                                 onerror="this.src='/images/restaurants/default.jpg'"
+                                 alt="@r.Name"
+                                 loading="lazy" />
 
                             <div class="badge-left">
                                 <span class="auth-badge">

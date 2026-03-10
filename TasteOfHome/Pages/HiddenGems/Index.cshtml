@@ -4,50 +4,69 @@
     ViewData["Title"] = "Hidden Gems";
 }
 
-<h2>Hidden Gems</h2>
-<p>Small home-based authentic food providers (family-run kitchens, couple-run services, home chefs, tiffin).</p>
+<div class="hidden-page-wrapper">
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
+    <div class="hidden-header">
+        <div>
+            <h2 class="hidden-title">Hidden Gems</h2>
+            <p class="hidden-subtitle">
+                Small home-based authentic food providers (family-run kitchens, couple-run services, home chefs, tiffin).
+            </p>
+        </div>
 
-<a class="btn btn-success mb-3" href="/HiddenGems/Submit">+ Submit Hidden Gem</a>
+        <a asp-page="/HiddenGems/Submit" class="hidden-submit-btn">
+            + Submit Hidden Gem
+        </a>
+    </div>
 
-@if (!Model.HiddenGems.Any())
-{
-    <p>No Hidden Gems yet.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Provider</th>
-                <th>Location</th>
-                <th>Food Type</th>
-                <th>Status</th>
-                <th>Authenticity</th>
-            </tr>
-        </thead>
-        <tbody>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="success-banner">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (!Model.HiddenGems.Any())
+    {
+        <div class="empty-state">
+            No Hidden Gems yet.
+        </div>
+    }
+    else
+    {
+        <div class="hidden-grid">
             @foreach (var h in Model.HiddenGems)
             {
-                <tr>
-                    <td>
-                        <strong>@h.ProviderName</strong><br />
-                        <small>@h.Description</small><br />
-                        @if (!string.IsNullOrWhiteSpace(h.ContactInfo))
-                        {
-                            <small><b>Contact:</b> @h.ContactInfo</small>
-                        }
-                    </td>
-                    <td>@h.Location</td>
-                    <td>@h.FoodType</td>
-                    <td>@h.Status</td>
-                    <td>@h.AuthenticityHint%</td>
-                </tr>
+                <div class="hidden-card">
+
+                    <div class="hidden-card-top">
+                        <h4>@h.ProviderName</h4>
+                        <span class="hidden-auth">@h.AuthenticityHint%</span>
+                    </div>
+
+                    <p class="hidden-desc">@h.Description</p>
+
+                    <div class="hidden-meta">
+                        <div>
+                            <i class="bi bi-geo-alt"></i> @h.Location
+                        </div>
+                        <span class="food-type">@h.FoodType</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(h.ContactInfo))
+                    {
+                        <div class="hidden-contact">
+                            <strong>Contact:</strong> @h.ContactInfo
+                        </div>
+                    }
+
+                    <div class="hidden-status @h.Status.ToLower()">
+                        @h.Status
+                    </div>
+
+                </div>
             }
-        </tbody>
-    </table>
-}
+        </div>
+    }
+
+</div>

@@ -11,7 +11,7 @@
         public float Rating { get; set; } = 0;
         public int NumberOfReviews { get; set; } = 0;
 
-        
+        public string? ImageUrl { get; set; }
         public string DietaryTagsCsv { get; set; } = "";
 
        

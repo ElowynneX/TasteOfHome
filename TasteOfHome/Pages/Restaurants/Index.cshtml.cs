@@ -15,6 +15,34 @@ namespace TasteOfHome.Pages.Restaurants
             _db = db;
         }
 
+        public string GetImageFileName(int id)
+        {
+            return id switch
+            {
+                1 => "spice-garden.jpg",
+                2 => "green-bowl.jpg",
+                3 => "golden-wok.jpg",
+                4 => "istanbul-grill.jpg",
+                5 => "nonna-kitchen.jpg",
+                6 => "seoul-street.jpg",
+                7 => "pho-saigon.jpg",
+                8 => "tokyo-bento.jpg",
+                9 => "el-mariachi.jpg",
+                10 => "falafel-house.jpg",
+                11 => "taste-of-punjab.jpg",
+                12 => "bangkok-express.jpg",
+                13 => "habesha-table.jpg",
+                14 => "casa-latina.jpg",
+                15 => "mediterraneo.jpg",
+                16 => "karachi-bbq.jpg",
+                17 => "plant-power.jpg",
+                18 => "la-creperie.jpg",
+                19 => "caribbean-flavors.jpg",
+                20 => "mama-africa.jpg",
+                _ => "default.jpg"
+            };
+        }
+
         //Create list of all Restaurants
         public List<Restaurant> Restaurants { get; set; } = new();
 
@@ -25,6 +53,7 @@ namespace TasteOfHome.Pages.Restaurants
         //Create another list for the selected location filter
         [BindProperty(SupportsGet = true)]
         public List<string> SelectedCuisineFilter { get; set; } = new();
+
 
 
         //--------------//
@@ -54,6 +83,8 @@ namespace TasteOfHome.Pages.Restaurants
             }
 
             Restaurants = await filteredRestaurants.ToListAsync();
+
+
         }
     }
 }

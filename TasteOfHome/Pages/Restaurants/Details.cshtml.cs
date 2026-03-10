@@ -13,6 +13,34 @@ namespace TasteOfHome.Pages.Restaurants
             _httpClient = httpClientFactory.CreateClient();
         }
 
+        public string GetImageFileName(int id)
+        {
+            return id switch
+            {
+                1 => "spice-garden.jpg",
+                2 => "green-bowl.jpg",
+                3 => "golden-wok.jpg",
+                4 => "istanbul-grill.jpg",
+                5 => "nonna-kitchen.jpg",
+                6 => "seoul-street.jpg",
+                7 => "pho-saigon.jpg",
+                8 => "tokyo-bento.jpg",
+                9 => "el-mariachi.jpg",
+                10 => "falafel-house.jpg",
+                11 => "taste-of-punjab.jpg",
+                12 => "bangkok-express.jpg",
+                13 => "habesha-table.jpg",
+                14 => "casa-latina.jpg",
+                15 => "mediterraneo.jpg",
+                16 => "karachi-bbq.jpg",
+                17 => "plant-power.jpg",
+                18 => "la-creperie.jpg",
+                19 => "caribbean-flavors.jpg",
+                20 => "mama-africa.jpg",
+                _ => "default.jpg"
+            };
+        }
+
         //Variable used in the page view
         public Restaurant Restaurant { get; set; }
 
