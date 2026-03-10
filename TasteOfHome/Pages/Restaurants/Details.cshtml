@@ -1,158 +1,210 @@
 ﻿@page
 @model TasteOfHome.Pages.Restaurants.DetailsModel
 
-<div class="details-wrapper">
-    <h2>@Model.Restaurant?.Name</h2>
-    <!-- BACK LINK -->
-    <a asp-page="/Restaurants/Index" class="back-link">
-        <i class="bi bi-arrow-left"></i> Back to Restaurants
-    </a>
+@if (Model.Restaurant == null)
+{
+    <p>Restaurant not found.</p>
+}
+else
+{
 
-    <!-- HERO IMAGE -->
-    <div class="details-hero-img">
-        <img src="/images/restaurants/@Model.GetImageFileName(Model.Restaurant.Id)"
-             alt="@Model.Restaurant.Name"
-             loading="lazy"
-             onerror="this.src='/images/restaurants/default.jpg'" />
+    <div class="details-wrapper">
 
-        <div class="hero-overlay">
-            <h1>@Model.Restaurant.Name</h1>
-            <div class="hero-tags">
-                <span class="hero-cuisine">@Model.Restaurant.Cuisine</span>
-                <span class="hero-price">$$</span>
+        <h2>@Model.Restaurant.Name</h2>
+
+        <!-- BACK LINK -->
+        <a asp-page="/Restaurants/Index" class="back-link">
+            <i class="bi bi-arrow-left"></i> Back to Restaurants
+        </a>
+
+        <!-- HERO IMAGE -->
+        <div class="details-hero-img">
+            <img src="/images/restaurants/@Model.GetImageFileName(Model.Restaurant.Id)"
+                 alt="@Model.Restaurant.Name"
+                 loading="lazy"
+                 onerror="this.src='/images/restaurants/default.jpg'" />
+
+            <div class="hero-overlay">
+                <h1>@Model.Restaurant.Name</h1>
+
+                <div class="hero-tags">
+                    <span class="hero-cuisine">@Model.Restaurant.Cuisine</span>
+                    <span class="hero-price">$$</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- INFO CARDS -->
-    <div class="details-top-grid">
- 
-        <!-- LEFT CARD -->
-        <div class="info-card">
-            <div class="info-badges">
-                <span class="badge-rating">
-                    ⭐ @Model.Restaurant.Rating
-                </span>
+        <!-- INFO CARDS -->
+        <div class="details-top-grid">
 
-                <span class="badge-auth">
-                    Authenticity @Model.Restaurant.Authenticity%
-                </span>
+            <!-- LEFT CARD -->
+            <div class="info-card">
+
+                <div class="info-badges">
+
+                    <span class="badge-rating">
+                        ⭐ @Model.Restaurant.Rating
+                    </span>
+
+                    <span class="badge-auth">
+                        Authenticity @Model.Restaurant.Authenticity%
+                    </span>
+
+                </div>
+
+                <p class="restaurant-desc">
+                    Authentic home-style @Model.Restaurant.Cuisine cuisine located in @Model.Restaurant.Location.
+                </p>
+
+                @if (User.Identity?.IsAuthenticated ?? false)
+                {
+                    <a asp-page="/Restaurants/Feedback"
+                       asp-route-id="@Model.Restaurant.Id"
+                       class="btn btn-toh">
+                        Submit Authenticity Feedback
+                    </a>
+                }
+                else
+                {
+                    <a asp-page="/Login"
+                       class="btn btn-toh">
+                        Sign in to Leave Feedback
+                    </a>
+                }
+
             </div>
 
-            <p class="restaurant-desc">
-                Authentic home-style @Model.Restaurant.Cuisine cuisine located in @Model.Restaurant.Location.
-            </p>
+            <!-- RIGHT CARD -->
+            <div class="location-card">
 
-            @if (User.Identity?.IsAuthenticated ?? false)
+                <h5>
+                    <i class="bi bi-geo-alt"></i> Location
+                </h5>
+
+                <p>@Model.Restaurant.Address</p>
+
+                <button class="btn btn-toh w-100">
+                    Get Directions
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- SECOND GRID -->
+        <div class="details-second-grid">
+
+            <!-- STORY -->
+            <div class="story-card">
+
+                <div class="section-title">
+                    <div class="icon-circle">📖</div>
+                    <h4>Our Story & Heritage</h4>
+                </div>
+
+                <p>
+                    @(Model.Restaurant.CulturalStory ?? "Traditional family recipes passed down through generations.")
+                </p>
+
+                <hr />
+
+                <h6>Cultural Traditions</h6>
+
+                <p>
+                    @(Model.Restaurant.CulturalTraditions ?? "Authentic cooking traditions preserved by the chefs.")
+                </p>
+
+            </div>
+
+
+            <!-- DIETARY -->
+            <div class="diet-card">
+
+                <h5>Dietary Options</h5>
+
+                <div class="diet-tags">
+                    @foreach (var tag in Model.Restaurant.DietaryTags)
+                    {
+                        <span class="diet-chip @tag.ToLower().Replace(" ", "")">
+                            @tag
+                        </span>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SIGNATURE DISHES -->
+        <div class="signature-section">
+
+            <div class="section-title">
+                <div class="icon-circle">🍽</div>
+                <h4>Signature Dishes</h4>
+            </div>
+
+            @if (Model.Restaurant.SignatureDishes != null && Model.Restaurant.SignatureDishes.Any())
             {
-                <a asp-page="/Restaurants/Feedback"
-                   asp-route-id="@Model.Restaurant.Id"
-                   class="btn btn-toh">
-                    Submit Authenticity Feedback
-                </a>
+
+                <div class="signature-grid">
+
+                    @foreach (var dish in Model.Restaurant.SignatureDishes)
+                    {
+                        <div class="signature-item">@dish</div>
+                    }
+
+                </div>
+
             }
             else
             {
-                <a asp-page="/Login"
-                   class="btn btn-toh">
-                    Sign in to Leave Feedback
-                </a>
+                <p>No signature dishes listed.</p>
             }
+
         </div>
 
-        <!-- RIGHT CARD -->
-        <div class="location-card">
-            <h5><i class="bi bi-geo-alt"></i> Location</h5>
-            <p>@Model.Restaurant.Address</p>
 
-            <button class="btn btn-toh w-100">
-                Get Directions
-            </button>
-        </div>
+        <!-- REVIEWS -->
+        <div class="reviews-section">
 
-    </div>
+            <h5>Community Reviews</h5>
 
-    <!-- SECOND GRID -->
-    <div class="details-second-grid">
-
-        <!-- STORY -->
-        <div class="story-card">
-            <div class="section-title">
-                <div class="icon-circle">📖</div>
-                <h4>Our Story & Heritage</h4>
-            </div>
-
-            <p>
-                Founded in 1985, this family-owned restaurant brings traditional recipes directly to your table.
-            </p>
-
-            <hr />
-
-            <h6>Cultural Traditions</h6>
-            <p>
-                All spices are ground fresh daily. Recipes have been passed down for generations.
-            </p>
-        </div>
-
-        <!-- DIETARY -->
-        <div class="diet-card">
-            <h5>Dietary Options</h5>
-
-            <div class="diet-tags">
-                @foreach (var tag in Model.Restaurant.DietaryTags)
-                {
-                    <span class="diet-chip">@tag</span>
-                }
-            </div>
-        </div>
-
-    </div>
-
-    <!-- SIGNATURE -->
-    <div class="signature-section">
-        <div class="section-title">
-            <div class="icon-circle">🍽</div>
-            <h4>Signature Dishes</h4>
-        </div>
-
-        <div class="signature-grid">
-            <div class="signature-item">Butter Chicken</div>
-            <div class="signature-item">Dal Makhani</div>
-            <div class="signature-item">Tandoori Roti</div>
-            <div class="signature-item">Paneer Tikka Masala</div>
-        </div>
-    </div>
-
-    <!-- REVIEWS -->
-    <div class="reviews-section">
-        <h5>Community Reviews</h5>
-
-        @* THIS CODE SHOWS ALL REVIEWS RATHER THAN JUST PRESET ONES
-            HOWEVER, FEEDBACK CLASS NEEDS TO BE ADJUSTED SO THAT THE FEEDBACK HAS NAMES ATTACHED
-            @foreach (var review in Model.RestaurantFeedback)
+            @* Dynamic Reviews Section (future improvement) *@
+            @*
+        @foreach (var review in Model.RestaurantFeedback)
         {
             <div class="review-card">
 
                 <div class="stars">
+
                     @for (int i = 0; i < review.Rating; i++)
                     {
                         <span>⭐</span>
                     }
+
                 </div>
 
                 <p>@review.Review</p>
+
             </div>
-        } *@
+        }
+        *@
 
-        <div class="review-card">
-            ⭐⭐⭐⭐⭐ by Sarah M.
-            <p>Absolutely authentic! The flavors remind me of home cooking.</p>
+
+            <div class="review-card">
+                ⭐⭐⭐⭐⭐ by Sarah M.
+                <p>Absolutely authentic! The flavors remind me of home cooking.</p>
+            </div>
+
+            <div class="review-card">
+                ⭐⭐⭐⭐⭐ by James K.
+                <p>A hidden gem! Cultural atmosphere makes this place special.</p>
+            </div>
+
         </div>
 
-        <div class="review-card">
-            ⭐⭐⭐⭐⭐ by James K.
-            <p>A hidden gem! Cultural atmosphere makes this place special.</p>
-        </div>
     </div>
 
-</div>
+}

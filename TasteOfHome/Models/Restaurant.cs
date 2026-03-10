@@ -12,6 +12,12 @@
         public int NumberOfReviews { get; set; } = 0;
 
         public string? ImageUrl { get; set; }
+
+        public string? CulturalStory { get; set; }
+        public string? CulturalTraditions { get; set; }
+        public string? SignatureDishesCsv { get; set; }
+
+
         public string DietaryTagsCsv { get; set; } = "";
 
        
@@ -22,6 +28,15 @@
                 .ToList();
 
             set => DietaryTagsCsv = string.Join(',', value ?? new List<string>());
+        }
+
+        public List<string> SignatureDishes
+        {
+            get => SignatureDishesCsv?
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList() ?? new List<string>();
+
+            set => SignatureDishesCsv = string.Join(',', value ?? new List<string>());
         }
     }
 }
