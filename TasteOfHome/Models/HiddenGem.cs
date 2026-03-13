@@ -1,41 +1,43 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TasteOfHome.Models
 {
     public class HiddenGem
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Provider name is required")]
-        [StringLength(120)]
+        [Required]
+        [MaxLength(100)]
         public string ProviderName { get; set; } = "";
 
-        [Required(ErrorMessage = "Location is required")]
-        [StringLength(120)]
+        [Required]
+        [MaxLength(100)]
         public string Location { get; set; } = "";
 
-        // e.g., "Gujarati Tiffin", "Punjabi Home Chef"
-        [Required(ErrorMessage = "Food type is required")]
-        [StringLength(80)]
+        [Required]
+        [MaxLength(100)]
         public string FoodType { get; set; } = "";
 
-        [Required(ErrorMessage = "Description is required")]
-        [StringLength(600)]
+        [Required]
+        [MaxLength(500)]
         public string Description { get; set; } = "";
 
-        // Optional contact (WhatsApp/phone/Instagram/email)
-        [StringLength(120)]
+        [MaxLength(100)]
         public string? ContactInfo { get; set; }
 
-        // MVP: Pending or Approved
+        [Range(0, 100)]
+        public int AuthenticityHint { get; set; }
+
         [Required]
-        [StringLength(20)]
+        [MaxLength(20)]
         public string Status { get; set; } = "Pending";
 
-        // Optional hint: hidden gems often higher authenticity than restaurants
-        [Range(0, 100, ErrorMessage = "Authenticity must be 0–100")]
-        public int AuthenticityHint { get; set; } = 90;
+        [Required(ErrorMessage = "Your phone number is required.")]
+        [Display(Name = "Your Phone Number")]
+        [MaxLength(20)]
+        public string SubmitterPhoneNumber { get; set; } = "";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Authorization;
 using TasteOfHome.Services;
 using TasteOfHome.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
 builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();

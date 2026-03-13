@@ -6,12 +6,14 @@
 
 <div class="container mt-4">
     <h2 class="mb-3">Admin Dashboard</h2>
-    <p class="text-muted">Review user feedback and approve or deny it.</p>
+    <p class="text-muted">Review feedback and hidden gem submissions.</p>
 
     @if (TempData["StatusMessage"] != null)
     {
         <div class="alert alert-success">@TempData["StatusMessage"]</div>
     }
+
+    <h3 class="mt-4">Restaurant Feedback</h3>
 
     @if (Model.FeedbackList.Count == 0)
     {
@@ -19,7 +21,7 @@
     }
     else
     {
-        <div class="table-responsive">
+        <div class="table-responsive mb-5">
             <table class="table table-bordered table-striped">
                 <thead class="table-light">
                     <tr>
@@ -57,6 +59,96 @@
                                 }
                             </td>
                         </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <h3 class="mt-4">Hidden Gem Submissions</h3>
+
+    @if (Model.HiddenGemList.Count == 0)
+    {
+        <div class="alert alert-info">No hidden gem submissions found.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Provider</th>
+                        <th>Location</th>
+                        <th>Food Type</th>
+                        <th>Authenticity</th>
+                        <th>Status</th>
+                        <th style="width: 180px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var gem in Model.HiddenGemList)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@gem.ProviderName</strong><br />
+                                <small>@gem.Description</small>
+                                @if (!string.IsNullOrWhiteSpace(gem.ContactInfo))
+                                {
+                                    <br />
+                                    <small><strong>Contact:</strong> @gem.ContactInfo</small>
+                                }
+                            </td>
+                            <td>@gem.Location</td>
+                            <td>@gem.FoodType</td>
+                            <td>@gem.AuthenticityHint%</td>
+                            <td>@gem.Status</td>
+                            <td>
+                                @if (gem.Status == "Pending")
+                                {
+                                    <form method="post" asp-page-handler="ApproveHiddenGem" asp-route-id="@gem.Id" style="display:inline;">
+                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+
+                                    <form method="post" asp-page-handler="DenyHiddenGem" asp-route-id="@gem.Id" style="display:inline; margin-left:6px;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Deny</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No action</span>
+                                }
+                            </td>
+
+                        </tr>
+
+                    <td>
+                        @if (gem.Status == "Pending")
+                        {
+                            <form method="post" asp-page-handler="ApproveHiddenGem" asp-route-id="@gem.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+
+                            <form method="post" asp-page-handler="DenyHiddenGem" asp-route-id="@gem.Id" style="display:inline; margin-left:6px;">
+                                <button type="submit" class="btn btn-danger btn-sm">Deny</button>
+                            </form>
+
+                            <form method="post" asp-page-handler="DeleteHiddenGem" asp-route-id="@gem.Id" style="display:inline; margin-left:6px;">
+                                <button type="submit" class="btn btn-dark btn-sm"
+                                        onclick="return confirm('Are you sure you want to delete this hidden gem?');">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="DeleteHiddenGem" asp-route-id="@gem.Id" style="display:inline;">
+                                <button type="submit" class="btn btn-dark btn-sm"
+                                        onclick="return confirm('Are you sure you want to delete this hidden gem?');">
+                                    Delete
+                                </button>
+                            </form>
+                        }
+                    </td>
                     }
                 </tbody>
             </table>

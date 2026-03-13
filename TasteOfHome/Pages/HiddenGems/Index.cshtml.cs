@@ -20,6 +20,7 @@ namespace TasteOfHome.Pages.HiddenGems
         {
             HiddenGems = await _db.HiddenGems
                 .AsNoTracking()
+                .Where(h => h.Status == "Approved")
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync();
         }

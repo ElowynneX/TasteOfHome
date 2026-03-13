@@ -46,8 +46,14 @@
 
             <div class="form-group-modern">
                 <label asp-for="HiddenGem.ContactInfo">Contact / Order method (optional)</label>
-                <input asp-for="HiddenGem.ContactInfo" placeholder="Phone / WhatsApp / Instagram / Email" />
+                <input asp-for="HiddenGem.ContactInfo" placeholder="PhoneX / WhatsApp / Instagram / Email" />
                 <span asp-validation-for="HiddenGem.ContactInfo"></span>
+            </div>
+
+            <div class="form-group-modern">
+                <label asp-for="HiddenGem.SubmitterPhoneNumber">Your Phone Number</label>
+                <input asp-for="HiddenGem.SubmitterPhoneNumber" placeholder="+14165551234" />
+                <span asp-validation-for="HiddenGem.SubmitterPhoneNumber"></span>
             </div>
 
             <div class="form-group-modern">

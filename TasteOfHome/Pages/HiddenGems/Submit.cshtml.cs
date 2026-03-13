@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using TasteOfHome.Data;
@@ -5,6 +6,7 @@ using TasteOfHome.Models;
 
 namespace TasteOfHome.Pages.HiddenGems
 {
+    [Authorize]
     public class SubmitModel : PageModel
     {
         private readonly AppDbContext _db;
@@ -17,9 +19,6 @@ namespace TasteOfHome.Pages.HiddenGems
         [BindProperty]
         public HiddenGem HiddenGem { get; set; } = new HiddenGem();
 
-        [TempData]
-        public string? SuccessMessage { get; set; }
-
         public void OnGet()
         {
         }
@@ -27,7 +26,9 @@ namespace TasteOfHome.Pages.HiddenGems
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
+            {
                 return Page();
+            }
 
             HiddenGem.Status = "Pending";
             HiddenGem.CreatedAt = DateTime.UtcNow;
@@ -35,8 +36,8 @@ namespace TasteOfHome.Pages.HiddenGems
             _db.HiddenGems.Add(HiddenGem);
             await _db.SaveChangesAsync();
 
-            SuccessMessage = "Hidden Gem submitted successfully! It is pending review.";
-            return RedirectToPage("/HiddenGems/Index");
+            TempData["StatusMessage"] = "Hidden Gem submitted and is pending admin review.";
+            return RedirectToPage("/Index");
         }
     }
 }
