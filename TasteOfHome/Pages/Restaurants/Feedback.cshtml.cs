@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -49,13 +50,16 @@ namespace TasteOfHome.Pages.Restaurants
                 return Page();
             }
 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
             var feedback = new Feedback
             {
                 Rating = Feedback.Rating,
                 Authenticity = Feedback.Authenticity,
                 Review = Feedback.Review,
                 RestaurantId = Feedback.RestaurantId,
-                Status = "Pending"
+                Status = "Pending",
+                UserId = userId
             };
 
             _db.Feedback.Add(feedback);
@@ -65,4 +69,4 @@ namespace TasteOfHome.Pages.Restaurants
             return RedirectToPage("/Restaurants/Details", new { id = Feedback.RestaurantId });
         }
     }
-}
+}   

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http.Json;
+using System.Security.Claims;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
 
@@ -9,12 +9,10 @@ namespace TasteOfHome.Pages.Restaurants
 {
     public class DetailsModel : PageModel
     {
-        private readonly HttpClient _httpClient;
         private readonly AppDbContext _db;
 
-        public DetailsModel(IHttpClientFactory httpClientFactory, AppDbContext db)
+        public DetailsModel(AppDbContext db)
         {
-            _httpClient = httpClientFactory.CreateClient();
             _db = db;
         }
 
@@ -51,18 +49,21 @@ namespace TasteOfHome.Pages.Restaurants
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            var response = await _httpClient.GetAsync($"https://localhost:7024/api/Restaurants/{id}");
+            Restaurant = await _db.Restaurants.FindAsync(id);
 
-            if (!response.IsSuccessStatusCode)
+            if (Restaurant == null)
             {
                 return Redirect("/Error");
             }
 
-            Restaurant = await response.Content.ReadFromJsonAsync<Restaurant>() ?? new Restaurant();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             RestaurantFeedback = await _db.Feedback
                 .Where(f => f.RestaurantId == id &&
-                           (f.Status == "Approved" || f.Status == null || f.Status == ""))
+                    (
+                        f.Status == "Approved" ||
+                        (!string.IsNullOrEmpty(userId) && f.UserId == userId)
+                    ))
                 .OrderByDescending(f => f.Id)
                 .ToListAsync();
 

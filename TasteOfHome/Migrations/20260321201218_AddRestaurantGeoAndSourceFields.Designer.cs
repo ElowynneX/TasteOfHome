@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TasteOfHome.Data;
 
@@ -10,9 +11,11 @@ using TasteOfHome.Data;
 namespace TasteOfHome.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260321201218_AddRestaurantGeoAndSourceFields")]
+    partial class AddRestaurantGeoAndSourceFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.24");
@@ -178,6 +181,10 @@ namespace TasteOfHome.Migrations
                     b.Property<string>("CulturalTraditions")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("DietaryTags")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("DietaryTagsCsv")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -212,6 +219,10 @@ namespace TasteOfHome.Migrations
 
                     b.Property<float>("Rating")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("SignatureDishes")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SignatureDishesCsv")
                         .HasColumnType("TEXT");

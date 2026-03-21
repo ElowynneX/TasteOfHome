@@ -1,0 +1,17 @@
+﻿@page
+@model EditModel
+
+<h2>Edit Review</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Review.Id" />
+
+    <label>Rating</label>
+    <input asp-for="Review.Rating" type="number" min="1" max="5" />
+    <span asp-validation-for="Review.Rating"></span>
+
+    <label>Review</label>
+<textarea asp-for="Review.Review"></textarea>
+    <span asp-validation-for="Review.Review"></span>
+    <button type="submit">Save</button>
+</form>

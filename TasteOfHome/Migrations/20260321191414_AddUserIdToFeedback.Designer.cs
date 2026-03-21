@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TasteOfHome.Data;
 
@@ -10,9 +11,11 @@ using TasteOfHome.Data;
 namespace TasteOfHome.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260321191414_AddUserIdToFeedback")]
+    partial class AddUserIdToFeedback
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.24");
@@ -164,10 +167,6 @@ namespace TasteOfHome.Migrations
                     b.Property<int>("Authenticity")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Cuisine")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -178,26 +177,20 @@ namespace TasteOfHome.Migrations
                     b.Property<string>("CulturalTraditions")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DietaryTagsCsv")
+                    b.Property<string>("DietaryTags")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ExternalId")
+                    b.Property<string>("DietaryTagsCsv")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("TEXT");
 
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("REAL");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("REAL");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -206,18 +199,14 @@ namespace TasteOfHome.Migrations
                     b.Property<int>("NumberOfReviews")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PostalCode")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<float>("Rating")
                         .HasColumnType("REAL");
 
-                    b.Property<string>("SignatureDishesCsv")
+                    b.Property<string>("SignatureDishes")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Source")
-                        .IsRequired()
+                    b.Property<string>("SignatureDishesCsv")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

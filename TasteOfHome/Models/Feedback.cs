@@ -25,6 +25,9 @@ namespace TasteOfHome.Models
         [MaxLength(20)]
         public string Status { get; set; } = "Approved";
 
+        // ✅ ADD THIS
+        public string UserId { get; set; } = "";
+
         public Feedback() { }
 
         public Feedback(int rating, int authenticity, string review, int restaurantId)

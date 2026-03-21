@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using TasteOfHome.Services;
 using TasteOfHome.Models;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,6 +22,11 @@ builder.Services.AddScoped<PasswordResetService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=tasteofhome.db"));
+
+builder.Services.Configure<GooglePlacesOptions>(
+    builder.Configuration.GetSection("GooglePlaces"));
+
+builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
 builder.Services.AddAuthentication(options =>
 {

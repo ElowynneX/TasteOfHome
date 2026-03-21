@@ -1,4 +1,6 @@
-﻿namespace TasteOfHome.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TasteOfHome.Models
 {
     public class Restaurant
     {
@@ -17,10 +19,15 @@
         public string? CulturalTraditions { get; set; }
         public string? SignatureDishesCsv { get; set; }
 
-
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public string Source { get; set; } = "";
+        public string ExternalId { get; set; } = "";
+        public string PostalCode { get; set; } = "";
+        public string City { get; set; } = "";
         public string DietaryTagsCsv { get; set; } = "";
 
-       
+        [NotMapped]
         public List<string> DietaryTags
         {
             get => DietaryTagsCsv
@@ -30,6 +37,7 @@
             set => DietaryTagsCsv = string.Join(',', value ?? new List<string>());
         }
 
+        [NotMapped]
         public List<string> SignatureDishes
         {
             get => SignatureDishesCsv?

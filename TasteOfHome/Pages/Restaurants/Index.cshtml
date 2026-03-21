@@ -13,7 +13,7 @@
         <a href="/Restaurants" class="clear-filters-btn">
             Clear All Filters
         </a>
-       
+
         <hr />
 
         <form method="get" onchange="this.submit()" class="filters-body">
@@ -61,14 +61,13 @@
             </div>
         </form>
     </aside>
-    
 
     <main class="content w-100">
         <div class="restaurants-header">
             <h2 class="page-title">Discover Restaurants</h2>
 
             <a asp-page="/HiddenGems/Index" class="hidden-gem-nav-btn">
-                 Hidden Gems
+                Hidden Gems
             </a>
         </div>
 
@@ -84,10 +83,12 @@
                         <!-- Image Section -->
                         <div class="restaurant-image">
 
-                            <img src="/images/restaurants/@Model.GetImageFileName(r.Id)"
-                                 onerror="this.src='/images/restaurants/default.jpg'"
-                                 alt="@r.Name"
-                                 loading="lazy" />
+                            <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
+                                                                 ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
+                                                                 : r.ImageUrl)"
+                             onerror="this.src='/images/restaurants/default.jpg'"
+                             alt="@r.Name"
+                             loading="lazy" />
 
                             <div class="badge-left">
                                 <span class="auth-badge">
@@ -95,7 +96,7 @@
                                 </span>
                             </div>
 
-                            @if (r.Rating >= 4.5)
+                        @if (r.Rating >= 4.5)
                             {
                                 <div class="badge-right">
                                     <span class="hidden-badge">
