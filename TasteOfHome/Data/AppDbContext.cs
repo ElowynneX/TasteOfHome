@@ -13,6 +13,7 @@ namespace TasteOfHome.Data
         public DbSet<Feedback> Feedback => Set<Feedback>();
         public DbSet<HiddenGem> HiddenGems { get; set; }
 
+        public DbSet<Reservation> Reservations { get; set; } = default!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -24,6 +25,12 @@ namespace TasteOfHome.Data
             modelBuilder.Entity<Feedback>()
                 .Property(f => f.Status)
                 .HasDefaultValue("Approved");
+
+            modelBuilder.Entity<Reservation>()
+       .HasOne(r => r.Restaurant)
+       .WithMany()
+       .HasForeignKey(r => r.RestaurantId)
+       .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

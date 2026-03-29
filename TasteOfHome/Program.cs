@@ -3,35 +3,32 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Data;
-using Microsoft.AspNetCore.Authorization;
 using TasteOfHome.Services;
 using TasteOfHome.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<OpenAiOptions>(
+    builder.Configuration.GetSection("OpenAI"));
+builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
+
+builder.Services.Configure<SmtpOptions>(
+    builder.Configuration.GetSection("Smtp"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<PasswordResetService>();
+
+builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=tasteofhome.db"));
 
 builder.Services.Configure<GooglePlacesOptions>(
     builder.Configuration.GetSection("GooglePlaces"));
-
 builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
-
-// OPENAI / AI ENRICHMENT
-builder.Services.Configure<OpenAiOptions>(
-    builder.Configuration.GetSection("OpenAI"));
-
-builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -56,7 +53,6 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Create DB + seed
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -64,7 +60,6 @@ using (var scope = app.Services.CreateScope())
     DbSeeder.Seed(db);
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -74,7 +69,7 @@ if (!app.Environment.IsDevelopment())
 app.MapGet("/login-google", (string? returnUrl) =>
 {
     return Results.Challenge(
-        new Microsoft.AspNetCore.Authentication.AuthenticationProperties
+        new AuthenticationProperties
         {
             RedirectUri = string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl
         },
@@ -95,7 +90,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map endpoints AFTER routing
 app.MapControllers();
 app.MapRazorPages();
 

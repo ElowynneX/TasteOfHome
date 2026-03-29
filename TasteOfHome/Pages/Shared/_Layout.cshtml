@@ -34,6 +34,12 @@
                 <i class="bi bi-search-heart"></i> Discover
             </a>
 
+            <li class="nav-item">
+                <a class="nav-link" asp-page="/Reservations/MyReservations">
+                    <i class="bi bi-calendar-check"></i> My Reservations
+                </a>
+            </li>
+
             @if (User.Identity?.IsAuthenticated == true)
             {
                 @if (isAdmin)

@@ -164,6 +164,13 @@
             </div>
         </div>
 
+        @if (!string.IsNullOrWhiteSpace(Model.AiSuggestion))
+        {
+            <div class="alert alert-info mb-4 shadow-sm border-0">
+                <strong>AI Suggestion:</strong> @Model.AiSuggestion
+            </div>
+        }
+
         @if (!string.IsNullOrWhiteSpace(Model.SearchError))
         {
             <div class="search-error-bar">
@@ -190,74 +197,84 @@
             <div class="restaurant-grid">
             @foreach (var r in Model.Restaurants)
                 {
-                    <a class="card-link"
-                       asp-page="/Restaurants/Details"
-                       asp-route-id="@r.Id">
+                    <div class="restaurant-card">
+                        <div class="restaurant-image">
+                            <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
+                                                                 ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
+                                                                 : r.ImageUrl)"
+                         onerror="this.src='/images/restaurants/default.jpg'"
+                         alt="@r.Name"
+                         loading="lazy" />
 
-                        <div class="restaurant-card">
-                            <div class="restaurant-image">
-                                <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
-                                                                         ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
-                                                                         : r.ImageUrl)"
-                             onerror="this.src='/images/restaurants/default.jpg'"
-                             alt="@r.Name"
-                             loading="lazy" />
+                            <div class="badge-left">
+                                <span class="auth-badge">
+                                    <i class="bi bi-award"></i> @r.Authenticity%
+                                </span>
+                            </div>
 
-                                <div class="badge-left">
-                                    <span class="auth-badge">
-                                        <i class="bi bi-award"></i> @r.Authenticity%
+                    @if (r.Rating >= 4.5)
+                            {
+                                <div class="badge-right">
+                                    <span class="hidden-badge">
+                                        <i class="bi bi-stars"></i> Hidden Gem
                                     </span>
                                 </div>
+                            }
+                        </div>
 
-                        @if (r.Rating >= 4.5)
+                        <div class="restaurant-body">
+                            <div class="title-row">
+                                <h3 class="restaurant-title">@r.Name</h3>
+
+                                <div class="rating-badge">
+                                    <i class="bi bi-star-fill"></i> @r.Rating
+                                </div>
+                            </div>
+
+                            <div class="meta-row">
+                                <span class="cuisine-pill">@r.Cuisine</span>
+                                <span class="source-pill">TasteOfHome</span>
+                                <span class="price-range">$$</span>
+                            </div>
+
+                            <p class="restaurant-desc">
+                                Explore authentic @r.Cuisine cuisine near @r.Location with community reviews and platform details.
+                            </p>
+
+                            <div class="dietary-row">
+                                @foreach (var tag in r.DietaryTags)
                                 {
-                                    <div class="badge-right">
-                                        <span class="hidden-badge">
-                                            <i class="bi bi-stars"></i> Hidden Gem
-                                        </span>
-                                    </div>
+                                    <span class="diet-pill @tag.Replace("-", "").ToLower()">
+                                        @tag.ToLower()
+                                    </span>
                                 }
                             </div>
 
-                            <div class="restaurant-body">
-                                <div class="title-row">
-                                    <h3 class="restaurant-title">@r.Name</h3>
+                            <div class="special-button">
+                                🎉 Community favorite and platform-verified
+                            </div>
 
-                                    <div class="rating-badge">
-                                        <i class="bi bi-star-fill"></i> @r.Rating
-                                    </div>
-                                </div>
+                            <div class="location-row">
+                                <i class="bi bi-geo-alt"></i>
+                                <span>@r.Location</span>
+                            </div>
 
-                                <div class="meta-row">
-                                    <span class="cuisine-pill">@r.Cuisine</span>
-                                    <span class="source-pill">TasteOfHome</span>
-                                    <span class="price-range">$$</span>
-                                </div>
+                            <div class="mt-3 d-flex gap-2">
+                                <a asp-page="/Restaurants/Details"
+                                   asp-route-id="@r.Id"
+                                   class="btn btn-outline-dark flex-fill">
+                                    View Details
+                                </a>
 
-                                <p class="restaurant-desc">
-                                    Explore authentic @r.Cuisine cuisine near @r.Location with community reviews and platform details.
-                                </p>
-
-                                <div class="dietary-row">
-                                    @foreach (var tag in r.DietaryTags)
-                                    {
-                                        <span class="diet-pill @tag.Replace("-", "").ToLower()">
-                                            @tag.ToLower()
-                                        </span>
-                                    }
-                                </div>
-
-                                <div class="special-button">
-                                    🎉 Community favorite and platform-verified
-                                </div>
-
-                                <div class="location-row">
-                                    <i class="bi bi-geo-alt"></i>
-                                    <span>@r.Location</span>
-                                </div>
+                                <a asp-page="/Reservations/Create"
+                                   asp-route-restaurantId="@r.Id"
+                                   class="btn text-white flex-fill"
+                                   style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
+                                    Reserve
+                                </a>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 }
             </div>
         }
@@ -281,6 +298,7 @@
             @foreach (var r in Model.LiveRestaurants)
                 {
                     var addressText = string.IsNullOrWhiteSpace(r.Address) ? r.City : r.Address;
+                    var cityValue = !string.IsNullOrWhiteSpace(r.City) ? r.City : nearbyLabel;
                     var mapsQuery = Uri.EscapeDataString(
                     $"{r.Name} {(string.IsNullOrWhiteSpace(addressText) ? nearbyLabel : addressText)}");
 
@@ -337,6 +355,35 @@
                             </div>
 
                             <div class="mt-3 d-flex gap-2 flex-wrap">
+                                <form method="post" asp-page-handler="ImportAndViewDetails" class="d-inline">
+                                    <input type="hidden" name="name" value="@r.Name" />
+                                    <input type="hidden" name="cuisine" value="@Model.FormatCuisineLabel(r.Cuisine)" />
+                                    <input type="hidden" name="address" value="@addressText" />
+                                    <input type="hidden" name="city" value="@cityValue" />
+                                    <input type="hidden" name="imageUrl" value="@r.ImageUrl" />
+                                    <input type="hidden" name="servesVegetarianFood" value="@r.ServesVegetarianFood.ToString().ToLower()" />
+
+                                    <button type="submit"
+                                            class="btn btn-outline-dark">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </button>
+                                </form>
+
+                                <form method="post" asp-page-handler="ImportAndReserve" class="d-inline">
+                                    <input type="hidden" name="name" value="@r.Name" />
+                                    <input type="hidden" name="cuisine" value="@Model.FormatCuisineLabel(r.Cuisine)" />
+                                    <input type="hidden" name="address" value="@addressText" />
+                                    <input type="hidden" name="city" value="@cityValue" />
+                                    <input type="hidden" name="imageUrl" value="@r.ImageUrl" />
+                                    <input type="hidden" name="servesVegetarianFood" value="@r.ServesVegetarianFood.ToString().ToLower()" />
+
+                                    <button type="submit"
+                                            class="btn text-white"
+                                            style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
+                                        <i class="bi bi-calendar-plus"></i> Add to TasteOfHome & Reserve
+                                    </button>
+                                </form>
+
                                 <a href="https://www.google.com/maps/search/?api=1&query=@mapsQuery"
                                    target="_blank"
                                    rel="noopener noreferrer"

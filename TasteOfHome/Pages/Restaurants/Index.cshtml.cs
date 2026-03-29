@@ -13,6 +13,7 @@ namespace TasteOfHome.Pages.Restaurants
     {
         private readonly AppDbContext _db;
         private readonly IGooglePlacesService _googlePlacesService;
+        private readonly IAiRestaurantEnrichmentService _aiRestaurantEnrichmentService;
 
         private static readonly string[] SupportedDietaryTags =
         {
@@ -38,10 +39,14 @@ namespace TasteOfHome.Pages.Restaurants
             "asdfgh", "qwerty", "zxcvbn", "poiuyt", "lkjhg", "mnbvc", "vdswfecewfc"
         };
 
-        public IndexModel(AppDbContext db, IGooglePlacesService googlePlacesService)
+        public IndexModel(
+            AppDbContext db,
+            IGooglePlacesService googlePlacesService,
+            IAiRestaurantEnrichmentService aiRestaurantEnrichmentService)
         {
             _db = db;
             _googlePlacesService = googlePlacesService;
+            _aiRestaurantEnrichmentService = aiRestaurantEnrichmentService;
         }
 
         public List<Restaurant> Restaurants { get; set; } = new();
@@ -61,6 +66,7 @@ namespace TasteOfHome.Pages.Restaurants
 
         public string SearchSummary { get; set; } = "";
         public string SearchError { get; set; } = "";
+        public string AiSuggestion { get; set; } = "";
 
         public int TotalResultsCount => Restaurants.Count + LiveRestaurants.Count;
 
@@ -135,6 +141,7 @@ namespace TasteOfHome.Pages.Restaurants
                 LiveRestaurants = new List<ImportedRestaurantDto>();
                 SearchSummary = $"No restaurants found for \"{SearchQuery}\".";
                 SearchError = "";
+                AiSuggestion = "";
                 return;
             }
 
@@ -174,6 +181,127 @@ namespace TasteOfHome.Pages.Restaurants
             if (hasValidIntent)
             {
                 await LoadLiveNearbyRestaurantsAsync(cravingKeywords);
+                await LoadAiSuggestionAsync();
+            }
+        }
+
+        public async Task<IActionResult> OnPostImportAndReserveAsync(
+            string name,
+            string cuisine,
+            string address,
+            string city,
+            string imageUrl,
+            bool servesVegetarianFood)
+        {
+            var restaurantId = await ImportLiveRestaurantAsync(
+                name, cuisine, address, city, imageUrl, servesVegetarianFood);
+
+            if (restaurantId == 0)
+            {
+                TempData["StatusMessage"] = "Unable to import this restaurant.";
+                return RedirectToPage();
+            }
+
+            return RedirectToPage("/Reservations/Create", new { restaurantId });
+        }
+
+        public async Task<IActionResult> OnPostImportAndViewDetailsAsync(
+            string name,
+            string cuisine,
+            string address,
+            string city,
+            string imageUrl,
+            bool servesVegetarianFood)
+        {
+            var restaurantId = await ImportLiveRestaurantAsync(
+                name, cuisine, address, city, imageUrl, servesVegetarianFood);
+
+            if (restaurantId == 0)
+            {
+                TempData["StatusMessage"] = "Unable to import this restaurant.";
+                return RedirectToPage();
+            }
+
+            return RedirectToPage("/Restaurants/Details", new { id = restaurantId });
+        }
+
+        private async Task<int> ImportLiveRestaurantAsync(
+            string name,
+            string cuisine,
+            string address,
+            string city,
+            string imageUrl,
+            bool servesVegetarianFood)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return 0;
+
+            var normalizedName = name.Trim();
+            var normalizedAddress = (address ?? "").Trim();
+            var normalizedCity = string.IsNullOrWhiteSpace(city) ? City : city.Trim();
+            var normalizedCuisine = string.IsNullOrWhiteSpace(cuisine)
+                ? "Restaurant"
+                : FormatCuisineLabel(cuisine.Trim());
+
+            var existingRestaurant = await _db.Restaurants.FirstOrDefaultAsync(r =>
+                r.Name.ToLower() == normalizedName.ToLower() &&
+                r.Address.ToLower() == normalizedAddress.ToLower());
+
+            if (existingRestaurant != null)
+                return existingRestaurant.Id;
+
+            var dietaryTags = new List<string>();
+            if (servesVegetarianFood)
+            {
+                dietaryTags.Add("Vegetarian");
+            }
+
+            var restaurant = new Restaurant
+            {
+                Name = normalizedName,
+                Cuisine = normalizedCuisine,
+                Location = string.IsNullOrWhiteSpace(normalizedCity) ? "Nearby Area" : normalizedCity,
+                City = string.IsNullOrWhiteSpace(normalizedCity) ? "" : normalizedCity,
+                Address = normalizedAddress,
+                ImageUrl = string.IsNullOrWhiteSpace(imageUrl) ? "" : imageUrl.Trim(),
+                Rating = 0,
+                Authenticity = 0,
+                NumberOfReviews = 0,
+                Source = "GooglePlaces",
+                ExternalId = $"google-{Guid.NewGuid():N}",
+                DietaryTags = dietaryTags,
+                CulturalStory = "Imported from a nearby live search result.",
+                CulturalTraditions = "Additional cultural and menu details can be enriched later."
+            };
+
+            _db.Restaurants.Add(restaurant);
+            await _db.SaveChangesAsync();
+
+            return restaurant.Id;
+        }
+
+        private async Task LoadAiSuggestionAsync()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery) &&
+                string.IsNullOrWhiteSpace(City) &&
+                !SelectedCuisineFilter.Any() &&
+                !SelectedDietaryFilters.Any())
+            {
+                AiSuggestion = "";
+                return;
+            }
+
+            try
+            {
+                AiSuggestion = await _aiRestaurantEnrichmentService.GetSearchSuggestionAsync(
+                    SearchQuery,
+                    City,
+                    SelectedCuisineFilter,
+                    SelectedDietaryFilters);
+            }
+            catch
+            {
+                AiSuggestion = "";
             }
         }
 
@@ -567,9 +695,9 @@ namespace TasteOfHome.Pages.Restaurants
                 var match = Regex.Match(query, pattern, RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
-                    var city = match.Groups["city"].Value.Trim();
-                    if (!string.IsNullOrWhiteSpace(city))
-                        return NormalizeCity(city);
+                    var cityValue = match.Groups["city"].Value.Trim();
+                    if (!string.IsNullOrWhiteSpace(cityValue))
+                        return NormalizeCity(cityValue);
                 }
             }
 

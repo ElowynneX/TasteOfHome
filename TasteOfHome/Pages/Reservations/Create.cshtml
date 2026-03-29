@@ -1,0 +1,134 @@
+﻿@page "{restaurantId:int}"
+@model TasteOfHome.Pages.Reservations.CreateModel
+@{
+    ViewData["Title"] = "Reserve a Table";
+}
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-page="/Restaurants/Details" asp-route-id="@Model.Restaurant.Id" class="text-decoration-none fw-semibold">
+            <i class="bi bi-arrow-left"></i> Back to Restaurant
+        </a>
+    </div>
+
+    <div class="position-relative overflow-hidden rounded-4 shadow-sm mb-4" style="min-height: 240px;">
+        <img src="@Model.RestaurantImageUrl"
+             alt="@Model.Restaurant.Name"
+             class="w-100 h-100 position-absolute top-0 start-0"
+             style="object-fit: cover;" />
+
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+             style="background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.22));"></div>
+
+        <div class="position-relative text-white p-4" style="z-index: 2;">
+            <span class="badge bg-warning text-dark mb-3">Premium Reservation</span>
+            <h1 class="fw-bold mb-2">Reserve a Table</h1>
+            <p class="mb-1 fs-5">@Model.Restaurant.Name</p>
+            <p class="mb-0 opacity-75">@Model.Restaurant.Cuisine • @Model.Restaurant.Location</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">Booking Details</h4>
+
+                    <form method="post">
+                        <input asp-for="Input.RestaurantId" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.CustomerName" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.CustomerName" class="form-control form-control-lg" placeholder="Your full name" />
+                                <span asp-validation-for="Input.CustomerName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.PhoneNumber" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.PhoneNumber" class="form-control form-control-lg" placeholder="Phone number" />
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.ReservationDate" class="form-label fw-semibold">Date</label>
+                                <input asp-for="Input.ReservationDate"
+                                       type="date"
+                                       min="@DateTime.Today.ToString("yyyy-MM-dd")"
+                                       class="form-control form-control-lg" />
+                                <span asp-validation-for="Input.ReservationDate" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.ReservationTime" class="form-label fw-semibold">Time</label>
+                                <select asp-for="Input.ReservationTime" class="form-select form-select-lg">
+                                    @foreach (var slot in Model.TimeSlots)
+                                    {
+                                        <option value="@slot">@slot</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Input.ReservationTime" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.NumberOfGuests" class="form-label fw-semibold">Number of Guests</label>
+                                <select asp-for="Input.NumberOfGuests" class="form-select form-select-lg">
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Input.NumberOfGuests" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.SpecialRequest" class="form-label fw-semibold">Special Request</label>
+                                <textarea asp-for="Input.SpecialRequest"
+                                          rows="4"
+                                          class="form-control"
+                                          placeholder="Any dietary restrictions, seating request, or special occasion?"></textarea>
+                                <span asp-validation-for="Input.SpecialRequest" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-lg text-white fw-semibold"
+                                    style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
+                                Confirm Reservation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Restaurant Summary</h5>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold">@Model.Restaurant.Name</div>
+                        <div class="text-muted">@Model.Restaurant.Address</div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-light text-dark">@Model.Restaurant.Cuisine</span>
+                        <span class="badge bg-success">⭐ @Model.Restaurant.Rating.ToString("0.0")</span>
+                        <span class="badge bg-primary">Authenticity @Model.Restaurant.Authenticity%</span>
+                    </div>
+
+                    <p class="text-muted mb-0">
+                        Reservations are saved with <strong>Pending</strong> status first. This keeps the experience realistic for your capstone without requiring live seat inventory.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

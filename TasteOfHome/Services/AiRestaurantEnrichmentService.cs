@@ -26,10 +26,8 @@ namespace TasteOfHome.Services
             string address,
             string existingDietaryTagsCsv)
         {
-            if (string.IsNullOrWhiteSpace(_options.ApiKey))
-            {
-                throw new InvalidOperationException("OpenAI ApiKey is missing.");
-            }
+            EnsureApiKey();
+
             var prompt = $$"""
 You are helping enrich a multicultural restaurant discovery app called TasteOfHome.
 
@@ -95,6 +93,75 @@ Rules:
                 }
             };
 
+            var outputText = await SendResponsesRequestAsync(requestBody);
+
+            var parsed = JsonSerializer.Deserialize<RestaurantEnrichmentResponse>(
+                outputText,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (parsed == null)
+            {
+                throw new InvalidOperationException("Failed to parse AI enrichment JSON.");
+            }
+
+            return new RestaurantEnrichmentResult
+            {
+                CulturalStory = parsed.CulturalStory?.Trim() ?? "",
+                CulturalTraditions = parsed.CulturalTraditions?.Trim() ?? "",
+                SignatureDishes = CleanList(parsed.SignatureDishes, 5),
+                DietaryTags = CleanList(parsed.DietaryTags, 5)
+            };
+        }
+
+        public async Task<string> GetSearchSuggestionAsync(
+            string searchQuery,
+            string city,
+            List<string> selectedCuisineFilters,
+            List<string> selectedDietaryFilters)
+        {
+            EnsureApiKey();
+
+            var cuisineText = selectedCuisineFilters != null && selectedCuisineFilters.Any()
+                ? string.Join(", ", selectedCuisineFilters)
+                : "None";
+
+            var dietaryText = selectedDietaryFilters != null && selectedDietaryFilters.Any()
+                ? string.Join(", ", selectedDietaryFilters)
+                : "None";
+
+            var prompt = $$"""
+You are helping users search for restaurants in a multicultural restaurant discovery app called TasteOfHome.
+
+User request:
+- Search query: {{searchQuery}}
+- City: {{(string.IsNullOrWhiteSpace(city) ? "Not specified" : city)}}
+- Selected cuisine filters: {{cuisineText}}
+- Selected dietary filters: {{dietaryText}}
+
+Write a short, helpful suggestion in 1 or 2 sentences.
+Rules:
+- Keep it under 45 words.
+- Be practical and user-friendly.
+- Suggest what kind of restaurant or dishes the user may want.
+- Do not use bullet points.
+- Do not make up exact restaurant facts.
+""";
+
+            var requestBody = new
+            {
+                model = _options.Model,
+                input = prompt
+            };
+
+            var outputText = await SendResponsesRequestAsync(requestBody);
+            return outputText.Trim();
+        }
+
+        private async Task<string> SendResponsesRequestAsync(object requestBody)
+        {
             using var request = new HttpRequestMessage(
                 HttpMethod.Post,
                 $"{_options.BaseUrl.TrimEnd('/')}/responses");
@@ -117,50 +184,51 @@ Rules:
             }
 
             using var doc = JsonDocument.Parse(responseJson);
-
-            string outputText = "";
-
-            if (doc.RootElement.TryGetProperty("output_text", out var outputProp))
-            {
-                outputText = outputProp.GetString() ?? "";
-            }
-            else if (doc.RootElement.TryGetProperty("output", out var outputArray))
-            {
-                // fallback parsing (new API format)
-                var first = outputArray[0];
-                var content = first.GetProperty("content")[0];
-                outputText = content.GetProperty("text").GetString() ?? "";
-            }
+            var outputText = ExtractOutputText(doc);
 
             if (string.IsNullOrWhiteSpace(outputText))
             {
                 throw new InvalidOperationException("AI returned empty or unexpected response format.");
             }
 
-            if (string.IsNullOrWhiteSpace(outputText))
+            return outputText;
+        }
+
+        private static string ExtractOutputText(JsonDocument doc)
+        {
+            if (doc.RootElement.TryGetProperty("output_text", out var outputProp))
             {
-                throw new InvalidOperationException("OpenAI returned empty output_text.");
+                return outputProp.GetString() ?? "";
             }
 
-            var parsed = JsonSerializer.Deserialize<RestaurantEnrichmentResponse>(
-                outputText,
-                new JsonSerializerOptions
+            if (doc.RootElement.TryGetProperty("output", out var outputArray) &&
+                outputArray.ValueKind == JsonValueKind.Array &&
+                outputArray.GetArrayLength() > 0)
+            {
+                var first = outputArray[0];
+
+                if (first.TryGetProperty("content", out var contentArray) &&
+                    contentArray.ValueKind == JsonValueKind.Array &&
+                    contentArray.GetArrayLength() > 0)
                 {
-                    PropertyNameCaseInsensitive = true
-                });
+                    var content = contentArray[0];
 
-            if (parsed == null)
-            {
-                throw new InvalidOperationException("Failed to parse AI enrichment JSON.");
+                    if (content.TryGetProperty("text", out var textProp))
+                    {
+                        return textProp.GetString() ?? "";
+                    }
+                }
             }
 
-            return new RestaurantEnrichmentResult
+            return "";
+        }
+
+        private void EnsureApiKey()
+        {
+            if (string.IsNullOrWhiteSpace(_options.ApiKey))
             {
-                CulturalStory = parsed.CulturalStory?.Trim() ?? "",
-                CulturalTraditions = parsed.CulturalTraditions?.Trim() ?? "",
-                SignatureDishes = CleanList(parsed.SignatureDishes, 5),
-                DietaryTags = CleanList(parsed.DietaryTags, 5)
-            };
+                throw new InvalidOperationException("OpenAI ApiKey is missing.");
+            }
         }
 
         private static List<string> CleanList(List<string>? items, int max)

@@ -1,15 +1,29 @@
 ﻿@page
 @model TasteOfHome.Pages.Restaurants.DetailsModel
 
-@if (Model.Restaurant == null || Model.Restaurant.Id == 0)
+@if (Model.Restaurant == null)
 {
-    <div class="container py-5">
-        <div class="alert alert-warning">Restaurant not found.</div>
-        <a asp-page="/Restaurants/Index" class="btn btn-outline-secondary">Back to Restaurants</a>
-    </div>
+    <p>Restaurant not found.</p>
 }
 else
 {
+    var authenticity = Model.Restaurant.Authenticity;
+    var authClass = "bg-secondary";
+    var authText = "Low Authenticity";
+
+    if (authenticity >= 80)
+    {
+        authClass = "bg-success";
+        authText = "Authentic";
+    }
+    else if (authenticity >= 60)
+    {
+        authClass = "bg-warning text-dark";
+        authText = "Moderately Authentic";
+    }
+
+    var mapsQuery = Uri.EscapeDataString($"{Model.Restaurant.Name} {Model.Restaurant.Address}");
+
     <div class="container py-4">
         <div class="mb-3">
             <a asp-page="/Restaurants/Index" class="text-decoration-none fw-semibold">
@@ -19,110 +33,122 @@ else
 
         @if (TempData["StatusMessage"] != null)
         {
-            <div class="alert alert-success">@TempData["StatusMessage"]</div>
+            <div class="alert alert-success mt-3">@TempData["StatusMessage"]</div>
         }
 
-        <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="card border-0 shadow-sm overflow-hidden mb-4 rounded-4">
             <div class="position-relative">
-                <img src="@Model.RestaurantImageUrl"
+                <img src="@(string.IsNullOrWhiteSpace(Model.Restaurant.ImageUrl)
+                                ? $"/images/restaurants/{Model.GetImageFileName(Model.Restaurant.Id)}"
+                                : Model.Restaurant.ImageUrl)"
                      alt="@Model.Restaurant.Name"
-                     class="w-100"
-                     style="height: 360px; object-fit: cover;"
                      loading="lazy"
-                     onerror="this.src='/images/restaurants/default.jpg'" />
+                     onerror="this.src='/images/restaurants/default.jpg'"
+                     class="w-100"
+                     style="height: 360px; object-fit: cover;" />
 
                 <div class="position-absolute top-0 start-0 w-100 h-100"
-                     style="background: linear-gradient(to top, rgba(0,0,0,0.72), rgba(0,0,0,0.18));">
-                </div>
+                     style="background: linear-gradient(to top, rgba(0,0,0,.76), rgba(0,0,0,.2));"></div>
 
                 <div class="position-absolute bottom-0 start-0 text-white p-4 w-100">
-                    <div class="d-flex flex-wrap gap-2 mb-2">
+                    <div class="d-flex flex-wrap gap-2 mb-3">
                         <span class="badge bg-light text-dark px-3 py-2">@Model.Restaurant.Cuisine</span>
-                        <span class="badge bg-warning text-dark px-3 py-2">@Model.PriceLevel</span>
-                        <span class="badge bg-success px-3 py-2">
-                            ⭐ @Model.Restaurant.Rating.ToString("0.0")
-                        </span>
-                        <span class="badge bg-primary px-3 py-2">
-                            Authenticity @Model.Restaurant.Authenticity%
+                        <span class="badge bg-warning text-dark px-3 py-2">$$</span>
+                        <span class="badge bg-primary px-3 py-2">⭐ @Model.Restaurant.Rating</span>
+                        <span class="badge @authClass px-3 py-2">
+                            <i class="bi bi-patch-check-fill"></i> @authText (@Model.Restaurant.Authenticity%)
                         </span>
                     </div>
 
                     <h1 class="fw-bold mb-2">@Model.Restaurant.Name</h1>
-                    <p class="mb-0 fs-6">
-                        Authentic home-style @Model.Restaurant.Cuisine cuisine in @Model.Restaurant.Location
-                    </p>
+                    <p class="mb-0">@Model.Restaurant.Location • @Model.Restaurant.Address</p>
                 </div>
             </div>
         </div>
 
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
                         <h4 class="fw-bold mb-3">About this restaurant</h4>
 
-                        <p class="text-muted mb-4">
-                            Discover cultural flavors, community ratings, and signature dishes from
-                            one of TasteOfHome’s featured restaurants.
+                        <p class="restaurant-desc mb-4">
+                            Authentic home-style @Model.Restaurant.Cuisine cuisine located in @Model.Restaurant.Location.
                         </p>
 
-                        <div class="row g-3">
+                        <div class="row g-3 mb-4">
                             <div class="col-md-4">
-                                <div class="rounded-4 bg-light p-3 h-100 text-center">
-                                    <div class="fs-4 fw-bold">@Model.Restaurant.Rating.ToString("0.0")</div>
+                                <div class="bg-light rounded-4 p-3 text-center h-100">
+                                    <div class="fs-4 fw-bold">@Model.Restaurant.Rating</div>
                                     <div class="text-muted small">Average Rating</div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="rounded-4 bg-light p-3 h-100 text-center">
+                                <div class="bg-light rounded-4 p-3 text-center h-100">
                                     <div class="fs-4 fw-bold">@Model.Restaurant.Authenticity%</div>
                                     <div class="text-muted small">Authenticity Score</div>
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <div class="rounded-4 bg-light p-3 h-100 text-center">
-                                    <div class="fs-4 fw-bold">@Model.Restaurant.NumberOfReviews</div>
-                                    <div class="text-muted small">Approved Reviews</div>
+                                <div class="bg-light rounded-4 p-3 text-center h-100">
+                                    <div class="fs-4 fw-bold">@Model.RestaurantFeedback.Count</div>
+                                    <div class="text-muted small">Visible Reviews</div>
                                 </div>
                             </div>
                         </div>
 
-                        <hr class="my-4" />
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a asp-page="/Reservations/Create"
+                               asp-route-restaurantId="@Model.Restaurant.Id"
+                               class="btn text-white px-4"
+                               style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 12px;">
+                                <i class="bi bi-calendar-check"></i> Reserve a Table
+                            </a>
 
-                        @if (User.Identity?.IsAuthenticated ?? false)
-                        {
-                            <a asp-page="/Restaurants/Feedback"
-                               asp-route-id="@Model.Restaurant.Id"
-                               class="btn btn-danger px-4">
-                                Submit Authenticity Feedback
-                            </a>
-                        }
-                        else
-                        {
-                            <a asp-page="/Login" class="btn btn-danger px-4">
-                                Sign in to Leave Feedback
-                            </a>
-                        }
+                            @if (User.Identity?.IsAuthenticated ?? false)
+                            {
+                                <a asp-page="/Restaurants/Feedback"
+                                   asp-route-id="@Model.Restaurant.Id"
+                                   class="btn btn-outline-dark px-4">
+                                    Submit Authenticity Feedback
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-page="/Login" class="btn btn-outline-dark px-4">
+                                    Sign in to Leave Feedback
+                                </a>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
                         <h5 class="fw-bold mb-3">
-                            <i class="bi bi-geo-alt me-2"></i>Location
+                            <i class="bi bi-geo-alt"></i> Location
                         </h5>
 
-                        <p class="mb-2"><strong>City:</strong> @Model.Restaurant.Location</p>
-                        <p class="mb-4"><strong>Address:</strong> @Model.Restaurant.Address</p>
+                        <p class="mb-2"><strong>Address:</strong> @Model.Restaurant.Address</p>
+                        <p class="mb-4"><strong>City:</strong> @Model.Restaurant.Location</p>
 
-                        <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(Model.Restaurant.Address)"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-outline-dark w-100">
-                            Get Directions
-                        </a>
+                        <div class="d-grid gap-2">
+                            <a href="https://www.google.com/maps/search/?api=1&query=@mapsQuery"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn btn-outline-dark">
+                                Get Directions
+                            </a>
+
+                            <a asp-page="/Reservations/Create"
+                               asp-route-restaurantId="@Model.Restaurant.Id"
+                               class="btn text-white"
+                               style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
+                                Book This Table
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -130,160 +156,123 @@ else
 
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge bg-success">Cultural Info</span>
-                            <h4 class="fw-bold mb-0">Story & Heritage</h4>
+                        <div class="mb-3">
+                            <span style="background:#22c55e;color:white;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;">
+                                AI Generated
+                            </span>
                         </div>
 
-                        @if (Model.HasCulturalStory)
-                        {
-                            <p class="mb-4">
-                                @(string.IsNullOrWhiteSpace(Model.Restaurant.CulturalStory)
-                                                        ? "Traditional family recipes and authentic food culture are at the heart of this restaurant."
-                                                        : Model.Restaurant.CulturalStory)
-                                                                                     </p>
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width:40px;height:40px;background:#fff2e8;">📖</div>
+                            <h4 class="fw-bold mb-0">Our Story & Heritage</h4>
+                        </div>
 
-                            <h6 class="fw-bold">Cultural Traditions</h6>
-                            <p class="mb-0">
-                                @(string.IsNullOrWhiteSpace(Model.Restaurant.CulturalTraditions)
-                                                        ? "Authentic culinary traditions are preserved through ingredients, preparation, and service style."
-                                                        : Model.Restaurant.CulturalTraditions)
-                    </p>
-                                        }
-                        else
-                        {
-                            <p class="mb-0 text-muted">
-                                Cultural story information is not available yet for this restaurant.
-                            </p>
-                        }
+                        <p>@(Model.Restaurant.CulturalStory ?? "Traditional family recipes passed down through generations.")</p>
+
+                        <hr />
+
+                        <h6 class="fw-bold">Cultural Traditions</h6>
+                        <p class="mb-0">@(Model.Restaurant.CulturalTraditions ?? "Authentic cooking traditions preserved by the chefs.")</p>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
                     <div class="card-body p-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge bg-success">Dietary</span>
-                            <h5 class="fw-bold mb-0">Options</h5>
+                        <div class="mb-3">
+                            <span style="background:#22c55e;color:white;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;">
+                                AI Generated
+                            </span>
                         </div>
 
-                        @if (Model.HasDietaryTags)
-                        {
-                            <div class="d-flex flex-wrap gap-2">
+                        <h5 class="fw-bold mb-3">Dietary Options</h5>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            @if (Model.Restaurant.DietaryTags != null && Model.Restaurant.DietaryTags.Any())
+                            {
                                 @foreach (var tag in Model.Restaurant.DietaryTags)
                                 {
-                                    var badgeClass = "bg-secondary";
-
-                                    if (tag.Equals("Vegetarian", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        badgeClass = "bg-success";
-                                    }
-                                    else if (tag.Equals("Vegan", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        badgeClass = "bg-dark";
-                                    }
-                                    else if (tag.Equals("Halal", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        badgeClass = "bg-primary";
-                                    }
-                                    else if (tag.Equals("Gluten-Free", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        badgeClass = "bg-warning text-dark";
-                                    }
-
-                                    <span class="badge @badgeClass px-3 py-2 rounded-pill">@tag</span>
+                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill">@tag</span>
                                 }
-                            </div>
-                        }
-                        else
-                        {
-                            <p class="text-muted mb-0">No dietary options listed.</p>
-                        }
+                            }
+                            else
+                            {
+                                <span class="text-muted">No dietary options listed.</span>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
+                <div class="mb-3">
+                    <span style="background:#22c55e;color:white;padding:4px 8px;border-radius:6px;font-size:12px;font-weight:600;">
+                        AI Generated
+                    </span>
+                </div>
+
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <span class="badge bg-success">Featured</span>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;background:#fff2e8;">🍽</div>
                     <h4 class="fw-bold mb-0">Signature Dishes</h4>
                 </div>
 
-                @if (Model.HasSignatureDishes)
+                @if (Model.Restaurant.SignatureDishes != null && Model.Restaurant.SignatureDishes.Any())
                 {
                     <div class="row g-3">
                         @foreach (var dish in Model.Restaurant.SignatureDishes)
                         {
                             <div class="col-md-6 col-lg-3">
-                                <div class="border rounded-4 p-3 h-100 bg-light">
-                                    <div class="fw-semibold">@dish</div>
-                                </div>
+                                <div class="border rounded-4 p-3 h-100 bg-light">@dish</div>
                             </div>
                         }
                     </div>
                 }
                 else
                 {
-                    <p class="text-muted mb-0">No signature dishes listed.</p>
+                    <p class="mb-0">No signature dishes listed.</p>
                 }
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-                    <h4 class="fw-bold mb-0">Community Reviews</h4>
+                    <h5 class="fw-bold mb-0">Community Reviews</h5>
 
-                    @if (User.Identity?.IsAuthenticated ?? false)
-                    {
-                        <a asp-page="/Restaurants/Feedback"
-                           asp-route-id="@Model.Restaurant.Id"
-                           class="btn btn-outline-danger btn-sm">
-                            Write a Review
-                        </a>
-                    }
+                    <a asp-page="/Reservations/Create"
+                       asp-route-restaurantId="@Model.Restaurant.Id"
+                       class="btn btn-sm text-white"
+                       style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
+                        Reserve
+                    </a>
                 </div>
 
                 @if (Model.RestaurantFeedback != null && Model.RestaurantFeedback.Any())
                 {
                     @foreach (var review in Model.RestaurantFeedback)
                     {
-                        var isOwner = User.Identity?.IsAuthenticated == true &&
-                        review.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
                         <div class="border rounded-4 p-4 mb-3">
-                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
-                                <div>
-                                    <div class="mb-2">
-                                        @for (int i = 0; i < review.Rating; i++)
-                                        {
-                                            <span>⭐</span>
-                                        }
-                                    </div>
-
-                                    <div class="text-muted small">
-                                        Authenticity Score: <strong>@review.Authenticity%</strong>
-                                    </div>
-
-                                    @if (!string.IsNullOrWhiteSpace(review.Status) && review.Status != "Approved")
-                                    {
-                                        <div class="mt-2">
-                                            <span class="badge bg-warning text-dark">@review.Status</span>
-                                        </div>
-                                    }
-                                </div>
+                            <div class="stars mb-2">
+                                @for (int i = 0; i < review.Rating; i++)
+                                {
+                                    <span>⭐</span>
+                                }
                             </div>
 
-                            <p class="mb-0">@review.Review</p>
+                            <p><strong>Authenticity:</strong> @review.Authenticity%</p>
+                            <p>@review.Review</p>
 
-                            @if (isOwner)
+                            @if (User.Identity?.IsAuthenticated == true &&
+                                 review.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
                             {
-                                <div class="mt-3">
+                                <div class="mt-2">
                                     <a asp-page="/Reviews/Edit"
                                        asp-route-id="@review.Id"
                                        class="btn btn-warning btn-sm me-2">
@@ -307,14 +296,14 @@ else
                 }
                 else
                 {
-                    <div class="text-center py-4">
-                        <p class="text-muted mb-3">No reviews yet — be the first to share your experience.</p>
+                    <div class="text-center py-3">
+                        <p>No reviews yet — be the first to share your experience!</p>
 
                         @if (User.Identity?.IsAuthenticated ?? false)
                         {
                             <a asp-page="/Restaurants/Feedback"
                                asp-route-id="@Model.Restaurant.Id"
-                               class="btn btn-danger">
+                               class="btn btn-toh mt-2">
                                 Write First Review
                             </a>
                         }

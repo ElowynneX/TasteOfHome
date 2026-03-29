@@ -2,18 +2,25 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
+using TasteOfHome.Services;
 
 namespace TasteOfHome.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly AppDbContext _db;
+        private readonly IGooglePlacesService _googlePlacesService;
+        private readonly ILogger<IndexModel> _logger;
+        private readonly IAiRestaurantEnrichmentService _aiRestaurantEnrichmentService;
 
-        public IndexModel(ILogger<IndexModel> logger, AppDbContext db)
+        public IndexModel(
+      AppDbContext db,
+      IGooglePlacesService googlePlacesService,
+      IAiRestaurantEnrichmentService aiRestaurantEnrichmentService)
         {
-            _logger = logger;
             _db = db;
+            _googlePlacesService = googlePlacesService;
+            _aiRestaurantEnrichmentService = aiRestaurantEnrichmentService;
         }
 
         public List<HiddenGem> ApprovedHiddenGems { get; set; } = new();

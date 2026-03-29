@@ -8,6 +8,12 @@
             string city,
             string address,
             string existingDietaryTagsCsv);
+
+        Task<string> GetSearchSuggestionAsync(
+            string searchQuery,
+            string city,
+            List<string> selectedCuisineFilters,
+            List<string> selectedDietaryFilters);
     }
 
     public class RestaurantEnrichmentResult
