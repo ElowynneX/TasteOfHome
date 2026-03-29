@@ -1,10 +1,14 @@
 ﻿@page
+@using System
 @model TasteOfHome.Pages.Restaurants.IndexModel
 
-<div class="layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
+@{
+    var nearbyLabel = string.IsNullOrWhiteSpace(Model.City) ? "your area" : Model.City;
+    var hasNearbySearch = !string.IsNullOrWhiteSpace(Model.City) || !string.IsNullOrWhiteSpace(Model.SearchQuery);
+}
 
+<div class="layout">
+    <aside class="sidebar">
         <div class="sidebar-header">
             <i class="bi bi-funnel"></i>
             <span>Filters</span>
@@ -17,6 +21,8 @@
         <hr />
 
         <form method="get" onchange="this.submit()" class="filters-body">
+            <input type="hidden" name="SearchQuery" value="@Model.SearchQuery" />
+            <input type="hidden" name="City" value="@Model.City" />
 
             <div class="filter-group">
                 <div class="filter-title orange-dot">
@@ -64,93 +70,305 @@
 
     <main class="content w-100">
         <div class="restaurants-header">
-            <h2 class="page-title">Discover Restaurants</h2>
+            <div>
+                <h2 class="page-title">Discover Restaurants Near You</h2>
+                <p class="page-subtitle">
+                    Search TasteOfHome picks and nearby live restaurant results by city, craving, or cuisine.
+                </p>
+            </div>
 
             <a asp-page="/HiddenGems/Index" class="hidden-gem-nav-btn">
                 Hidden Gems
             </a>
         </div>
 
-        <div class="restaurant-grid">
-            @foreach (var r in Model.Restaurants)
+        <form method="get" class="search-hero">
+            <div class="search-row">
+                <div class="search-field">
+                    <label class="search-label">What are you craving?</label>
+                    <input type="text"
+                           name="SearchQuery"
+                           value="@Model.SearchQuery"
+                           class="search-input"
+                           placeholder="Try: vegetarian restaurants, halal food, Indian restaurants..." />
+                </div>
+
+                <div class="search-field city-field">
+                    <label class="search-label">Location</label>
+                    <input type="text"
+                           name="City"
+                           value="@Model.City"
+                           class="city-input"
+                           placeholder="Mississauga, Waterloo, Kitchener..." />
+                </div>
+
+                <div class="search-button-wrap">
+                    <button type="submit" class="search-btn">
+                        <i class="bi bi-search"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            @foreach (var filter in Model.SelectedDietaryFilters)
             {
-                <a class="card-link"
-                   asp-page="/Restaurants/Details"
-                   asp-route-id="@r.Id">
+                <input type="hidden" name="SelectedDietaryFilters" value="@filter" />
+            }
 
-                    <div class="restaurant-card">
+            @foreach (var filter in Model.SelectedCuisineFilter)
+            {
+                <input type="hidden" name="SelectedCuisineFilter" value="@filter" />
+            }
 
-                        <!-- Image Section -->
-                        <div class="restaurant-image">
+            <div class="quick-searches">
+                <span class="quick-search-label">Quick ideas:</span>
 
-                            <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
-                                                                 ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
-                                                                 : r.ImageUrl)"
+                <a asp-page="/Restaurants/Index"
+                   asp-route-SearchQuery="halal restaurants"
+                   asp-route-City="Waterloo"
+                   class="search-chip">
+                    Halal in Waterloo
+                </a>
+
+                <a asp-page="/Restaurants/Index"
+                   asp-route-SearchQuery="vegan food"
+                   asp-route-City="Kitchener"
+                   class="search-chip">
+                    Vegan in Kitchener
+                </a>
+
+                <a asp-page="/Restaurants/Index"
+                   asp-route-SearchQuery="Indian restaurants"
+                   asp-route-City="Cambridge"
+                   class="search-chip">
+                    Indian in Cambridge
+                </a>
+
+                <a asp-page="/Restaurants/Index"
+                   asp-route-SearchQuery="restaurants"
+                   asp-route-City="Mississauga"
+                   class="search-chip">
+                    Restaurants in Mississauga
+                </a>
+            </div>
+        </form>
+
+        <div class="search-summary-bar">
+            <div class="summary-left">
+                <i class="bi bi-stars"></i>
+                <span>@Model.SearchSummary</span>
+            </div>
+
+            <div class="summary-right">
+                @Model.TotalResultsCount result@(Model.TotalResultsCount == 1 ? "" : "s") found
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SearchError))
+        {
+            <div class="search-error-bar">
+                <i class="bi bi-exclamation-circle"></i>
+                <span>@Model.SearchError</span>
+            </div>
+        }
+
+        @if (Model.Restaurants.Any())
+        {
+            <div class="section-header">
+                <div>
+                    <h3>
+                        @(string.IsNullOrWhiteSpace(Model.City)
+                                            ? "Curated TasteOfHome Picks"
+                                            : $"TasteOfHome Picks Near {Model.City}")
+                </h3>
+                <p>
+                    Saved platform restaurants matched for your search and location.
+                </p>
+            </div>
+        </div>
+
+            <div class="restaurant-grid">
+            @foreach (var r in Model.Restaurants)
+                {
+                    <a class="card-link"
+                       asp-page="/Restaurants/Details"
+                       asp-route-id="@r.Id">
+
+                        <div class="restaurant-card">
+                            <div class="restaurant-image">
+                                <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
+                                                                         ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
+                                                                         : r.ImageUrl)"
                              onerror="this.src='/images/restaurants/default.jpg'"
                              alt="@r.Name"
                              loading="lazy" />
 
-                            <div class="badge-left">
-                                <span class="auth-badge">
-                                    <i class="bi bi-award"></i> @r.Authenticity%
-                                </span>
-                            </div>
-
-                        @if (r.Rating >= 4.5)
-                            {
-                                <div class="badge-right">
-                                    <span class="hidden-badge">
-                                        <i class="bi bi-stars"></i> Hidden Gem
+                                <div class="badge-left">
+                                    <span class="auth-badge">
+                                        <i class="bi bi-award"></i> @r.Authenticity%
                                     </span>
                                 </div>
-                            }
 
+                        @if (r.Rating >= 4.5)
+                                {
+                                    <div class="badge-right">
+                                        <span class="hidden-badge">
+                                            <i class="bi bi-stars"></i> Hidden Gem
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="restaurant-body">
+                                <div class="title-row">
+                                    <h3 class="restaurant-title">@r.Name</h3>
+
+                                    <div class="rating-badge">
+                                        <i class="bi bi-star-fill"></i> @r.Rating
+                                    </div>
+                                </div>
+
+                                <div class="meta-row">
+                                    <span class="cuisine-pill">@r.Cuisine</span>
+                                    <span class="source-pill">TasteOfHome</span>
+                                    <span class="price-range">$$</span>
+                                </div>
+
+                                <p class="restaurant-desc">
+                                    Explore authentic @r.Cuisine cuisine near @r.Location with community reviews and platform details.
+                                </p>
+
+                                <div class="dietary-row">
+                                    @foreach (var tag in r.DietaryTags)
+                                    {
+                                        <span class="diet-pill @tag.Replace("-", "").ToLower()">
+                                            @tag.ToLower()
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="special-button">
+                                    🎉 Community favorite and platform-verified
+                                </div>
+
+                                <div class="location-row">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>@r.Location</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+
+        @if (Model.LiveRestaurants.Any())
+        {
+            <div class="section-header">
+                <div>
+                    <h3>
+                        @(hasNearbySearch
+                                            ? $"Nearby Restaurants Around {nearbyLabel}"
+                                            : "Live Nearby Results")
+                </h3>
+                <p>
+                    Real-time nearby restaurant matches discovered from Google Places for this location search.
+                </p>
+            </div>
+        </div>
+
+            <div class="restaurant-grid">
+            @foreach (var r in Model.LiveRestaurants)
+                {
+                    var addressText = string.IsNullOrWhiteSpace(r.Address) ? r.City : r.Address;
+                    var mapsQuery = Uri.EscapeDataString(
+                    $"{r.Name} {(string.IsNullOrWhiteSpace(addressText) ? nearbyLabel : addressText)}");
+
+                    <div class="restaurant-card live-result-card">
+                        <div class="restaurant-image">
+                            <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
+                                                                 ? "/images/restaurants/default.jpg"
+                                                                 : r.ImageUrl)"
+                         onerror="this.src='/images/restaurants/default.jpg'"
+                         alt="@r.Name"
+                         loading="lazy" />
+
+                            <div class="badge-left">
+                                <span class="live-badge">
+                                    <i class="bi bi-compass"></i> Nearby Match
+                                </span>
+                            </div>
                         </div>
 
-                        <!-- Body -->
                         <div class="restaurant-body">
-
                             <div class="title-row">
                                 <h3 class="restaurant-title">@r.Name</h3>
 
-                                <div class="rating-badge">
-                                    <i class="bi bi-star-fill"></i> @r.Rating
+                                <div class="rating-badge live-rating">
+                                    <i class="bi bi-search-heart"></i> Live Result
                                 </div>
                             </div>
 
                             <div class="meta-row">
-                                <span class="cuisine-pill">@r.Cuisine</span>
-                                <span class="price-range">$$</span>
+                                <span class="cuisine-pill">@Model.FormatCuisineLabel(r.Cuisine)</span>
+                                <span class="source-pill live-source">Google Places</span>
                             </div>
 
                             <p class="restaurant-desc">
-                                Authentic home-style @r.Cuisine cuisine located in @r.Location.
+                                A nearby restaurant match around @nearbyLabel based on your current search.
                             </p>
 
                             <div class="dietary-row">
-                                @foreach (var tag in r.DietaryTags)
+                        @if (r.ServesVegetarianFood)
                                 {
-                                    <span class="diet-pill @tag.Replace("-", "").ToLower()">
-                                        @tag.ToLower()
-                                    </span>
+                                    <span class="diet-pill vegetarian">vegetarian</span>
                                 }
+
+                                <span class="diet-pill live-pill">nearby</span>
                             </div>
 
-                            <div class="special-button">
-                                🎉 Special Menu Available
+                            <div class="special-button live-action">
+                                📍 Live nearby place discovered for this area
                             </div>
 
                             <div class="location-row">
                                 <i class="bi bi-geo-alt"></i>
-                                <span>@r.Location</span>
+                                <span>@addressText</span>
                             </div>
 
+                            <div class="mt-3 d-flex gap-2 flex-wrap">
+                                <a href="https://www.google.com/maps/search/?api=1&query=@mapsQuery"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="admin-btn admin-btn-approve">
+                                    <i class="bi bi-map"></i> Get Directions
+                                </a>
+
+                                <a href="https://www.google.com/maps/search/?api=1&query=@mapsQuery"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="admin-btn admin-btn-deny">
+                                    <i class="bi bi-box-arrow-up-right"></i> Open in Maps
+                                </a>
+                            </div>
                         </div>
-
                     </div>
+                }
+            </div>
+        }
 
-                </a>
-            }
-        </div>
+        @if (!Model.Restaurants.Any() && !Model.LiveRestaurants.Any())
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-search-heart"></i>
+                </div>
+
+                <h3>No nearby restaurants matched your search</h3>
+                <p>
+                    Try searching a broader area, a nearby city, or a simpler craving like “restaurants in Mississauga”.
+                </p>
+            </div>
+        }
     </main>
 </div>

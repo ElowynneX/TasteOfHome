@@ -12,7 +12,6 @@
     var approvedHiddenGems = Model.HiddenGemList.Count(h => h.Status == "Approved");
 
     var totalRestaurants = Model.RestaurantList.Count;
-    var importedRestaurants = Model.RestaurantList.Count(r => r.Source == "GooglePlaces");
 }
 
 @if (TempData["StatusMessage"] != null)
@@ -38,7 +37,7 @@
     <div class="stat-card">
         <div class="stat-label">Total Restaurants</div>
         <div class="stat-value">@totalRestaurants</div>
-        <div class="stat-meta">@importedRestaurants imported from Google</div>
+        <div class="stat-meta">Currently available on the platform</div>
     </div>
 
     <div class="stat-card">
@@ -47,40 +46,6 @@
         <div class="stat-meta">Published to the platform</div>
     </div>
 </div>
-
-<section class="admin-section">
-    <div class="admin-section-header">
-        <div>
-            <h2 class="admin-section-title">Import Nearby Restaurants</h2>
-            <p class="admin-section-subtitle">Fetch real restaurants by region and add them to the platform.</p>
-        </div>
-    </div>
-
-    <div class="admin-panel p-4">
-        <form method="post" asp-page-handler="ImportNearby" class="row g-3">
-            @Html.AntiForgeryToken()
-
-            <div class="col-md-9">
-                <input asp-for="ImportQuery"
-                       class="form-control"
-                       placeholder="Example: restaurants in Kitchener Ontario" />
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="admin-btn admin-btn-approve w-100">
-                    Import Restaurants
-                </button>
-            </div>
-        </form>
-
-        <div class="mt-3 text-light">
-            Try:
-            <span class="metric-pill">restaurants in Waterloo Ontario</span>
-            <span class="metric-pill">restaurants in Cambridge Ontario</span>
-            <span class="metric-pill">restaurants in Brampton Ontario</span>
-            <span class="metric-pill">restaurants in Scarborough Toronto Ontario</span>
-        </div>
-    </div>
-</section>
 
 <section class="admin-section">
     <div class="admin-section-header">

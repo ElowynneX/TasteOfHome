@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TasteOfHome.Data;
-using TasteOfHome.Models;
 using TasteOfHome.Services;
 
 namespace TasteOfHome.Pages.Admin
@@ -14,20 +13,14 @@ namespace TasteOfHome.Pages.Admin
     {
         private readonly AppDbContext _db;
         private readonly ISmsSender _smsSender;
-        private readonly IGooglePlacesService _googlePlacesService;
 
         public IndexModel(
             AppDbContext db,
-            ISmsSender smsSender,
-            IGooglePlacesService googlePlacesService)
+            ISmsSender smsSender)
         {
             _db = db;
             _smsSender = smsSender;
-            _googlePlacesService = googlePlacesService;
         }
-
-        [BindProperty]
-        public string ImportQuery { get; set; } = "";
 
         [BindProperty]
         public List<int> SelectedRestaurantIds { get; set; } = new();
@@ -98,63 +91,6 @@ namespace TasteOfHome.Pages.Admin
             await LoadHiddenGemsAsync();
             await LoadRestaurantsAsync();
             return Page();
-        }
-
-        public async Task<IActionResult> OnPostImportNearbyAsync()
-        {
-            var redirect = RedirectIfNotAdmin();
-            if (redirect != null)
-                return redirect;
-
-            if (string.IsNullOrWhiteSpace(ImportQuery))
-            {
-                TempData["StatusMessage"] = "Please enter an import query.";
-                return RedirectToPage();
-            }
-
-            var imported = await _googlePlacesService.SearchRestaurantsAsync(ImportQuery);
-
-            int added = 0;
-
-            foreach (var item in imported)
-            {
-                if (string.IsNullOrWhiteSpace(item.ExternalId))
-                    continue;
-
-                bool exists = await _db.Restaurants.AnyAsync(r => r.ExternalId == item.ExternalId);
-                if (exists)
-                    continue;
-
-                var restaurant = new Restaurant
-                {
-                    Name = item.Name,
-                    Address = item.Address,
-                    Location = string.IsNullOrWhiteSpace(item.City) ? "Ontario" : item.City,
-                    City = item.City,
-                    PostalCode = item.PostalCode,
-                    Cuisine = MapCuisine(item.Cuisine),
-                    Latitude = item.Latitude,
-                    Longitude = item.Longitude,
-                    Source = "GooglePlaces",
-                    ExternalId = item.ExternalId,
-                    ImageUrl = item.ImageUrl,
-                    Rating = 0,
-                    Authenticity = 0,
-                    NumberOfReviews = 0,
-                    CulturalStory = "Imported from location search.",
-                    CulturalTraditions = "Community details can be enriched later.",
-                    DietaryTagsCsv = BuildDietaryTags(item),
-                    SignatureDishesCsv = ""
-                };
-
-                _db.Restaurants.Add(restaurant);
-                added++;
-            }
-
-            await _db.SaveChangesAsync();
-
-            TempData["StatusMessage"] = $"Import complete. Added {added} new restaurants.";
-            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostDeleteRestaurantAsync(int id)
@@ -443,33 +379,6 @@ namespace TasteOfHome.Pages.Admin
             }
 
             await _db.SaveChangesAsync();
-        }
-
-        private static string MapCuisine(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return "Other";
-
-            var value = input.Replace("_", " ").ToLowerInvariant();
-
-            if (value.Contains("indian")) return "Indian";
-            if (value.Contains("chinese")) return "Chinese";
-            if (value.Contains("middle eastern") || value.Contains("shawarma") || value.Contains("falafel")) return "Middle Eastern";
-            if (value.Contains("italian") || value.Contains("pizza")) return "Italian";
-            if (value.Contains("vietnamese") || value.Contains("pho")) return "Vietnamese";
-            if (value.Contains("ethiopian")) return "Ethiopian";
-
-            return "Other";
-        }
-
-        private static string BuildDietaryTags(ImportedRestaurantDto item)
-        {
-            var tags = new List<string>();
-
-            if (item.ServesVegetarianFood)
-                tags.Add("Vegetarian");
-
-            return string.Join(",", tags);
         }
     }
 }

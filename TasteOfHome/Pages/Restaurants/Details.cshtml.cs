@@ -16,6 +16,9 @@ namespace TasteOfHome.Pages.Restaurants
             _db = db;
         }
 
+        public Restaurant Restaurant { get; set; } = new Restaurant();
+        public List<Feedback> RestaurantFeedback { get; set; } = new();
+
         public string GetImageFileName(int id)
         {
             return id switch
@@ -44,14 +47,53 @@ namespace TasteOfHome.Pages.Restaurants
             };
         }
 
-        public Restaurant Restaurant { get; set; } = new Restaurant();
-        public List<Feedback> RestaurantFeedback { get; set; } = new List<Feedback>();
+        public string RestaurantImageUrl
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Restaurant.ImageUrl))
+                {
+                    return $"/images/restaurants/{GetImageFileName(Restaurant.Id)}";
+                }
+
+                return Restaurant.ImageUrl;
+            }
+        }
+
+        public bool HasCulturalStory
+        {
+            get
+            {
+                return !string.IsNullOrWhiteSpace(Restaurant.CulturalStory) ||
+                       !string.IsNullOrWhiteSpace(Restaurant.CulturalTraditions);
+            }
+        }
+
+        public bool HasDietaryTags
+        {
+            get
+            {
+                return Restaurant.DietaryTags != null && Restaurant.DietaryTags.Any();
+            }
+        }
+
+        public bool HasSignatureDishes
+        {
+            get
+            {
+                return Restaurant.SignatureDishes != null && Restaurant.SignatureDishes.Any();
+            }
+        }
+
+        public string PriceLevel => "$$";
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            Restaurant = await _db.Restaurants.FindAsync(id);
+            Restaurant = await _db.Restaurants
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == id) ?? new Restaurant();
 
-            if (Restaurant == null)
+            if (Restaurant.Id == 0)
             {
                 return Redirect("/Error");
             }
@@ -59,6 +101,7 @@ namespace TasteOfHome.Pages.Restaurants
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             RestaurantFeedback = await _db.Feedback
+                .AsNoTracking()
                 .Where(f => f.RestaurantId == id &&
                     (
                         f.Status == "Approved" ||

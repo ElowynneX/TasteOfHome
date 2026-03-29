@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
 using TasteOfHome.Services;
@@ -16,13 +17,15 @@ namespace TasteOfHome.Pages
             _db = db;
         }
 
-        [BindProperty] public string Email { get; set; } = "";
-        [BindProperty] public string Password { get; set; } = "";
-        public string Message { get; set; } = "";
+        [BindProperty]
+        public string Email { get; set; } = "";
 
+        [BindProperty]
+        public string Password { get; set; } = "";
+
+        public string Message { get; set; } = "";
         public string Error { get; set; } = "";
 
-        
         public async Task<IActionResult> OnPostAsync()
         {
             var email = (Email ?? "").Trim().ToLowerInvariant();
@@ -31,6 +34,14 @@ namespace TasteOfHome.Pages
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 Error = "Email and password are required.";
+                Message = "";
+                return Page();
+            }
+
+            var emailValidator = new EmailAddressAttribute();
+            if (!emailValidator.IsValid(email))
+            {
+                Error = "Please enter a valid email address.";
                 Message = "";
                 return Page();
             }
@@ -61,7 +72,7 @@ namespace TasteOfHome.Pages
             await _db.SaveChangesAsync();
             Console.WriteLine($"[REGISTER] saved user email={email}");
 
-            FakeUsers.Users.Add((Email, Password));
+            FakeUsers.Users.Add((email, password));
 
             Message = "Account created successfully. Please log in.";
             Error = "";

@@ -86,7 +86,7 @@ namespace TasteOfHome.Data
                     Location = "North York",
                     Address = "512 Yonge St, North York, ON",
                     ImageUrl = "/images/restaurants/seoul-street.jpg",
-                    DietaryTags = new List<string>(),
+                    DietaryTags = new List<string> { "Halal" },
                     CulturalStory = "Street food flavors inspired by Seoul's famous night markets.",
                     CulturalTraditions = "Korean BBQ grilling and fermented dishes like kimchi.",
                     SignatureDishesCsv = "Bibimbap,Korean Fried Chicken,Bulgogi,Tteokbokki"
@@ -114,7 +114,7 @@ namespace TasteOfHome.Data
                     Location = "Toronto",
                     Address = "210 Dundas St W, Toronto, ON",
                     ImageUrl = "/images/restaurants/tokyo-bento.jpg",
-                    DietaryTags = new List<string>(),
+                    DietaryTags = new List<string> { "Gluten-Free" },
                     CulturalStory = "Japanese bento culture offering balanced meals.",
                     CulturalTraditions = "Precision cooking and seasonal ingredients.",
                     SignatureDishesCsv = "Sushi,Tempura,Ramen,Teriyaki Bento"
@@ -198,7 +198,7 @@ namespace TasteOfHome.Data
                     Location = "Mississauga",
                     Address = "205 Lakeshore Rd E, Mississauga, ON",
                     ImageUrl = "/images/restaurants/casa-latina.jpg",
-                    DietaryTags = new List<string>(),
+                    DietaryTags = new List<string> { "Gluten-Free" },
                     CulturalStory = "Latin flavors representing multiple South American cultures.",
                     CulturalTraditions = "Family recipes with bold spices and grilled meats.",
                     SignatureDishesCsv = "Arepas,Empanadas,Grilled Steak,Plantains"

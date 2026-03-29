@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using TasteOfHome.Services;
 using TasteOfHome.Models;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -28,6 +27,12 @@ builder.Services.Configure<GooglePlacesOptions>(
 
 builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
+// OPENAI / AI ENRICHMENT
+builder.Services.Configure<OpenAiOptions>(
+    builder.Configuration.GetSection("OpenAI"));
+
+builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -46,6 +51,7 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
     options.SaveTokens = true;
 });
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
@@ -64,6 +70,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
 app.MapGet("/login-google", (string? returnUrl) =>
 {
     return Results.Challenge(
@@ -74,13 +81,13 @@ app.MapGet("/login-google", (string? returnUrl) =>
         new[] { "Google" }
     );
 });
-    
 
 app.MapGet("/logout", async (HttpContext ctx) =>
 {
     await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/");
 });
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
