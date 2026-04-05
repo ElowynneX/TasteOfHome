@@ -5,124 +5,845 @@
     Layout = "/Pages/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container-fluid p-4 p-lg-5">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+<div class="checkin-page">
+    <div class="checkin-header">
         <div>
-            <h2 class="fw-bold text-white mb-1">Event Ticket Check-In</h2>
-            <p class="text-light opacity-75 mb-0">Scan or paste a QR ticket code to validate guest entry.</p>
+            <h1 class="checkin-title">Event Ticket Check-In</h1>
+            <p class="checkin-subtitle">
+                Validate guest entry with QR scanning or manual ticket lookup.
+            </p>
         </div>
-        <a asp-page="/Admin/Events/Index" class="btn btn-light rounded-pill px-4">
-            Back to Events
-        </a>
+
+        <div class="checkin-header-actions">
+            <a asp-page="/Admin/Events/Index" class="btn-back-events">
+                <i class="bi bi-arrow-left me-2"></i>Back to Events
+            </a>
+        </div>
     </div>
 
     @if (TempData["CheckInSuccess"] != null)
     {
-        <div class="alert alert-success rounded-4 border-0 shadow-sm">@TempData["CheckInSuccess"]</div>
+        <div class="alert-success-modern">
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["CheckInSuccess"]
+        </div>
     }
 
     @if (TempData["CheckInError"] != null)
     {
-        <div class="alert alert-danger rounded-4 border-0 shadow-sm">@TempData["CheckInError"]</div>
+        <div class="alert-danger-modern">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["CheckInError"]
+        </div>
     }
 
+    <div class="checkin-top-stats">
+        <div class="mini-stat-card">
+            <div class="mini-stat-icon blue">
+                <i class="bi bi-qr-code-scan"></i>
+            </div>
+            <div>
+                <div class="mini-stat-label">Scanner Mode</div>
+                <div class="mini-stat-value" id="scannerModeText">Ready</div>
+            </div>
+        </div>
+
+        <div class="mini-stat-card">
+            <div class="mini-stat-icon green">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+                <div class="mini-stat-label">Validation</div>
+                <div class="mini-stat-value" id="validationText">Awaiting ticket</div>
+            </div>
+        </div>
+
+        <div class="mini-stat-card">
+            <div class="mini-stat-icon orange">
+                <i class="bi bi-person-badge"></i>
+            </div>
+            <div>
+                <div class="mini-stat-label">Check-In Flow</div>
+                <div class="mini-stat-value">Live Admin Control</div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">Scan Ticket</h4>
-                    <div id="reader" class="rounded-4 overflow-hidden border mb-3" style="background:#fff;"></div>
-
-                    <div class="small text-muted mb-4">
-                        Camera scan works best on HTTPS or localhost.
+        <div class="col-xl-6">
+            <div class="glass-card h-100">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title">Scan Ticket</h3>
+                        <p class="card-subtitle">Use camera scan or paste a ticket code manually.</p>
                     </div>
+                    <span class="status-chip status-chip-blue" id="cameraStatusBadge">Camera Ready</span>
+                </div>
 
-                    <form method="post" asp-page-handler="Lookup">
-                        <label class="form-label fw-semibold">Ticket Code</label>
-                        <input asp-for="TicketCode" class="form-control form-control-lg mb-3" placeholder="TOH-EVT-XXXXXXXXXXXX" />
-                        <button type="submit" class="btn text-white rounded-pill px-4"
-                                style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
-                            Lookup Ticket
+                <div class="scanner-shell">
+                    <div id="reader" class="scanner-box"></div>
+                </div>
+
+                <div class="scanner-helper" id="scanStatusText">
+                    Point the camera at the guest's QR ticket. Best results on HTTPS or localhost.
+                </div>
+
+                <form method="post" asp-page-handler="Lookup" class="lookup-form">
+                    <label class="form-label-modern">Ticket Code</label>
+                    <div class="manual-entry-row">
+                        <input asp-for="TicketCode"
+                               id="TicketCode"
+                               class="form-control modern-input"
+                               placeholder="TOH-EVT-XXXXXXXXXXXX" />
+                        <button type="submit" class="btn-lookup-ticket">
+                            <i class="bi bi-search me-2"></i>Lookup
                         </button>
-                    </form>
+                    </div>
+                </form>
+
+                <div class="scanner-actions">
+                    <button type="button" id="startScannerBtn" class="btn-soft-blue">
+                        <i class="bi bi-camera-video me-2"></i>Start Scanner
+                    </button>
+
+                    <button type="button" id="stopScannerBtn" class="btn-soft-dark">
+                        <i class="bi bi-stop-circle me-2"></i>Stop Scanner
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4">
-                <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">Ticket Result</h4>
+        <div class="col-xl-6">
+            <div class="glass-card h-100">
+                <div class="card-head">
+                    <div>
+                        <h3 class="card-title">Ticket Result</h3>
+                        <p class="card-subtitle">Guest validation details and live entry control.</p>
+                    </div>
 
                     @if (Model.Reservation == null)
                     {
-                        <div class="text-muted">No ticket loaded yet. Scan or search a ticket code.</div>
+                        <span class="status-chip status-chip-muted">No Ticket Loaded</span>
+                    }
+                    else if (Model.Reservation.IsCheckedIn)
+                    {
+                        <span class="status-chip status-chip-primary">Already Checked In</span>
+                    }
+                    else if (Model.Reservation.Status == "Cancelled")
+                    {
+                        <span class="status-chip status-chip-danger">Cancelled</span>
+                    }
+                    else if (Model.Reservation.PaymentStatus != "Paid")
+                    {
+                        <span class="status-chip status-chip-warning">Payment Pending</span>
                     }
                     else
                     {
-                        <div class="mb-2"><strong>Guest:</strong> @Model.Reservation.CustomerName</div>
-                        <div class="mb-2"><strong>Email:</strong> @Model.Reservation.Email</div>
-                        <div class="mb-2"><strong>Phone:</strong> @Model.Reservation.PhoneNumber</div>
-                        <div class="mb-2"><strong>Event:</strong> @Model.Reservation.CulturalEvent?.Title</div>
-                        <div class="mb-2"><strong>Date:</strong> @Model.Reservation.CulturalEvent?.EventDate.ToString("MMMM dd, yyyy")</div>
-                        <div class="mb-2"><strong>Venue:</strong> @Model.Reservation.CulturalEvent?.VenueName</div>
-                        <div class="mb-2"><strong>Spots:</strong> @Model.Reservation.NumberOfSpots</div>
-                        <div class="mb-2"><strong>Payment:</strong> @Model.Reservation.PaymentStatus</div>
-                        <div class="mb-2"><strong>Booking Status:</strong> @Model.Reservation.Status</div>
-                        <div class="mb-3"><strong>Ticket Code:</strong> @Model.Reservation.TicketCode</div>
-
-                        @if (Model.Reservation.IsCheckedIn && Model.Reservation.CheckedInAt.HasValue)
-                        {
-                            <div class="alert alert-info rounded-4 border-0">
-                                Already checked in on @Model.Reservation.CheckedInAt.Value.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")
-                            </div>
-                        }
-                        else if (Model.Reservation.Status == "Cancelled")
-                        {
-                            <div class="alert alert-danger rounded-4 border-0">
-                                This booking is cancelled.
-                            </div>
-                        }
-                        else if (Model.Reservation.PaymentStatus != "Paid")
-                        {
-                            <div class="alert alert-warning rounded-4 border-0">
-                                This ticket cannot be checked in because payment is not completed.
-                            </div>
-                        }
-                        else
-                        {
-                            <form method="post" asp-page-handler="ConfirmCheckIn">
-                                <input type="hidden" asp-for="TicketCode" value="@Model.Reservation.TicketCode" />
-                                <button type="submit" class="btn btn-success rounded-pill px-4">
-                                    Confirm Check-In
-                                </button>
-                            </form>
-                        }
+                        <span class="status-chip status-chip-success">Valid Ticket</span>
                     }
                 </div>
+
+                @if (Model.Reservation == null)
+                {
+                    <div class="empty-ticket-state">
+                        <div class="empty-ticket-icon">
+                            <i class="bi bi-ticket-perforated"></i>
+                        </div>
+                        <h4>No ticket selected yet</h4>
+                        <p>Scan a QR code or paste a ticket code to load guest details and allow check-in.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="ticket-profile-card">
+                        <div class="ticket-profile-main">
+                            <div class="ticket-avatar">
+                                @Model.Reservation.CustomerName.Substring(0, 1).ToUpper()
+                            </div>
+
+                            <div>
+                                <div class="ticket-guest-name">@Model.Reservation.CustomerName</div>
+                                <div class="ticket-guest-meta">@Model.Reservation.Email</div>
+                                <div class="ticket-guest-meta">@Model.Reservation.PhoneNumber</div>
+                            </div>
+                        </div>
+
+                        <div class="ticket-amount-pill">
+                            @Model.Reservation.AmountPaid.ToString("C")
+                        </div>
+                    </div>
+
+                    <div class="ticket-grid">
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Event</div>
+                            <div class="ticket-info-value">@Model.Reservation.CulturalEvent?.Title</div>
+                        </div>
+
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Date</div>
+                            <div class="ticket-info-value">@Model.Reservation.CulturalEvent?.EventDate.ToString("MMMM dd, yyyy")</div>
+                        </div>
+
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Venue</div>
+                            <div class="ticket-info-value">@Model.Reservation.CulturalEvent?.VenueName</div>
+                        </div>
+
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Spots</div>
+                            <div class="ticket-info-value">@Model.Reservation.NumberOfSpots</div>
+                        </div>
+
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Payment</div>
+                            <div class="ticket-info-value">@Model.Reservation.PaymentStatus</div>
+                        </div>
+
+                        <div class="ticket-info-card">
+                            <div class="ticket-info-label">Booking Status</div>
+                            <div class="ticket-info-value">@Model.Reservation.Status</div>
+                        </div>
+                    </div>
+
+                    <div class="ticket-code-panel">
+                        <div class="ticket-code-label">Ticket Code</div>
+                        <div class="ticket-code-value">@Model.Reservation.TicketCode</div>
+                    </div>
+
+                    @if (Model.Reservation.IsCheckedIn && Model.Reservation.CheckedInAt.HasValue)
+                    {
+                        <div class="alert-info-modern">
+                            <i class="bi bi-person-check-fill me-2"></i>
+                            Guest already checked in on
+                            @Model.Reservation.CheckedInAt.Value.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")
+                        </div>
+                    }
+                    else if (Model.Reservation.Status == "Cancelled")
+                    {
+                        <div class="alert-danger-modern mt-3">
+                            <i class="bi bi-x-octagon-fill me-2"></i>
+                            This booking is cancelled and cannot be checked in.
+                        </div>
+                    }
+                    else if (Model.Reservation.PaymentStatus != "Paid")
+                    {
+                        <div class="alert-warning-modern mt-3">
+                            <i class="bi bi-hourglass-split me-2"></i>
+                            This booking cannot be checked in until payment is completed.
+                        </div>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="ConfirmCheckIn" class="mt-4">
+                            <input type="hidden" asp-for="TicketCode" value="@Model.Reservation.TicketCode" />
+                            <button type="submit" class="btn-confirm-checkin">
+                                <i class="bi bi-check2-circle me-2"></i>Confirm Guest Check-In
+                            </button>
+                        </form>
+                    }
+                }
             </div>
         </div>
     </div>
 </div>
 
+<style>
+    .checkin-page {
+        padding: 24px;
+        color: #eef4ff;
+    }
+
+    .checkin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .checkin-title {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0 0 6px 0;
+        color: #fff;
+    }
+
+    .checkin-subtitle {
+        margin: 0;
+        color: #9db0d3;
+    }
+
+    .btn-back-events {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 11px 18px;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #0b1733;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+    }
+
+    .alert-success-modern,
+    .alert-danger-modern,
+    .alert-warning-modern,
+    .alert-info-modern {
+        border-radius: 16px;
+        padding: 14px 16px;
+        font-weight: 600;
+        margin-bottom: 18px;
+        border: 1px solid transparent;
+    }
+
+    .alert-success-modern {
+        background: rgba(25, 135, 84, 0.16);
+        color: #b8f5d2;
+        border-color: rgba(25, 135, 84, 0.32);
+    }
+
+    .alert-danger-modern {
+        background: rgba(220, 53, 69, 0.16);
+        color: #ffb3bc;
+        border-color: rgba(220, 53, 69, 0.30);
+    }
+
+    .alert-warning-modern {
+        background: rgba(255, 193, 7, 0.14);
+        color: #ffe08a;
+        border-color: rgba(255, 193, 7, 0.28);
+    }
+
+    .alert-info-modern {
+        background: rgba(13, 110, 253, 0.14);
+        color: #b9d4ff;
+        border-color: rgba(13, 110, 253, 0.28);
+    }
+
+    .checkin-top-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .mini-stat-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(10, 21, 50, 0.88);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    }
+
+    .mini-stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+        .mini-stat-icon.blue {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+
+        .mini-stat-icon.green {
+            background: linear-gradient(135deg, #10b981, #047857);
+        }
+
+        .mini-stat-icon.orange {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+    .mini-stat-label {
+        color: #9db0d3;
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+    }
+
+    .mini-stat-value {
+        color: white;
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .glass-card {
+        background: rgba(10, 21, 50, 0.92);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.22);
+        height: 100%;
+    }
+
+    .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+
+    .card-title {
+        margin: 0 0 4px 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .card-subtitle {
+        margin: 0;
+        color: #9db0d3;
+        font-size: 0.95rem;
+    }
+
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-chip-blue {
+        background: rgba(59, 130, 246, 0.16);
+        color: #9fc7ff;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .status-chip-success {
+        background: rgba(25, 135, 84, 0.18);
+        color: #8cf0b8;
+        border: 1px solid rgba(25, 135, 84, 0.28);
+    }
+
+    .status-chip-warning {
+        background: rgba(255, 193, 7, 0.16);
+        color: #ffe08a;
+        border: 1px solid rgba(255, 193, 7, 0.25);
+    }
+
+    .status-chip-danger {
+        background: rgba(220, 53, 69, 0.18);
+        color: #ff9eaa;
+        border: 1px solid rgba(220, 53, 69, 0.28);
+    }
+
+    .status-chip-primary {
+        background: rgba(13, 110, 253, 0.18);
+        color: #b9d4ff;
+        border: 1px solid rgba(13, 110, 253, 0.28);
+    }
+
+    .status-chip-muted {
+        background: rgba(108, 117, 125, 0.18);
+        color: #d6dde6;
+        border: 1px solid rgba(108, 117, 125, 0.26);
+    }
+
+    .scanner-shell {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 14px;
+        margin-bottom: 14px;
+    }
+
+    .scanner-box {
+        overflow: hidden;
+        border-radius: 16px;
+        background: #0f172a;
+        min-height: 340px;
+    }
+
+    .scanner-helper {
+        color: #b8c8e4;
+        font-size: 0.92rem;
+        margin-bottom: 16px;
+    }
+
+    .lookup-form {
+        margin-top: 8px;
+    }
+
+    .form-label-modern {
+        display: block;
+        color: #dce8ff;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .manual-entry-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .modern-input {
+        flex: 1;
+        min-width: 240px;
+        background: rgba(255,255,255,0.06);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 14px 16px;
+    }
+
+        .modern-input:focus {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border-color: rgba(59,130,246,0.55);
+            box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.15);
+        }
+
+        .modern-input::placeholder {
+            color: #94a3b8;
+        }
+
+    .btn-lookup-ticket {
+        border: none;
+        border-radius: 14px;
+        padding: 14px 18px;
+        font-weight: 700;
+        color: white;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        box-shadow: 0 10px 24px rgba(255, 110, 77, 0.22);
+    }
+
+    .scanner-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
+    .btn-soft-blue,
+    .btn-soft-dark,
+    .btn-confirm-checkin {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+    .btn-soft-blue {
+        background: rgba(59, 130, 246, 0.16);
+        color: #9fc7ff;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-soft-dark {
+        background: rgba(255,255,255,0.08);
+        color: #dce8ff;
+        border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    .btn-confirm-checkin {
+        width: 100%;
+        color: white;
+        background: linear-gradient(135deg, #10b981, #047857);
+        box-shadow: 0 12px 26px rgba(16,185,129,0.22);
+    }
+
+    .ticket-profile-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    .ticket-profile-main {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .ticket-avatar {
+        width: 58px;
+        height: 58px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .ticket-guest-name {
+        color: white;
+        font-size: 1.12rem;
+        font-weight: 800;
+        margin-bottom: 3px;
+    }
+
+    .ticket-guest-meta {
+        color: #b7c8e6;
+        font-size: 0.92rem;
+    }
+
+    .ticket-amount-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.14);
+        color: #8cf0b8;
+        border: 1px solid rgba(16, 185, 129, 0.22);
+        font-weight: 800;
+    }
+
+    .ticket-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .ticket-info-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 14px;
+    }
+
+    .ticket-info-label {
+        color: #9db0d3;
+        font-size: 0.82rem;
+        margin-bottom: 6px;
+    }
+
+    .ticket-info-value {
+        color: #ffffff;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .ticket-code-panel {
+        background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(16,185,129,0.08));
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 16px;
+        margin-top: 10px;
+    }
+
+    .ticket-code-label {
+        color: #9db0d3;
+        font-size: 0.83rem;
+        margin-bottom: 8px;
+    }
+
+    .ticket-code-value {
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 800;
+        word-break: break-all;
+        letter-spacing: 0.03em;
+    }
+
+    .empty-ticket-state {
+        min-height: 440px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #bfd0ec;
+        padding: 20px;
+    }
+
+    .empty-ticket-icon {
+        width: 82px;
+        height: 82px;
+        border-radius: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        background: rgba(255,255,255,0.06);
+        color: #ffb26b;
+        margin-bottom: 16px;
+    }
+
+    @@media (max-width: 1100px) {
+        .checkin-top-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .checkin-page {
+            padding: 16px;
+        }
+
+        .checkin-title {
+            font-size: 1.55rem;
+        }
+
+        .ticket-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .manual-entry-row {
+            flex-direction: column;
+        }
+
+        .modern-input {
+            min-width: unset;
+            width: 100%;
+        }
+    }
+</style>
+
 @section Scripts {
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
+        let scannerInstance = null;
+        let scannerRunning = false;
+
+        const ticketInput = document.getElementById("TicketCode");
+        const scanStatusText = document.getElementById("scanStatusText");
+        const cameraStatusBadge = document.getElementById("cameraStatusBadge");
+        const scannerModeText = document.getElementById("scannerModeText");
+        const validationText = document.getElementById("validationText");
+        const startScannerBtn = document.getElementById("startScannerBtn");
+        const stopScannerBtn = document.getElementById("stopScannerBtn");
+
+        function setScannerUi(stateText, helperText, badgeText) {
+            if (scannerModeText) scannerModeText.textContent = stateText;
+            if (scanStatusText) scanStatusText.textContent = helperText;
+            if (cameraStatusBadge) cameraStatusBadge.textContent = badgeText;
+        }
+
+        function setValidationText(text) {
+            if (validationText) validationText.textContent = text;
+        }
+
         function onScanSuccess(decodedText) {
-            const input = document.getElementById("TicketCode");
-            if (input) {
-                input.value = decodedText;
+            if (ticketInput) {
+                ticketInput.value = decodedText;
+                ticketInput.classList.add("border-success");
+            }
+
+            setScannerUi(
+                "QR Detected",
+                "QR scanned successfully. Review the ticket code below and click Lookup.",
+                "QR Captured"
+            );
+            setValidationText("Ticket captured");
+        }
+
+        function onScanFailure() {
+        }
+
+        async function startScanner() {
+            if (!window.Html5Qrcode || scannerRunning) return;
+
+            try {
+                scannerInstance = new Html5Qrcode("reader");
+                await scannerInstance.start(
+                    { facingMode: "environment" },
+                    {
+                        fps: 10,
+                        qrbox: { width: 220, height: 220 }
+                    },
+                    onScanSuccess,
+                    onScanFailure
+                );
+
+                scannerRunning = true;
+                setScannerUi(
+                    "Scanning Live",
+                    "Camera is active. Hold the QR ticket steady inside the scan area.",
+                    "Scanning"
+                );
+                setValidationText("Awaiting scan");
+            } catch (err) {
+                setScannerUi(
+                    "Camera Error",
+                    "Could not start the camera. You can still paste the ticket code manually.",
+                    "Unavailable"
+                );
+                setValidationText("Manual lookup only");
+                console.error(err);
             }
         }
 
-        window.addEventListener("load", function () {
-            if (window.Html5QrcodeScanner) {
-                const scanner = new Html5QrcodeScanner("reader", {
-                    fps: 10,
-                    qrbox: 220
-                });
+        async function stopScanner() {
+            if (!scannerInstance || !scannerRunning) return;
 
-                scanner.render(onScanSuccess);
+            try {
+                await scannerInstance.stop();
+                await scannerInstance.clear();
+            } catch (err) {
+                console.error(err);
+            }
+
+            scannerRunning = false;
+            scannerInstance = null;
+
+            setScannerUi(
+                "Stopped",
+                "Scanner stopped. Restart camera or use manual ticket lookup.",
+                "Stopped"
+            );
+            setValidationText("Scanner paused");
+        }
+
+        if (startScannerBtn) {
+            startScannerBtn.addEventListener("click", function () {
+                startScanner();
+            });
+        }
+
+        if (stopScannerBtn) {
+            stopScannerBtn.addEventListener("click", function () {
+                stopScanner();
+            });
+        }
+
+        window.addEventListener("load", function () {
+            startScanner();
+
+            @if (Model.Reservation != null)
+            {
+                    if (Model.Reservation.IsCheckedIn)
+                    {
+                            <text>setValidationText("Already checked in");</text>
+                    }
+                    else if (Model.Reservation.Status == "Cancelled")
+                    {
+                            <text>setValidationText("Cancelled ticket");</text>
+                    }
+                    else if (Model.Reservation.PaymentStatus != "Paid")
+                    {
+                            <text>setValidationText("Payment pending");</text>
+                    }
+                    else
+                    {
+                            <text>setValidationText("Valid ticket loaded");</text>
+                    }
             }
         });
     </script>
