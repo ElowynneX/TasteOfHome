@@ -1,0 +1,596 @@
+﻿@page
+@model TasteOfHome.Pages.Admin.Events.CreateModel
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="event-create-page">
+    @if (!ViewContext.ModelState.IsValid && ViewContext.ModelState.ErrorCount > 0)
+    {
+        <div class="event-alert-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Please fix the highlighted fields before creating the event.
+        </div>
+    }
+
+    <div class="event-page-header">
+        <div>
+            <div class="event-page-kicker">Admin Event Studio</div>
+            <h2 class="event-page-title">Create New Event</h2>
+            <p class="event-page-subtitle">
+                Build a premium event listing with schedule, pricing, venue details, and presentation content.
+            </p>
+        </div>
+
+        <a asp-page="/Admin/Events/Index" class="event-back-btn">
+            <i class="bi bi-arrow-left me-2"></i>Back
+        </a>
+    </div>
+
+    <div class="event-create-layout">
+        <div class="event-form-card">
+            <form method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Core Event Details</h3>
+                        <p>Basic identity, category, and public-facing event information.</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Input.Title" class="form-label">Title</label>
+                            <input asp-for="Input.Title" class="form-control premium-input" placeholder="TasteOfHome Spring Food Festival" />
+                            <span asp-validation-for="Input.Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label asp-for="Input.Category" class="form-label">Category</label>
+                            <input asp-for="Input.Category" class="form-control premium-input" placeholder="Party / Event / Festival" />
+                            <span asp-validation-for="Input.Category" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label asp-for="Input.CultureTag" class="form-label">Culture Tag</label>
+                            <input asp-for="Input.CultureTag" class="form-control premium-input" placeholder="Indian / Italian / Mexican" />
+                            <span asp-validation-for="Input.CultureTag" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Input.VenueName" class="form-label">Venue Name</label>
+                            <input asp-for="Input.VenueName" class="form-control premium-input" placeholder="Royal Banquet Hall" />
+                            <span asp-validation-for="Input.VenueName" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Input.Address" class="form-label">Address</label>
+                            <input asp-for="Input.Address" class="form-control premium-input" placeholder="123 Main Street" />
+                            <span asp-validation-for="Input.Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.City" class="form-label">City</label>
+                            <input asp-for="Input.City" class="form-control premium-input" placeholder="Toronto" />
+                            <span asp-validation-for="Input.City" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.EventDate" class="form-label">Event Date</label>
+                            <input asp-for="Input.EventDate" type="date" class="form-control premium-input" />
+                            <span asp-validation-for="Input.EventDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label asp-for="Input.StartTime" class="form-label">Start Time</label>
+                            <input asp-for="Input.StartTime" type="time" class="form-control premium-input" />
+                            <span asp-validation-for="Input.StartTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label asp-for="Input.EndTime" class="form-label">End Time</label>
+                            <input asp-for="Input.EndTime" type="time" class="form-control premium-input" />
+                            <span asp-validation-for="Input.EndTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Input.Description" class="form-label">Description</label>
+                            <textarea asp-for="Input.Description" class="form-control premium-input premium-textarea" rows="5" placeholder="Describe the atmosphere, event purpose, audience, and overall experience..."></textarea>
+                            <span asp-validation-for="Input.Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Experience Details</h3>
+                        <p>Make the event feel rich, curated, and realistic for users.</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="Input.Highlights" class="form-label">Highlights</label>
+                            <input asp-for="Input.Highlights" class="form-control premium-input" placeholder="Live music, buffet, dance" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.FoodDetails" class="form-label">Food Details</label>
+                            <input asp-for="Input.FoodDetails" class="form-control premium-input" placeholder="Snacks, dinner, dessert" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.EntertainmentDetails" class="form-label">Entertainment Details</label>
+                            <input asp-for="Input.EntertainmentDetails" class="form-control premium-input" placeholder="DJ, games, performers" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.DressCode" class="form-label">Dress Code</label>
+                            <input asp-for="Input.DressCode" class="form-control premium-input" placeholder="Casual / Traditional / Formal" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.ImageUrl" class="form-label">Image URL</label>
+                            <input asp-for="Input.ImageUrl" class="form-control premium-input" placeholder="https://..." />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.HostedBy" class="form-label">Hosted By</label>
+                            <input asp-for="Input.HostedBy" class="form-control premium-input" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Booking Setup</h3>
+                        <p>Set capacity, pricing, and visibility for registrations.</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="Input.PricePerPerson" class="form-label">Price Per Person</label>
+                            <div class="input-with-prefix">
+                                <span class="input-prefix">$</span>
+                                <input asp-for="Input.PricePerPerson" type="number" step="0.01" min="0" class="form-control premium-input premium-input-prefix" />
+                            </div>
+                            <span asp-validation-for="Input.PricePerPerson" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="Input.Capacity" class="form-label">Capacity</label>
+                            <input asp-for="Input.Capacity" type="number" min="1" class="form-control premium-input" />
+                            <span asp-validation-for="Input.Capacity" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Initial Booking State</label>
+                            <div class="static-field-card">
+                                0 reserved spots on creation
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="premium-check-card">
+                                <input asp-for="Input.IsActive" class="form-check-input premium-check-input" />
+                                <label asp-for="Input.IsActive" class="form-check-label">Event is active</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="premium-check-card">
+                                <input asp-for="Input.IsFeatured" class="form-check-input premium-check-input" />
+                                <label asp-for="Input.IsFeatured" class="form-check-label">Featured event</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a asp-page="/Admin/Events/Index" class="btn-cancel-event">Cancel</a>
+                    <button type="submit" class="btn-create-event">
+                        <i class="bi bi-calendar2-plus me-2"></i>Create Event
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="event-preview-card">
+            <div class="preview-header">
+                <div class="preview-kicker">Live Preview Notes</div>
+                <h3>What makes this feel premium</h3>
+            </div>
+
+            <div class="preview-note">
+                <div class="preview-icon"><i class="bi bi-stars"></i></div>
+                <div>
+                    <div class="preview-title">Strong event identity</div>
+                    <div class="preview-text">Use a polished title, cultural tag, and clear category.</div>
+                </div>
+            </div>
+
+            <div class="preview-note">
+                <div class="preview-icon"><i class="bi bi-geo-alt"></i></div>
+                <div>
+                    <div class="preview-title">Venue realism</div>
+                    <div class="preview-text">Add real venue names, accurate city, and proper addresses.</div>
+                </div>
+            </div>
+
+            <div class="preview-note">
+                <div class="preview-icon"><i class="bi bi-cash-stack"></i></div>
+                <div>
+                    <div class="preview-title">Smart pricing</div>
+                    <div class="preview-text">Keep ticket pricing aligned with the style and size of the event.</div>
+                </div>
+            </div>
+
+            <div class="preview-note">
+                <div class="preview-icon"><i class="bi bi-people"></i></div>
+                <div>
+                    <div class="preview-title">Capacity planning</div>
+                    <div class="preview-text">Set realistic capacity so the event can show booking pressure and sell out naturally.</div>
+                </div>
+            </div>
+
+            <div class="preview-summary-card">
+                <div class="summary-title">Recommended event ingredients</div>
+                <ul class="summary-list">
+                    <li>Clear title and cultural angle</li>
+                    <li>Venue, city, and exact date</li>
+                    <li>Food and entertainment details</li>
+                    <li>Professional image URL</li>
+                    <li>Reasonable pricing and capacity</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .event-create-page {
+        padding: 24px;
+        color: #eef4ff;
+    }
+
+    .event-alert-danger {
+        background: rgba(220, 53, 69, 0.16);
+        border: 1px solid rgba(220, 53, 69, 0.35);
+        color: #ffc2ca;
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .event-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .event-page-kicker {
+        color: #ffb26b;
+        font-size: 0.84rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .event-page-title {
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 900;
+        margin-bottom: 6px;
+    }
+
+    .event-page-subtitle {
+        margin: 0;
+        color: #98acd2;
+        max-width: 760px;
+    }
+
+    .event-back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #dce8ff;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(255,255,255,0.04);
+        font-weight: 700;
+    }
+
+        .event-back-btn:hover {
+            color: #fff;
+        }
+
+    .event-create-layout {
+        display: grid;
+        grid-template-columns: 2.1fr 0.9fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .event-form-card,
+    .event-preview-card {
+        background: rgba(10, 21, 50, 0.94);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        box-shadow: 0 18px 36px rgba(0,0,0,0.22);
+    }
+
+    .event-form-card {
+        padding: 22px;
+    }
+
+    .event-preview-card {
+        padding: 22px;
+        position: sticky;
+        top: 20px;
+    }
+
+    .form-section {
+        margin-bottom: 24px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+        .form-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 18px;
+            padding-bottom: 0;
+        }
+
+    .section-header {
+        margin-bottom: 16px;
+    }
+
+        .section-header h3 {
+            color: #fff;
+            font-size: 1.18rem;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+        }
+
+        .section-header p {
+            margin: 0;
+            color: #98acd2;
+            font-size: 0.92rem;
+        }
+
+    .form-label {
+        color: #dce8ff;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .premium-input {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #fff;
+        border-radius: 14px;
+        padding: 12px 14px;
+    }
+
+        .premium-input:focus {
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            border-color: rgba(255,138,0,0.45);
+            box-shadow: 0 0 0 0.2rem rgba(255,138,0,0.12);
+        }
+
+        .premium-input::placeholder {
+            color: #9fb2d6;
+        }
+
+    .premium-textarea {
+        resize: vertical;
+        min-height: 130px;
+    }
+
+    .input-with-prefix {
+        position: relative;
+    }
+
+    .input-prefix {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ffcf9a;
+        font-weight: 800;
+        z-index: 2;
+    }
+
+    .premium-input-prefix {
+        padding-left: 34px;
+    }
+
+    .static-field-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px dashed rgba(255,255,255,0.12);
+        border-radius: 14px;
+        padding: 12px 14px;
+        color: #bdd0f1;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+    }
+
+    .premium-check-card {
+        height: 100%;
+        min-height: 48px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .premium-check-input {
+        margin-top: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .btn-cancel-event {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 18px;
+        border-radius: 14px;
+        text-decoration: none;
+        color: #dce8ff;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        font-weight: 700;
+    }
+
+        .btn-cancel-event:hover {
+            color: #fff;
+        }
+
+    .btn-create-event {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 20px;
+        border-radius: 14px;
+        border: none;
+        color: white;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        box-shadow: 0 12px 24px rgba(255, 110, 77, 0.24);
+    }
+
+    .preview-header {
+        margin-bottom: 18px;
+    }
+
+    .preview-kicker {
+        color: #ffb26b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    .preview-header h3 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.3rem;
+        font-weight: 800;
+    }
+
+    .preview-note {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.06);
+        margin-bottom: 12px;
+    }
+
+    .preview-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(255,138,0,0.24), rgba(255,77,109,0.18));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffcc9c;
+        flex-shrink: 0;
+        font-size: 1rem;
+    }
+
+    .preview-title {
+        color: #fff;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .preview-text {
+        color: #9fb2d6;
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+
+    .preview-summary-card {
+        margin-top: 18px;
+        border-radius: 18px;
+        padding: 16px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .summary-title {
+        color: #fff;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+
+    .summary-list {
+        margin: 0;
+        padding-left: 18px;
+        color: #c9d8f1;
+    }
+
+        .summary-list li {
+            margin-bottom: 6px;
+        }
+
+    .text-danger {
+        font-size: 0.84rem;
+    }
+
+    @@media (max-width: 1200px) {
+        .event-create-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .event-preview-card {
+            position: static;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .event-create-page {
+            padding: 16px;
+        }
+
+        .event-page-title {
+            font-size: 1.6rem;
+        }
+
+        .form-actions {
+            justify-content: stretch;
+        }
+
+        .btn-cancel-event,
+        .btn-create-event {
+            width: 100%;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

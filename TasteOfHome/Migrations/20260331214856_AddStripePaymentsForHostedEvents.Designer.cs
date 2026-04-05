@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TasteOfHome.Data;
 
@@ -10,9 +11,11 @@ using TasteOfHome.Data;
 namespace TasteOfHome.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260331214856_AddStripePaymentsForHostedEvents")]
+    partial class AddStripePaymentsForHostedEvents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.24");
@@ -48,7 +51,7 @@ namespace TasteOfHome.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasMaxLength(200)
+                        .HasMaxLength(180)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Capacity")
@@ -56,58 +59,33 @@ namespace TasteOfHome.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("CultureTag")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(60)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DressCode")
-                        .HasMaxLength(500)
+                        .HasMaxLength(800)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("EndTime")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("EntertainmentDetails")
-                        .HasMaxLength(500)
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("FoodDetails")
-                        .HasMaxLength(500)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Highlights")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("HostedBy")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -117,14 +95,14 @@ namespace TasteOfHome.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("PricePerPerson")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ReservedSpots")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("StartTime")
                         .IsRequired()
-                        .HasMaxLength(20)
+                        .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -134,7 +112,7 @@ namespace TasteOfHome.Migrations
 
                     b.Property<string>("VenueName")
                         .IsRequired()
-                        .HasMaxLength(200)
+                        .HasMaxLength(120)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

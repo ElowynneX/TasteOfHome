@@ -1,0 +1,161 @@
+﻿@page
+@model TasteOfHome.Pages.EditProfileModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="edit-profile-page">
+    <div class="edit-profile-card">
+        <div class="edit-header">
+            <div>
+                <h1>Edit Profile</h1>
+                <p>Update your basic profile information.</p>
+            </div>
+
+            <a asp-page="/Profile" class="back-btn">
+                <i class="bi bi-arrow-left me-2"></i>Back
+            </a>
+        </div>
+
+        @if (TempData["ProfileMessage"] != null)
+        {
+            <div class="success-box">
+                @TempData["ProfileMessage"]
+            </div>
+        }
+
+        <form method="post" class="edit-form">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="form-grid">
+                <div>
+                    <label asp-for="Input.DisplayName" class="form-label"></label>
+                    <input asp-for="Input.DisplayName" class="form-control premium-input" />
+                    <span asp-validation-for="Input.DisplayName" class="text-danger"></span>
+                </div>
+
+                <div>
+                    <label asp-for="Input.Location" class="form-label"></label>
+                    <input asp-for="Input.Location" class="form-control premium-input" />
+                    <span asp-validation-for="Input.Location" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2 flex-wrap">
+                <button type="submit" class="save-btn">
+                    <i class="bi bi-check2-circle me-2"></i>Save Changes
+                </button>
+
+                <a asp-page="/Profile" class="cancel-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .edit-profile-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 36px 20px 50px;
+    }
+
+    .edit-profile-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 24px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+        padding: 28px;
+    }
+
+    .edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+        .edit-header h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .edit-header p {
+            margin: 0;
+            color: #667085;
+        }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #f25c2a;
+        border: 1px solid rgba(242, 92, 42, 0.15);
+        background: #fffaf6;
+        font-weight: 700;
+    }
+
+        .back-btn:hover {
+            color: #f25c2a;
+        }
+
+    .success-box {
+        background: #ecfdf3;
+        border: 1px solid #b7ebc6;
+        color: #137333;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 18px;
+        font-weight: 600;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .premium-input {
+        border-radius: 14px;
+        padding: 12px 14px;
+    }
+
+    .save-btn {
+        border: none;
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-weight: 800;
+        color: white;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+    }
+
+    .cancel-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 18px;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        color: #374151;
+        background: #f3f4f6;
+    }
+
+        .cancel-btn:hover {
+            color: #374151;
+        }
+
+    @@media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

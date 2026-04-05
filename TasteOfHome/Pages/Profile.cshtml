@@ -1,49 +1,561 @@
 ﻿@page
-@using TasteOfHome.Data
+@model TasteOfHome.Pages.ProfileModel
 @{
     ViewData["Title"] = "Profile";
-
-    string? email = null;
-
-    if (User.Identity != null && User.Identity.IsAuthenticated)
-    {
-        email = User.Identity.Name;
-    }
-    else if (!string.IsNullOrEmpty(FakeUsers.LoggedInEmail))
-    {
-        email = FakeUsers.LoggedInEmail;
-    }
 }
 
-<div class="content">
-
-    @if (!string.IsNullOrEmpty(email))
+<div class="profile-dashboard-page">
+    @if (!string.IsNullOrWhiteSpace(Model.Email))
     {
-        <div class="profile-card">
+        <div class="profile-page-header">
+            <h1>My Dashboard</h1>
+            <p>Manage your activity and preferences</p>
+        </div>
 
-            <div class="profile-avatar">
-                <i class="bi bi-person"></i>
+        <div class="profile-hero-card">
+            <div class="profile-hero-left">
+                <div class="profile-avatar">
+                    @Model.DisplayInitial
+                </div>
+
+                <div class="profile-main-info">
+                    <h2>@Model.DisplayName</h2>
+
+                    <div class="profile-meta-row">
+                        <span><i class="bi bi-envelope me-2"></i>@Model.Email</span>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.LocationLabel))
+                        {
+                            <span><i class="bi bi-geo-alt me-2"></i>@Model.LocationLabel</span>
+                        }
+                    </div>
+
+                    <div class="profile-badge-row">
+                        <span class="profile-badge">Food Explorer</span>
+                        <span class="profile-badge soft">TasteOfHome Member</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="profile-info">
-                <h2 class="profile-name">
-                    @email.Split('@')[0]
-                </h2>
+            <div class="profile-hero-right">
+                <a asp-page="/EditProfile" class="edit-profile-btn">
+                    <i class="bi bi-pencil-square me-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
 
-                <p class="profile-email">
-                    <i class="bi bi-envelope"></i>
-                    @email
-                </p>
+        <div class="profile-stats-grid">
+            <div class="profile-stat-card">
+                <div class="stat-icon orange"><i class="bi bi-calendar-check"></i></div>
+                <div>
+                    <div class="stat-label">Restaurant Reservations</div>
+                    <div class="stat-value">@Model.RestaurantReservationCount</div>
+                </div>
+            </div>
 
-                <span class="profile-badge">
-                    Food Explorer
-                </span>
+            <div class="profile-stat-card">
+                <div class="stat-icon purple"><i class="bi bi-ticket-perforated"></i></div>
+                <div>
+                    <div class="stat-label">Event Bookings</div>
+                    <div class="stat-value">@Model.EventBookingCount</div>
+                </div>
+            </div>
+
+            <div class="profile-stat-card">
+                <div class="stat-icon green"><i class="bi bi-gem"></i></div>
+                <div>
+                    <div class="stat-label">My Hidden Gems</div>
+                    <div class="stat-value">@Model.HiddenGemSubmissionCount</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-tabs">
+            <button type="button" class="profile-tab active" onclick="showProfileTab('overview', this)">
+                <i class="bi bi-bookmark me-2"></i>Overview
+            </button>
+
+            <button type="button" class="profile-tab" onclick="showProfileTab('reservations', this)">
+                <i class="bi bi-calendar2-check me-2"></i>Reservations
+            </button>
+
+            <button type="button" class="profile-tab" onclick="showProfileTab('events', this)">
+                <i class="bi bi-calendar-event me-2"></i>Events
+            </button>
+
+            <button type="button" class="profile-tab" onclick="showProfileTab('gems', this)">
+                <i class="bi bi-gem me-2"></i>My Gems
+            </button>
+        </div>
+
+        <div id="overviewTab" class="profile-tab-panel active">
+            <div class="profile-content-card">
+                <div class="content-card-header">
+                    <h3>My Activity Snapshot</h3>
+                    <p>Quick summary of your TasteOfHome activity.</p>
+                </div>
+
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-title">Restaurant reservations made</div>
+                        <div class="activity-value">@Model.RestaurantReservationCount</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-title">Event bookings completed</div>
+                        <div class="activity-value">@Model.EventBookingCount</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-title">Hidden gem submissions</div>
+                        <div class="activity-value">@Model.HiddenGemSubmissionCount</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reservationsTab" class="profile-tab-panel">
+            <div class="profile-content-card">
+                <div class="content-card-header">
+                    <h3>Restaurant Reservations</h3>
+                    <p>Your reservation activity on the platform.</p>
+                </div>
+
+                @if (Model.RecentReservations.Any())
+                {
+                    <div class="profile-list">
+                        @foreach (var item in Model.RecentReservations)
+                        {
+                            <div class="profile-list-item">
+                                <div>
+                                    <div class="list-item-title">@item.Title</div>
+                                    <div class="list-item-sub">@item.Subtitle</div>
+                                </div>
+                                <a asp-page="/Reservations/MyReservations" class="mini-view-btn">View</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-profile-state">
+                        No restaurant reservations yet.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div id="eventsTab" class="profile-tab-panel">
+            <div class="profile-content-card">
+                <div class="content-card-header">
+                    <h3>Event Bookings</h3>
+                    <p>Your booked events and cultural experiences.</p>
+                </div>
+
+                @if (Model.RecentEventBookings.Any())
+                {
+                    <div class="profile-list">
+                        @foreach (var item in Model.RecentEventBookings)
+                        {
+                            <div class="profile-list-item">
+                                <div>
+                                    <div class="list-item-title">@item.Title</div>
+                                    <div class="list-item-sub">@item.Subtitle</div>
+                                </div>
+                                <a asp-page="/Events/MyBookings" class="mini-view-btn">View</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-profile-state">
+                        No event bookings yet.
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div id="gemsTab" class="profile-tab-panel">
+            <div class="profile-content-card">
+                <div class="content-card-header">
+                    <h3>My Hidden Gems</h3>
+                    <p>Your submitted hidden gems and discovery activity.</p>
+                </div>
+
+                @if (Model.RecentHiddenGems.Any())
+                {
+                    <div class="profile-list">
+                        @foreach (var item in Model.RecentHiddenGems)
+                        {
+                            <div class="profile-list-item">
+                                <div>
+                                    <div class="list-item-title">@item.Title</div>
+                                    <div class="list-item-sub">@item.Subtitle</div>
+                                </div>
+                                <a asp-page="/HiddenGems/MySubmissions" class="mini-view-btn">View</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-profile-state">
+                        No hidden gem submissions yet.
+                    </div>
+                }
             </div>
         </div>
     }
     else
     {
-        <p>You are not logged in.</p>
+        <div class="profile-content-card">
+            <div class="empty-profile-state">
+                You are not logged in.
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .profile-dashboard-page {
+        padding: 36px 20px 50px;
+        max-width: 1240px;
+        margin: 0 auto;
     }
 
-</div>
+    .profile-page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .profile-page-header h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #f25c2a;
+            margin-bottom: 8px;
+        }
+
+        .profile-page-header p {
+            color: #667085;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+    .profile-hero-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 26px;
+        box-shadow: 0 10px 26px rgba(0,0,0,0.08);
+        padding: 24px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+
+    .profile-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        flex-wrap: wrap;
+    }
+
+    .profile-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        box-shadow: 0 10px 24px rgba(255, 110, 77, 0.22);
+        flex-shrink: 0;
+    }
+
+    .profile-main-info h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        color: #1f2937;
+    }
+
+    .profile-meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+        color: #7a8597;
+        margin-bottom: 12px;
+    }
+
+    .profile-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+        .profile-badge.soft {
+            background: #fff3eb;
+            color: #f25c2a;
+            border: 1px solid rgba(242, 92, 42, 0.15);
+        }
+
+    .edit-profile-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 18px;
+        border-radius: 14px;
+        border: 1px solid rgba(242, 92, 42, 0.18);
+        background: #fffaf6;
+        color: #f25c2a;
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+        .edit-profile-btn:hover {
+            color: #f25c2a;
+        }
+
+    .profile-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    .profile-stat-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 22px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .orange {
+        background: linear-gradient(135deg, #ff8a00, #ff6b2c);
+    }
+
+    .purple {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    }
+
+    .green {
+        background: linear-gradient(135deg, #10b981, #047857);
+    }
+
+    .stat-label {
+        color: #7a8597;
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        color: #1f2937;
+        font-size: 1.6rem;
+        font-weight: 900;
+    }
+
+    .profile-tabs {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        background: #fff;
+        border-radius: 18px;
+        padding: 8px;
+        gap: 8px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        margin-bottom: 24px;
+    }
+
+    .profile-tab {
+        border: none;
+        border-radius: 14px;
+        padding: 14px 16px;
+        background: transparent;
+        color: #374151;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+        .profile-tab.active {
+            background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+            color: white;
+        }
+
+    .profile-tab-panel {
+        display: none;
+    }
+
+        .profile-tab-panel.active {
+            display: block;
+        }
+
+    .profile-content-card {
+        background: #fff;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 24px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+        padding: 24px;
+    }
+
+    .content-card-header {
+        margin-bottom: 18px;
+    }
+
+        .content-card-header h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .content-card-header p {
+            margin: 0;
+            color: #7a8597;
+        }
+
+    .activity-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .activity-item {
+        border: 1px solid rgba(0,0,0,0.06);
+        background: #fffaf6;
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .activity-title {
+        color: #7a8597;
+        font-size: 0.95rem;
+        margin-bottom: 8px;
+    }
+
+    .activity-value {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #f25c2a;
+    }
+
+    .profile-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .profile-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        border: 1px solid rgba(0,0,0,0.06);
+        border-radius: 18px;
+        padding: 18px;
+    }
+
+    .list-item-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .list-item-sub {
+        color: #7a8597;
+        font-size: 0.95rem;
+    }
+
+    .mini-view-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 84px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 700;
+        color: white;
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+    }
+
+        .mini-view-btn:hover {
+            color: white;
+        }
+
+    .empty-profile-state {
+        color: #7a8597;
+        padding: 10px 0;
+        font-size: 1rem;
+    }
+
+    @@media (max-width: 992px) {
+        .profile-stats-grid,
+        .activity-list,
+        .profile-tabs {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .profile-page-header h1 {
+            font-size: 2.2rem;
+        }
+
+        .profile-main-info h2 {
+            font-size: 1.5rem;
+        }
+
+        .profile-list-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function showProfileTab(tabName, button) {
+            const panels = document.querySelectorAll('.profile-tab-panel');
+            const tabs = document.querySelectorAll('.profile-tab');
+
+            panels.forEach(panel => panel.classList.remove('active'));
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            button.classList.add('active');
+        }
+    </script>
+}

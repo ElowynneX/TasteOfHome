@@ -1,0 +1,77 @@
+﻿@page
+@model TasteOfHome.Pages.HiddenGems.MySubmissionsModel
+@{
+    ViewData["Title"] = "My Hidden Gem Submissions";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">My Hidden Gem Submissions</h2>
+            <p class="text-muted mb-0">Track the review status of the Hidden Gems you submitted.</p>
+        </div>
+
+        <a asp-page="/HiddenGems/Submit" class="btn btn-success">
+            + Submit New Hidden Gem
+        </a>
+    </div>
+
+    @if (TempData["StatusMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["StatusMessage"]</div>
+    }
+
+    @if (Model.MyHiddenGems.Any())
+    {
+        <div class="row g-4">
+            @foreach (var gem in Model.MyHiddenGems)
+            {
+                var badgeClass = gem.Status switch
+                {
+                    "Approved" => "bg-success",
+                    "Denied" => "bg-danger",
+                    _ => "bg-warning text-dark"
+                };
+
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold mb-1">@gem.ProviderName</h5>
+                                    <div class="text-muted small">@gem.FoodType • @gem.Location</div>
+                                </div>
+                                <span class="badge @badgeClass px-3 py-2">@gem.Status</span>
+                            </div>
+
+                            <p class="mb-2"><strong>Description:</strong> @gem.Description</p>
+                            <p class="mb-2"><strong>Authenticity Hint:</strong> @gem.AuthenticityHint%</p>
+
+                            @if (!string.IsNullOrWhiteSpace(gem.ContactInfo))
+                            {
+                                <p class="mb-2"><strong>Contact:</strong> @gem.ContactInfo</p>
+                            }
+
+                            <p class="mb-2"><strong>Submitted:</strong> @gem.CreatedAt.ToLocalTime().ToString("MMMM dd, yyyy hh:mm tt")</p>
+
+                            @if (gem.ReviewedAt.HasValue)
+                            {
+                                <p class="mb-0"><strong>Reviewed:</strong> @gem.ReviewedAt.Value.ToLocalTime().ToString("MMMM dd, yyyy hh:mm tt")</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-5 text-center">
+                <h4 class="fw-bold mb-2">No submissions yet</h4>
+                <p class="text-muted mb-4">Your Hidden Gem requests will appear here after you submit them.</p>
+                <a asp-page="/HiddenGems/Submit" class="btn btn-success">Submit Hidden Gem</a>
+            </div>
+        </div>
+    }
+</div>

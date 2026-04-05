@@ -13,13 +13,19 @@ namespace TasteOfHome.Pages.Admin
     {
         private readonly AppDbContext _db;
         private readonly ISmsSender _smsSender;
+        private readonly IConfiguration _configuration;
+        private readonly ILogger<IndexModel> _logger;
 
         public IndexModel(
             AppDbContext db,
-            ISmsSender smsSender)
+            ISmsSender smsSender,
+            IConfiguration configuration,
+            ILogger<IndexModel> logger)
         {
             _db = db;
             _smsSender = smsSender;
+            _configuration = configuration;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -49,9 +55,12 @@ namespace TasteOfHome.Pages.Admin
             public string Description { get; set; } = "";
             public string? ContactInfo { get; set; }
             public string SubmitterPhoneNumber { get; set; } = "";
+            public string? SubmittedByEmail { get; set; }
             public int AuthenticityHint { get; set; }
             public string Status { get; set; } = "";
             public DateTime CreatedAt { get; set; }
+            public DateTime? ReviewedAt { get; set; }
+            public string? ReviewedByEmail { get; set; }
         }
 
         public class RestaurantViewModel
@@ -69,8 +78,16 @@ namespace TasteOfHome.Pages.Admin
         private bool IsAdminUser()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var adminEmails = _configuration
+                .GetSection("AdminSettings:AdminEmails")
+                .Get<string[]>() ?? Array.Empty<string>();
+
             return User.Identity?.IsAuthenticated == true &&
-                   string.Equals(email, "admin@toh.com", StringComparison.OrdinalIgnoreCase);
+                   adminEmails.Any(a => string.Equals(a, email, StringComparison.OrdinalIgnoreCase));
         }
 
         private IActionResult? RedirectIfNotAdmin()
@@ -90,6 +107,9 @@ namespace TasteOfHome.Pages.Admin
             await LoadFeedbackAsync();
             await LoadHiddenGemsAsync();
             await LoadRestaurantsAsync();
+
+            _logger.LogInformation("Admin dashboard loaded. HiddenGemCount={Count}", HiddenGemList.Count);
+
             return Page();
         }
 
@@ -220,6 +240,9 @@ namespace TasteOfHome.Pages.Admin
             }
 
             hiddenGem.Status = "Approved";
+            hiddenGem.ReviewedAt = DateTime.UtcNow;
+            hiddenGem.ReviewedByEmail = User.FindFirstValue(ClaimTypes.Email);
+
             await _db.SaveChangesAsync();
 
             try
@@ -236,7 +259,8 @@ namespace TasteOfHome.Pages.Admin
             }
             catch (Exception ex)
             {
-                TempData["StatusMessage"] = "Hidden Gem approved, but SMS failed: " + ex.Message;
+                _logger.LogError(ex, "SMS failed for Hidden Gem approval. HiddenGemId={Id}", hiddenGem.Id);
+                TempData["StatusMessage"] = "Hidden Gem approved, but SMS failed.";
             }
 
             return RedirectToPage();
@@ -256,6 +280,9 @@ namespace TasteOfHome.Pages.Admin
             }
 
             hiddenGem.Status = "Denied";
+            hiddenGem.ReviewedAt = DateTime.UtcNow;
+            hiddenGem.ReviewedByEmail = User.FindFirstValue(ClaimTypes.Email);
+
             await _db.SaveChangesAsync();
 
             try
@@ -272,7 +299,8 @@ namespace TasteOfHome.Pages.Admin
             }
             catch (Exception ex)
             {
-                TempData["StatusMessage"] = "Hidden Gem denied, but SMS failed: " + ex.Message;
+                _logger.LogError(ex, "SMS failed for Hidden Gem denial. HiddenGemId={Id}", hiddenGem.Id);
+                TempData["StatusMessage"] = "Hidden Gem denied, but SMS failed.";
             }
 
             return RedirectToPage();
@@ -320,7 +348,8 @@ namespace TasteOfHome.Pages.Admin
         private async Task LoadHiddenGemsAsync()
         {
             HiddenGemList = await _db.HiddenGems
-                .OrderByDescending(h => h.CreatedAt)
+                .OrderBy(h => h.Status == "Pending" ? 0 : 1)
+                .ThenByDescending(h => h.CreatedAt)
                 .Select(h => new HiddenGemViewModel
                 {
                     Id = h.Id,
@@ -330,9 +359,12 @@ namespace TasteOfHome.Pages.Admin
                     Description = h.Description,
                     ContactInfo = h.ContactInfo,
                     SubmitterPhoneNumber = h.SubmitterPhoneNumber,
+                    SubmittedByEmail = h.SubmittedByEmail,
                     AuthenticityHint = h.AuthenticityHint,
                     Status = string.IsNullOrWhiteSpace(h.Status) ? "Pending" : h.Status,
-                    CreatedAt = h.CreatedAt
+                    CreatedAt = h.CreatedAt,
+                    ReviewedAt = h.ReviewedAt,
+                    ReviewedByEmail = h.ReviewedByEmail
                 })
                 .ToListAsync();
         }

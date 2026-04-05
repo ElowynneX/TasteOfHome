@@ -1,69 +1,76 @@
 ﻿@page
-@model IndexModel
+@model TasteOfHome.Pages.IndexModel
 @{
-    ViewData["Title"] = "TasteOfHome";
+    ViewData["Title"] = "Home";
 }
 
-<div class="home-hero">
-    <div class="home-hero-inner">
-        <h1 class="home-title">
-            TasteOfHome
-            <span class="title-accent"></span>
-        </h1>
-
-        <p class="home-subtitle">
-            Discover authentic restaurants by cuisine, culture,
-            and dietary needs — all in one place.
+<section class="home-hero">
+    <div class="hero-inner">
+        <h1 class="hero-title">TasteOfHome</h1>
+        <div class="hero-underline"></div>
+        <p class="hero-subtitle">
+            Discover authentic restaurants by cuisine, culture, and dietary needs — all in one place.
         </p>
-
-        <div class="home-cta">
-            <a class="btn btn-toh btn-lg" href="/Restaurants">
-                Browse Restaurants
-            </a>
-
-            <p class="home-helper">
-                Filter by cuisine • dietary preferences • culture
-            </p>
-        </div>
+        <a asp-page="/Restaurants/Index" class="hero-btn">Browse Restaurants</a>
+        <div class="hero-meta">Filter by cuisine • dietary preferences • culture</div>
     </div>
-</div>
+</section>
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Approved Hidden Gems</h2>
-        <a class="btn btn-success" href="/HiddenGems/Submit">+ Submit Hidden Gem</a>
-    </div>
-
-    @if (Model.ApprovedHiddenGems != null && Model.ApprovedHiddenGems.Any())
-    {
-        <div class="row">
-            @foreach (var gem in Model.ApprovedHiddenGems)
-            {
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">@gem.ProviderName</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">@gem.FoodType</h6>
-                            <p class="mb-2"><strong>Location:</strong> @gem.Location</p>
-                            <p class="card-text">@gem.Description</p>
-                            <p class="mb-2"><strong>Authenticity:</strong> @gem.AuthenticityHint%</p>
-
-                            @if (!string.IsNullOrWhiteSpace(gem.ContactInfo))
-                            {
-                                <p class="mb-0"><strong>Contact:</strong> @gem.ContactInfo</p>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-
-        <a class="btn btn-outline-primary" href="/HiddenGems/Index">View All Hidden Gems</a>
+<style>
+    .home-hero {
+        padding: 64px 20px 56px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        background: #f6f3f1;
     }
-    else
-    {
-        <div class="alert alert-info">
-            No approved hidden gems yet.
-        </div>
+
+    .hero-inner {
+        max-width: 760px;
+        width: 100%;
     }
-</div>
+
+    .hero-title {
+        font-size: clamp(3rem, 7vw, 4.5rem);
+        font-weight: 900;
+        color: #222;
+        margin-bottom: 10px;
+    }
+
+    .hero-underline {
+        width: 60px;
+        height: 4px;
+        border-radius: 999px;
+        background: #ff6b2c;
+        margin: 0 auto 20px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.35rem;
+        color: #5c6678;
+        line-height: 1.6;
+        margin-bottom: 22px;
+    }
+
+    .hero-btn {
+        display: inline-block;
+        padding: 14px 28px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #ff8a00, #ff6b2c);
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 24px rgba(255, 107, 44, 0.22);
+    }
+
+        .hero-btn:hover {
+            color: white;
+        }
+
+    .hero-meta {
+        margin-top: 14px;
+        color: #8a93a3;
+        font-size: 0.95rem;
+    }
+</style>

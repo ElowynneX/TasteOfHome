@@ -1,5 +1,5 @@
-﻿@using TasteOfHome.Data
-@using System.Security.Claims
+﻿@using System.Security.Claims
+@inject IConfiguration Configuration
 
 <!DOCTYPE html>
 <html lang="en">
@@ -11,78 +11,131 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TasteOfHome.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f6f3f1;
+        }
+
+        .site-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .site-main {
+            flex: 1 0 auto;
+            width: 100%;
+        }
+
+        .site-footer {
+            flex-shrink: 0;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            background: #f3ece8;
+            color: #6b7280;
+        }
+
+            .site-footer .container {
+                padding-top: 12px;
+                padding-bottom: 12px;
+            }
+    </style>
 </head>
 <body>
     @{
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        var adminEmails = Configuration
+        .GetSection("AdminSettings:AdminEmails")
+        .Get<string[]>() ?? Array.Empty<string>();
+
         var isAdmin = User.Identity?.IsAuthenticated == true
-        && string.Equals(userEmail, "admin@toh.com", StringComparison.OrdinalIgnoreCase);
+        && !string.IsNullOrWhiteSpace(userEmail)
+        && adminEmails.Any(a => string.Equals(a, userEmail, StringComparison.OrdinalIgnoreCase));
     }
 
-    <header class="toh-navbar">
-        <div class="toh-nav-left">
-            <div class="logo-circle">🍴</div>
-            <span class="logo-text">TasteOfHome</span>
-        </div>
+    <div class="site-shell">
+        <header class="toh-navbar">
+            <div class="toh-nav-left">
+                <div class="logo-circle">🍴</div>
+                <span class="logo-text">TasteOfHome</span>
+            </div>
 
-        <div class="toh-nav-right">
-            <a class="toh-nav-link" asp-page="/Index">
-                <i class="bi bi-house"></i> Home
-            </a>
-
-            <a class="toh-nav-link" asp-page="/Restaurants/Index">
-                <i class="bi bi-search-heart"></i> Discover
-            </a>
-
-            <li class="nav-item">
-                <a class="nav-link" asp-page="/Reservations/MyReservations">
-                    <i class="bi bi-calendar-check"></i> My Reservations
+            <div class="toh-nav-right">
+                <a class="toh-nav-link" asp-page="/Index">
+                    <i class="bi bi-house"></i> Home
                 </a>
-            </li>
 
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                @if (isAdmin)
+                <a class="toh-nav-link" asp-page="/Restaurants/Index">
+                    <i class="bi bi-search-heart"></i> Discover
+                </a>
+
+                <a class="toh-nav-link" asp-page="/Events/Index">
+                    <i class="bi bi-calendar-event"></i> Events
+                </a>
+
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a class="toh-nav-link" asp-page="/Admin/Index">
-                        <i class="bi bi-speedometer2"></i> Admin Dashboard
+                    <a class="toh-nav-link" asp-page="/Reservations/MyReservations">
+                        <i class="bi bi-calendar-check"></i> My Reservations
                     </a>
 
-                    <span class="badge bg-danger ms-2 align-self-center">Admin</span>
+                    <a class="toh-nav-link" asp-page="/Events/MyBookings">
+                        <i class="bi bi-ticket-perforated"></i> My Events
+                    </a>
+
+                    <a class="toh-nav-link" asp-page="/HiddenGems/MySubmissions">
+                        <i class="bi bi-card-checklist"></i> My Hidden Gems
+                    </a>
+
+                    <a class="toh-nav-link" asp-page="/Profile">
+                        <i class="bi bi-person"></i> Profile
+                    </a>
+
+                    @if (isAdmin)
+                    {
+                        <a class="toh-nav-link" asp-page="/Admin/Index">
+                            <i class="bi bi-speedometer2"></i> Admin Dashboard
+                        </a>
+
+                        <span class="badge bg-danger ms-2 align-self-center">Admin</span>
+                    }
+
+                    <a class="toh-nav-link" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
                 }
+                else
+                {
+                    <a class="toh-nav-link" asp-page="/Login">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
 
-                <a class="toh-nav-link" asp-page="/Profile">
-                    <i class="bi bi-person"></i> Profile
-                </a>
+                    <a class="toh-nav-link" asp-page="/Register">
+                        <i class="bi bi-person-plus"></i> Register
+                    </a>
+                }
+            </div>
+        </header>
 
-                <a class="toh-nav-link" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            }
-            else
-            {
-                <a class="toh-nav-link" asp-page="/Login">
-                    <i class="bi bi-box-arrow-in-right"></i> Login
-                </a>
-
-                <a class="toh-nav-link" asp-page="/Register">
-                    <i class="bi bi-person-plus"></i> Register
-                </a>
-            }
-        </div>
-    </header>
-
-    <div class="container-fluid px-0">
-        <main role="main">
+        <main role="main" class="site-main">
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - TasteOfHome - <a asp-area="" asp-page="/Privacy">Privacy</a>
-        </div>
-    </footer>
+        <footer class="site-footer">
+            <div class="container">
+                &copy; 2026 - TasteOfHome - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            </div>
+        </footer>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

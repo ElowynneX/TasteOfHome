@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Data;
 using TasteOfHome.Services;
 using TasteOfHome.Models;
+using Stripe;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,14 +14,22 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
+
+
+
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection("OpenAI"));
 builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
-
+builder.Services.AddHttpClient<ILiveEventsService, TicketmasterLiveEventsService>();
 builder.Services.Configure<SmtpOptions>(
     builder.Configuration.GetSection("Smtp"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<PasswordResetService>();
+
+builder.Services.Configure<StripeOptions>(
+    builder.Configuration.GetSection("Stripe"));
+
+builder.Services.AddControllers();
 
 builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
@@ -52,7 +62,11 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
+var stripeOptions = builder.Configuration.GetSection("Stripe").Get<StripeOptions>();
+if (stripeOptions != null && !string.IsNullOrWhiteSpace(stripeOptions.SecretKey))
+{
+    StripeConfiguration.ApiKey = stripeOptions.SecretKey;
+}
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -92,5 +106,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapRazorPages();
-
+app.MapControllers();
+app.MapRazorPages();
 app.Run();

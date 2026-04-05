@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
 
@@ -10,10 +12,12 @@ namespace TasteOfHome.Pages.HiddenGems
     public class SubmitModel : PageModel
     {
         private readonly AppDbContext _db;
+        private readonly ILogger<SubmitModel> _logger;
 
-        public SubmitModel(AppDbContext db)
+        public SubmitModel(AppDbContext db, ILogger<SubmitModel> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -32,12 +36,22 @@ namespace TasteOfHome.Pages.HiddenGems
 
             HiddenGem.Status = "Pending";
             HiddenGem.CreatedAt = DateTime.UtcNow;
+            HiddenGem.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            HiddenGem.SubmittedByEmail = User.FindFirstValue(ClaimTypes.Email);
 
             _db.HiddenGems.Add(HiddenGem);
             await _db.SaveChangesAsync();
 
+            _logger.LogInformation(
+                "Hidden Gem submitted. Id={Id}, Provider={Provider}, UserId={UserId}, Email={Email}, Status={Status}",
+                HiddenGem.Id,
+                HiddenGem.ProviderName,
+                HiddenGem.UserId,
+                HiddenGem.SubmittedByEmail,
+                HiddenGem.Status);
+
             TempData["StatusMessage"] = "Hidden Gem submitted and is pending admin review.";
-            return RedirectToPage("/Index");
+            return RedirectToPage("/HiddenGems/MySubmissions");
         }
     }
 }

@@ -1,0 +1,298 @@
+﻿@page
+@model TasteOfHome.Pages.Events.IndexModel
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div class="container py-4">
+    <div class="rounded-4 shadow-sm p-5 mb-4 border-0" style="background: linear-gradient(135deg, #fff7f1, #ffffff);">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark mb-3">Hybrid Events Experience</span>
+                <h1 class="fw-bold mb-3">Hosted Events + Real-Time Nearby Events</h1>
+                <p class="text-muted mb-0 fs-5">
+                    Reserve TasteOfHome hosted events directly on this website and also discover live nearby concerts,
+                    festivals, and cultural events in real time.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end d-grid gap-2">
+                <a asp-page="/Events/MyBookings" class="btn btn-dark btn-lg">My Hosted Event Bookings</a>
+                <button type="button" class="btn btn-outline-dark btn-lg" onclick="useMyLocation()">Use My Location</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="get" class="row g-3 align-items-end" id="eventsSearchForm">
+                <input type="hidden" id="Latitude" name="Latitude" value="@Model.Latitude" />
+                <input type="hidden" id="Longitude" name="Longitude" value="@Model.Longitude" />
+
+                <div class="col-lg-4">
+                    <label class="form-label fw-semibold">Keyword</label>
+                    <input type="text"
+                           name="Search"
+                           value="@Model.Search"
+                           class="form-control form-control-lg"
+                           placeholder="festival, pasta, concert, food..." />
+                </div>
+
+                <div class="col-lg-3">
+                    <label class="form-label fw-semibold">City</label>
+                    <input type="text"
+                           name="City"
+                           value="@Model.City"
+                           class="form-control form-control-lg"
+                           placeholder="Toronto, Mississauga..." />
+                </div>
+
+                <div class="col-lg-3">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select name="Category" class="form-select form-select-lg">
+                        <option value="">All categories</option>
+                        @foreach (var category in Model.Categories)
+                        {
+                            if (Model.Category == category)
+                            {
+                                <option value="@category" selected>@category</option>
+                            }
+                            else
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-2 d-grid gap-2">
+                    <button type="submit" class="btn btn-dark btn-lg">Search</button>
+                    <a asp-page="/Events/Index" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">TasteOfHome Hosted Events</h3>
+            <p class="text-muted mb-0">These can be reserved directly inside the website.</p>
+        </div>
+    </div>
+
+    @if (Model.HostedEvents.Any())
+    {
+        <div class="row g-4 mb-5">
+            @foreach (var evt in Model.HostedEvents)
+            {
+                var loadPercentage = evt.Capacity == 0 ? 0 : (int)Math.Round((double)evt.ReservedSpots / evt.Capacity * 100);
+                if (loadPercentage > 100)
+                {
+                    loadPercentage = 100;
+                }
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="event-card-premium h-100">
+                        <div class="event-image-shell">
+                            @if (!string.IsNullOrWhiteSpace(evt.ImageUrl))
+                            {
+                                <img src="@evt.ImageUrl"
+                                     alt="@evt.Title"
+                                     class="w-100 h-100"
+                                     style="object-fit: cover;"
+                                     onerror="this.style.display='none';" />
+                            }
+
+                            <span class="event-badge-chip">@evt.CultureTag</span>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <span class="badge bg-light text-dark border px-3 py-2">@evt.Category</span>
+                                <span class="fw-semibold text-muted">
+                                    @(evt.PricePerPerson <= 0 ? "Free" : evt.PricePerPerson.ToString("C"))
+                                </span>
+                            </div>
+
+                            <h4 class="fw-bold mb-2">@evt.Title</h4>
+                            <p class="text-muted mb-3">@evt.Description</p>
+
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-calendar-event me-2"></i>@evt.EventDate.ToString("MMMM dd, yyyy")
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-clock me-2"></i>@evt.StartTime - @evt.EndTime
+                            </div>
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-geo-alt me-2"></i>@evt.VenueName, @evt.City
+                            </div>
+                            <div class="small text-muted mb-3">
+                                <i class="bi bi-people me-2"></i>@evt.AvailableSpots spot(s) left
+                            </div>
+
+                            <div class="event-progress mb-3">
+                                <div class="event-progress-fill" style="width:@loadPercentage%;"></div>
+                            </div>
+
+                            <div class="d-grid">
+                                @if (!evt.IsSoldOut)
+                                {
+                                    <a asp-page="/Events/Reserve"
+                                       asp-route-eventId="@evt.Id"
+                                       class="btn btn-lg text-white fw-semibold"
+                                       style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
+                                        Reserve Spot
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-secondary btn-lg" disabled style="border-radius: 14px;">
+                                        Sold Out
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-5">
+            <div class="card-body p-4 text-center">
+                <h5 class="fw-bold">No hosted events found</h5>
+                <p class="text-muted mb-0">Try another city or keyword.</p>
+            </div>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h3 class="fw-bold mb-1">Live Nearby Events</h3>
+            <p class="text-muted mb-0">These are real-time third-party events from Ticketmaster.</p>
+        </div>
+    </div>
+
+    @if (Model.LiveEvents.Any())
+    {
+        <div class="row g-4">
+            @foreach (var evt in Model.LiveEvents)
+            {
+                var badgeClass = evt.HasTickets ? "bg-success" : "bg-secondary";
+                var badgeText = evt.HasTickets ? "Tickets Available" : "Check Event Page";
+
+                <div class="col-xl-6">
+                    <div class="event-card-premium h-100">
+                        <div class="event-image-shell">
+                            @if (!string.IsNullOrWhiteSpace(evt.ImageUrl))
+                            {
+                                <img src="@evt.ImageUrl"
+                                     alt="@evt.Title"
+                                     class="w-100 h-100"
+                                     style="object-fit: cover;"
+                                     onerror="this.style.display='none';" />
+                            }
+
+                            <span class="event-badge-chip">@evt.CultureTag</span>
+                        </div>
+
+                        <div class="p-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <span class="badge bg-light text-dark border px-3 py-2">
+                                    @(string.IsNullOrWhiteSpace(evt.Category) ? "Event" : evt.Category)
+                                </span>
+                                <span class="badge @badgeClass px-3 py-2">@badgeText</span>
+                            </div>
+
+                            <h3 class="fw-bold h4 mb-2">@evt.Title</h3>
+
+                            @if (!string.IsNullOrWhiteSpace(evt.Description))
+                            {
+                                <p class="text-muted mb-3">@evt.Description</p>
+                            }
+                            else
+                            {
+                                <p class="text-muted mb-3">See full live details on the official ticket page.</p>
+                            }
+
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                @evt.LocalDate
+                                @if (!string.IsNullOrWhiteSpace(evt.LocalTime))
+                                {
+                                    <span> • @evt.LocalTime</span>
+                                }
+                            </div>
+
+                            <div class="small text-muted mb-2">
+                                <i class="bi bi-geo-alt me-2"></i>
+                                @evt.VenueName
+                                @if (!string.IsNullOrWhiteSpace(evt.City))
+                                {
+                                    <span>, @evt.City</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(evt.PriceRangeText))
+                            {
+                                <div class="small text-muted mb-3">
+                                    <i class="bi bi-ticket-perforated me-2"></i>@evt.PriceRangeText
+                                </div>
+                            }
+
+                            <div class="d-grid">
+                                @if (!string.IsNullOrWhiteSpace(evt.TicketUrl))
+                                {
+                                    <a href="@evt.TicketUrl"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="btn btn-lg text-white fw-semibold"
+                                       style="background: linear-gradient(90deg, #1f2937, #111827); border:0; border-radius: 14px;">
+                                        Get Tickets on Official Site
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-secondary btn-lg" disabled style="border-radius: 14px;">
+                                        No Ticket Link Available
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4 text-center">
+                <h5 class="fw-bold">No live events found</h5>
+                <p class="text-muted mb-0">Try another city, keyword, or use your location.</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function useMyLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.getElementById("Latitude").value = position.coords.latitude;
+                    document.getElementById("Longitude").value = position.coords.longitude;
+                    document.getElementById("eventsSearchForm").submit();
+                },
+                function() {
+                    alert("Unable to get your location. Please search by city instead.");
+                }
+            );
+        }
+    </script>
+}

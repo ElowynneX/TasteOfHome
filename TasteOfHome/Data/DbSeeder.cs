@@ -6,68 +6,71 @@ namespace TasteOfHome.Data
     {
         public static void Seed(AppDbContext db)
         {
-            //Abort if there are already restaurants in the DB
-            if (db.Restaurants.Any()) return;
+            SeedRestaurantsAndFeedback(db);
+            SeedEvents(db);
+        }
 
-            //Set seeded information into lists for transfer into DB
-            var seeded = RestaurantSeed.GetRestaurants();
-            List<Feedback> feedbackSeeded = FeedbackSeed.GetFeedbacks();
+        private static void SeedRestaurantsAndFeedback(AppDbContext db)
+        {
+            if (db.Restaurants.Any())
+                return;
 
-            // =====================
-            // Restaurant Seeding
-            // =====================
-            foreach (var r in seeded)
+            var seededRestaurants = RestaurantSeed.GetRestaurants();
+            var seededFeedback = FeedbackSeed.GetFeedbacks();
+
+            foreach (var restaurant in seededRestaurants)
             {
-                //Grab all feedback related to current restaurant
-                List<Feedback> relevantFeedback = feedbackSeeded.Where(f => f.RestaurantId == r.Id).ToList();
-                float aveRating = 0;
-                int aveAuth = 0;
+                var relevantFeedback = seededFeedback
+                    .Where(f => f.RestaurantId == restaurant.Id)
+                    .ToList();
 
-                //Calculate the average rating & authenticity based on seeded feedback
-                foreach (var rf in relevantFeedback)
+                float averageRating = 0;
+                int averageAuthenticity = 0;
+
+                foreach (var feedback in relevantFeedback)
                 {
-                    aveRating += rf.Rating;
-                    aveAuth += rf.Authenticity;
+                    averageRating += feedback.Rating;
+                    averageAuthenticity += feedback.Authenticity;
                 }
 
                 db.Restaurants.Add(new Restaurant
                 {
-                    Name = r.Name,
-                    Cuisine = r.Cuisine,
-                    Location = r.Location,
-                    Address = r.Address,
-                    DietaryTags = r.DietaryTags,
-
-                    CulturalStory = r.CulturalStory,
-                    CulturalTraditions = r.CulturalTraditions,
-                    SignatureDishesCsv = r.SignatureDishesCsv,
-
-                    Rating = MathF.Round(aveRating / relevantFeedback.Count, 1),
-                    Authenticity = aveAuth / relevantFeedback.Count,
-                    NumberOfReviews = relevantFeedback.Count
-
-
+                    Name = restaurant.Name,
+                    Cuisine = restaurant.Cuisine,
+                    Location = restaurant.Location,
+                    Address = restaurant.Address,
+                    DietaryTags = restaurant.DietaryTags,
+                    CulturalStory = restaurant.CulturalStory,
+                    CulturalTraditions = restaurant.CulturalTraditions,
+                    SignatureDishesCsv = restaurant.SignatureDishesCsv,
+                    Rating = MathF.Round(averageRating / relevantFeedback.Count, 1),
+                    Authenticity = averageAuthenticity / relevantFeedback.Count,
+                    NumberOfReviews = relevantFeedback.Count,
+                    ImageUrl = restaurant.ImageUrl
                 });
             }
 
-            // =====================
-            // Feedback Seeding (doesn't seed if there are restaurants in the DB)
-            // =====================
-            foreach (var f in feedbackSeeded)
+            foreach (var feedback in seededFeedback)
             {
                 db.Feedback.Add(new Feedback
                 {
-                    Rating = f.Rating,
-                    Authenticity = f.Authenticity,
-                    Review = f.Review,
-                    RestaurantId = f.RestaurantId
+                    Rating = feedback.Rating,
+                    Authenticity = feedback.Authenticity,
+                    Review = feedback.Review,
+                    RestaurantId = feedback.RestaurantId
                 });
             }
 
-            //Save changes to the DB
             db.SaveChanges();
+        }
 
-            //Save changes to the DB
+        private static void SeedEvents(AppDbContext db)
+        {
+            if (db.CulturalEvents.Any())
+                return;
+
+            var events = EventSeed.GetEvents();
+            db.CulturalEvents.AddRange(events);
             db.SaveChanges();
         }
     }

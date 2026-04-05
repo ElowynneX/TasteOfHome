@@ -11,9 +11,11 @@ namespace TasteOfHome.Data
         public DbSet<Restaurant> Restaurants => Set<Restaurant>();
         public DbSet<AppUser> Users => Set<AppUser>();
         public DbSet<Feedback> Feedback => Set<Feedback>();
-        public DbSet<HiddenGem> HiddenGems { get; set; }
+        public DbSet<HiddenGem> HiddenGems => Set<HiddenGem>();
+        public DbSet<Reservation> Reservations => Set<Reservation>();
+        public DbSet<CulturalEvent> CulturalEvents => Set<CulturalEvent>();
+        public DbSet<EventReservation> EventReservations => Set<EventReservation>();
 
-        public DbSet<Reservation> Reservations { get; set; } = default!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -27,10 +29,20 @@ namespace TasteOfHome.Data
                 .HasDefaultValue("Approved");
 
             modelBuilder.Entity<Reservation>()
-       .HasOne(r => r.Restaurant)
-       .WithMany()
-       .HasForeignKey(r => r.RestaurantId)
-       .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(r => r.Restaurant)
+                .WithMany()
+                .HasForeignKey(r => r.RestaurantId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EventReservation>()
+                .HasOne(r => r.CulturalEvent)
+                .WithMany(e => e.Reservations)
+                .HasForeignKey(r => r.CulturalEventId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<EventReservation>()
+                .Property(r => r.AmountPaid)
+                .HasPrecision(10, 2);
         }
     }
 }

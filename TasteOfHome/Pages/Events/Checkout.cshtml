@@ -1,0 +1,31 @@
+﻿@page
+@model TasteOfHome.Pages.Events.CheckoutModel
+@{
+    ViewData["Title"] = "Payment Confirmation";
+}
+
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 mx-auto" style="max-width: 760px;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">TasteOfHome Event Payment</h2>
+                <p class="text-muted mb-0">@Model.PaymentMessage</p>
+            </div>
+
+            <div class="alert @(Model.Reservation.PaymentStatus == "Paid" ? "alert-success" : "alert-warning")">
+                <strong>Status:</strong> @Model.Reservation.PaymentStatus
+            </div>
+
+            <div class="mb-3"><strong>Event:</strong> @Model.EventItem.Title</div>
+            <div class="mb-3"><strong>Date:</strong> @Model.EventItem.EventDate.ToString("MMMM dd, yyyy")</div>
+            <div class="mb-3"><strong>Venue:</strong> @Model.EventItem.VenueName, @Model.EventItem.City</div>
+            <div class="mb-3"><strong>Spots:</strong> @Model.Reservation.NumberOfSpots</div>
+            <div class="mb-3"><strong>Amount:</strong> @Model.Reservation.AmountPaid.ToString("C")</div>
+
+            <div class="d-flex gap-2 flex-wrap mt-4">
+                <a asp-page="/Events/MyBookings" class="btn btn-dark">My Event Bookings</a>
+                <a asp-page="/Events/Index" class="btn btn-outline-secondary">Back to Events</a>
+            </div>
+        </div>
+    </div>
+</div>

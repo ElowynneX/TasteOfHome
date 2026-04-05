@@ -39,6 +39,17 @@ namespace TasteOfHome.Models
         [MaxLength(20)]
         public string SubmitterPhoneNumber { get; set; } = "";
 
+        [MaxLength(450)]
+        public string? UserId { get; set; }
+
+        [MaxLength(150)]
+        public string? SubmittedByEmail { get; set; }
+
+        [MaxLength(150)]
+        public string? ReviewedByEmail { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? ReviewedAt { get; set; }
     }
 }

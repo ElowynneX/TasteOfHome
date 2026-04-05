@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
+using TasteOfHome.Services;
 
 namespace TasteOfHome.Pages.Reservations
 {
@@ -13,10 +14,20 @@ namespace TasteOfHome.Pages.Reservations
     public class CreateModel : PageModel
     {
         private readonly AppDbContext _db;
+        private readonly IEmailSender _emailSender;
+        private readonly ISmsSender _smsSender;
+        private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(AppDbContext db)
+        public CreateModel(
+            AppDbContext db,
+            IEmailSender emailSender,
+            ISmsSender smsSender,
+            ILogger<CreateModel> logger)
         {
             _db = db;
+            _emailSender = emailSender;
+            _smsSender = smsSender;
+            _logger = logger;
         }
 
         public Restaurant Restaurant { get; set; } = new Restaurant();
@@ -82,6 +93,7 @@ namespace TasteOfHome.Pages.Reservations
             Input.ReservationDate = DateTime.Today.AddDays(1);
             Input.ReservationTime = "7:00 PM";
             Input.NumberOfGuests = 2;
+            Input.CustomerName = User.FindFirstValue(ClaimTypes.Name) ?? "";
 
             return Page();
         }
@@ -110,6 +122,7 @@ namespace TasteOfHome.Pages.Reservations
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "";
 
             var reservation = new Reservation
             {
@@ -128,8 +141,56 @@ namespace TasteOfHome.Pages.Reservations
             _db.Reservations.Add(reservation);
             await _db.SaveChangesAsync();
 
-            TempData["StatusMessage"] = $"Reservation request submitted for {Restaurant.Name} on {reservation.ReservationDate:MMMM dd, yyyy} at {reservation.ReservationTime}.";
+            await TrySendRestaurantReservationNotificationsAsync(userEmail, reservation);
+
+            TempData["StatusMessage"] =
+                $"Reservation request submitted for {Restaurant.Name} on {reservation.ReservationDate:MMMM dd, yyyy} at {reservation.ReservationTime}.";
+
             return RedirectToPage("/Reservations/MyReservations");
+        }
+
+        private async Task TrySendRestaurantReservationNotificationsAsync(string userEmail, Reservation reservation)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(userEmail))
+                {
+                    var subject = $"TasteOfHome Reservation Received - {Restaurant.Name}";
+                    var htmlBody = $@"
+                        <div style='font-family:Arial,sans-serif;line-height:1.6;color:#222'>
+                            <h2 style='color:#ff6b35;'>Reservation Received</h2>
+                            <p>Hi {reservation.CustomerName},</p>
+                            <p>Congrats! Your restaurant reservation request has been received by <strong>TasteOfHome</strong>.</p>
+
+                            <div style='background:#fff4ef;padding:16px;border-radius:12px;border:1px solid #ffd8c7;'>
+                                <p><strong>Restaurant:</strong> {Restaurant.Name}</p>
+                                <p><strong>Date:</strong> {reservation.ReservationDate:MMMM dd, yyyy}</p>
+                                <p><strong>Time:</strong> {reservation.ReservationTime}</p>
+                                <p><strong>Guests:</strong> {reservation.NumberOfGuests}</p>
+                                <p><strong>Status:</strong> {reservation.Status}</p>
+                            </div>
+
+                            <p style='margin-top:16px;'>We’ll keep your booking details ready in your TasteOfHome account.</p>
+                            <p>Thank you for using TasteOfHome.</p>
+                        </div>";
+
+                    await _emailSender.SendAsync(userEmail, subject, htmlBody);
+                }
+
+                if (!string.IsNullOrWhiteSpace(reservation.PhoneNumber))
+                {
+                    var sms =
+                        $"TasteOfHome: Hi {reservation.CustomerName}, your reservation request for {Restaurant.Name} on " +
+                        $"{reservation.ReservationDate:MMM dd} at {reservation.ReservationTime} for {reservation.NumberOfGuests} guest(s) has been received.";
+
+                    await _smsSender.SendSmsAsync(reservation.PhoneNumber, sms);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send restaurant reservation notification for reservation {ReservationId}", reservation.Id);
+                TempData["NotificationWarning"] = "Reservation saved, but confirmation email/SMS could not be sent.";
+            }
         }
 
         public string GetImageFileName(int id)

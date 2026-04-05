@@ -1,0 +1,156 @@
+﻿@page "{eventId:int}"
+@model TasteOfHome.Pages.Events.ReserveModel
+@{
+    ViewData["Title"] = "Reserve Event Spot";
+}
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-page="/Events/Index" class="text-decoration-none fw-semibold">
+            <i class="bi bi-arrow-left"></i> Back to Events
+        </a>
+    </div>
+
+    <div class="position-relative overflow-hidden rounded-4 shadow-sm mb-4" style="min-height: 240px; background: linear-gradient(135deg, #ff9a4d, #ff6f3d 55%, #ff3d54);">
+        @if (!string.IsNullOrWhiteSpace(Model.EventItem.ImageUrl))
+        {
+            <img src="@Model.EventItem.ImageUrl"
+                 alt="@Model.EventItem.Title"
+                 class="w-100 h-100 position-absolute top-0 start-0"
+                 style="object-fit: cover;"
+                 onerror="this.style.display='none';" />
+        }
+
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+             style="background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.22));"></div>
+
+        <div class="position-relative text-white p-4" style="z-index: 2;">
+            <span class="badge bg-warning text-dark mb-3">@Model.EventItem.Category</span>
+            <h1 class="fw-bold mb-2">Reserve Your Spot</h1>
+            <p class="mb-1 fs-5">@Model.EventItem.Title</p>
+            <p class="mb-0 opacity-75">@Model.EventItem.EventDate.ToString("MMMM dd, yyyy") • @Model.EventItem.StartTime - @Model.EventItem.EndTime • @Model.EventItem.City</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">Booking Details</h4>
+
+                    @if (!Model.IsStripeConfigured)
+                    {
+                        <div class="alert alert-danger">
+                            Stripe payment is not configured yet. Add your Stripe keys in appsettings.json first.
+                        </div>
+                    }
+                    else if (!Model.CanReserve)
+                    {
+                        <div class="alert alert-warning">
+                            This event is currently unavailable, sold out, or no longer active.
+                        </div>
+                    }
+
+                    <form method="post">
+                        <input asp-for="Input.CulturalEventId" type="hidden" />
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Input.CustomerName" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.CustomerName" class="form-control form-control-lg" placeholder="Your full name" />
+                                <span asp-validation-for="Input.CustomerName" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.Email" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.Email" class="form-control form-control-lg" placeholder="you@example.com" />
+                                <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.PhoneNumber" class="form-label fw-semibold"></label>
+                                <input asp-for="Input.PhoneNumber" class="form-control form-control-lg" placeholder="Phone number" />
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Input.NumberOfSpots" class="form-label fw-semibold">Number of Spots</label>
+                                <select asp-for="Input.NumberOfSpots" class="form-select form-select-lg">
+                                    @for (var i = 1; i <= Model.MaxSelectableSpots; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Input.NumberOfSpots" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Input.Notes" class="form-label fw-semibold">Notes</label>
+                                <textarea asp-for="Input.Notes"
+                                          rows="4"
+                                          class="form-control"
+                                          placeholder="Birthday, dietary request, accessibility support, or special note"></textarea>
+                                <span asp-validation-for="Input.Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            @if (Model.CanReserve)
+                            {
+                                <button type="submit" class="btn btn-lg text-white fw-semibold"
+                                        style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
+                                    Continue to Secure Payment
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-lg btn-secondary" style="border-radius: 14px;" disabled>
+                                    Event Unavailable
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Event Summary</h5>
+
+                    <div class="mb-3">
+                        <div class="fw-semibold">@Model.EventItem.Title</div>
+                        <div class="text-muted">@Model.EventItem.VenueName, @Model.EventItem.Address</div>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge bg-light text-dark border">@Model.EventItem.CultureTag</span>
+                        <span class="badge bg-light text-dark border">@Model.EventItem.City</span>
+                        <span class="badge bg-success">
+                            @(Model.EventItem.PricePerPerson <= 0 ? "Free" : Model.EventItem.PricePerPerson.ToString("C"))
+                        </span>
+                    </div>
+
+                    <div class="alert alert-light border rounded-4 mb-3">
+                        <div class="fw-semibold">Remaining spots: @Model.RemainingSpots</div>
+                        <div class="text-muted small">@Model.EventItem.ReservedSpots / @Model.EventItem.Capacity already reserved</div>
+                    </div>
+
+                    <p class="text-muted mb-2">
+                        Payment is processed securely through Stripe Checkout.
+                    </p>
+                    <p class="text-muted mb-0 small">
+                        Card details are handled by Stripe, not stored in TasteOfHome.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

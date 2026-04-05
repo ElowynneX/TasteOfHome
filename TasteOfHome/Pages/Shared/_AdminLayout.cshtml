@@ -1,0 +1,266 @@
+﻿@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TasteOfHome Admin</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TasteOfHome.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at top left, #1a2240 0%, #08142f 45%, #071126 100%);
+            color: #eef4ff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .admin-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .admin-sidebar {
+            width: 250px;
+            background: rgba(7, 17, 38, 0.92);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 8px 0 30px rgba(0,0,0,0.2);
+        }
+
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 28px;
+            text-decoration: none;
+        }
+
+        .admin-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .admin-brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+
+        .admin-brand-title {
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .admin-brand-subtitle {
+            color: #96abd3;
+            font-size: 0.88rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #d9e6ff;
+            text-decoration: none;
+            padding: 12px 14px;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+            font-weight: 600;
+        }
+
+            .admin-nav-link:hover {
+                background: rgba(255,255,255,0.06);
+                color: white;
+            }
+
+            .admin-nav-link.active-link {
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.08);
+                color: white;
+            }
+
+        .admin-sidebar-footer {
+            margin-top: 30px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .admin-user-role {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff5f6d, #ff7f50);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .admin-user-email {
+            color: #bfd0ec;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+
+        .admin-main {
+            flex: 1;
+            min-width: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .admin-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(6, 14, 30, 0.35);
+        }
+
+        .admin-page-info h1 {
+            margin: 0;
+            color: white;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .admin-page-info p {
+            margin: 4px 0 0 0;
+            color: #98acd2;
+        }
+
+        .admin-session-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #dfeaff;
+            font-weight: 700;
+        }
+
+        .admin-session-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+
+        .admin-content {
+            flex: 1;
+            min-height: 0;
+        }
+    </style>
+</head>
+<body>
+    @{
+        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "";
+        var path = Context.Request.Path.Value?.ToLower() ?? "";
+        var pageTitle = ViewData["Title"]?.ToString() ?? "Admin";
+    }
+
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div>
+                <a asp-page="/Admin/Index" class="admin-brand">
+                    <div class="admin-brand-icon">
+                        <i class="bi bi-fork-knife"></i>
+                    </div>
+                    <div class="admin-brand-text">
+                        <span class="admin-brand-title">TasteOfHome</span>
+                        <span class="admin-brand-subtitle">Admin Console</span>
+                    </div>
+                </a>
+
+                <nav class="admin-nav">
+                    <a asp-page="/Admin/Index" class="admin-nav-link @(path == "/admin" || path == "/admin/index" ? "active-link" : "")">
+                        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                    </a>
+
+                    <a asp-page="/Index" class="admin-nav-link">
+                        <i class="bi bi-house-door-fill"></i> Main Site
+                    </a>
+
+                    <a asp-page="/Admin/Events/Index" class="admin-nav-link @(path.Contains("/admin/events") ? "active-link" : "")">
+                        <i class="bi bi-calendar2-event-fill"></i> Manage Events
+                    </a>
+
+                    <a asp-page="/Admin/Analytics/Index" class="admin-nav-link @(path.Contains("/admin/analytics") ? "active-link" : "")">
+                        <i class="bi bi-bar-chart-line-fill"></i> Analytics
+                    </a>
+
+                    <a asp-page="/Profile" class="admin-nav-link">
+                        <i class="bi bi-person-circle"></i> Profile
+                    </a>
+
+                    <a href="/logout" class="admin-nav-link">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </nav>
+            </div>
+
+            <div class="admin-sidebar-footer">
+                <div class="admin-user-role">Administrator</div>
+                <div class="admin-user-email">@userEmail</div>
+            </div>
+        </aside>
+
+        <div class="admin-main">
+            <div class="admin-topbar">
+                <div class="admin-page-info">
+                    <h1>@pageTitle</h1>
+                    <p>Moderate reviews, manage hidden gems, and monitor platform activity.</p>
+                </div>
+
+                <div class="admin-session-badge">
+                    <span class="admin-session-dot"></span>
+                    Secure Admin Session
+                </div>
+            </div>
+
+            <main class="admin-content">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
