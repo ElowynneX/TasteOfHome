@@ -10,13 +10,12 @@ namespace TasteOfHome.Pages
     {
         private readonly AppDbContext _db;
         private readonly IGooglePlacesService _googlePlacesService;
-        private readonly ILogger<IndexModel> _logger;
         private readonly IAiRestaurantEnrichmentService _aiRestaurantEnrichmentService;
 
         public IndexModel(
-      AppDbContext db,
-      IGooglePlacesService googlePlacesService,
-      IAiRestaurantEnrichmentService aiRestaurantEnrichmentService)
+            AppDbContext db,
+            IGooglePlacesService googlePlacesService,
+            IAiRestaurantEnrichmentService aiRestaurantEnrichmentService)
         {
             _db = db;
             _googlePlacesService = googlePlacesService;
@@ -27,6 +26,18 @@ namespace TasteOfHome.Pages
 
         public async Task OnGetAsync()
         {
+            var adminSettings = await _db.AdminSettings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == 1);
+
+            var showHiddenGems = adminSettings?.ShowHiddenGemsOnHomepage ?? false;
+
+            if (!showHiddenGems)
+            {
+                ApprovedHiddenGems = new List<HiddenGem>();
+                return;
+            }
+
             ApprovedHiddenGems = await _db.HiddenGems
                 .AsNoTracking()
                 .Where(h => h.Status == "Approved")

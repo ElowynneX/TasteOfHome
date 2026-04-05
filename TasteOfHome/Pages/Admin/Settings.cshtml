@@ -1,0 +1,111 @@
+﻿@page
+@model TasteOfHome.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="container-fluid p-4 p-lg-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-white mb-1">Platform Settings</h2>
+            <p class="text-light opacity-75 mb-0">Control booking rules, submissions, and homepage behavior.</p>
+        </div>
+        <div class="text-light opacity-75">
+            Last updated: @Model.UpdatedAt.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")
+        </div>
+    </div>
+
+    @if (TempData["AdminSettingsMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+            @TempData["AdminSettingsMessage"]
+        </div>
+    }
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-warning mb-3"></div>
+
+        <div class="row g-4">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-lg rounded-4 h-100" style="background: rgba(255,255,255,0.96);">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3 text-dark">Booking Controls</h4>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch fs-5">
+                                <input asp-for="Input.EnableRestaurantReservations" class="form-check-input" />
+                                <label asp-for="Input.EnableRestaurantReservations" class="form-check-label fw-semibold text-dark"></label>
+                            </div>
+                            <div class="text-muted small">Turn restaurant reservation forms on or off across the platform.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch fs-5">
+                                <input asp-for="Input.EnableEventBookings" class="form-check-input" />
+                                <label asp-for="Input.EnableEventBookings" class="form-check-label fw-semibold text-dark"></label>
+                            </div>
+                            <div class="text-muted small">Control whether users can reserve and pay for hosted cultural events.</div>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.MaxGuestsPerReservation" class="form-label fw-semibold text-dark"></label>
+                            <select asp-for="Input.MaxGuestsPerReservation" class="form-select form-select-lg">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@i guest(s)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.MaxGuestsPerReservation" class="text-danger"></span>
+                            <div class="form-text">This value is enforced on the reservation form.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-lg rounded-4 h-100" style="background: rgba(255,255,255,0.96);">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3 text-dark">Hidden Gem Controls</h4>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch fs-5">
+                                <input asp-for="Input.EnableHiddenGemSubmissions" class="form-check-input" />
+                                <label asp-for="Input.EnableHiddenGemSubmissions" class="form-check-label fw-semibold text-dark"></label>
+                            </div>
+                            <div class="text-muted small">Disable this to temporarily pause all new hidden gem submissions.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch fs-5">
+                                <input asp-for="Input.RequireHiddenGemApproval" class="form-check-input" />
+                                <label asp-for="Input.RequireHiddenGemApproval" class="form-check-label fw-semibold text-dark"></label>
+                            </div>
+                            <div class="text-muted small">When enabled, every submitted hidden gem stays pending until admin review.</div>
+                        </div>
+
+                        <div>
+                            <div class="form-check form-switch fs-5">
+                                <input asp-for="Input.ShowHiddenGemsOnHomepage" class="form-check-input" />
+                                <label asp-for="Input.ShowHiddenGemsOnHomepage" class="form-check-label fw-semibold text-dark"></label>
+                            </div>
+                            <div class="text-muted small">Controls whether approved hidden gems are loaded for the homepage experience.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-lg px-5 rounded-pill text-white shadow"
+                            style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border: 0;">
+                        Save Admin Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

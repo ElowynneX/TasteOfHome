@@ -33,6 +33,8 @@ namespace TasteOfHome.Pages.Events
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
+        public bool EventBookingsEnabled { get; set; } = true;
+
         public int RemainingSpots => Math.Max(0, EventItem.Capacity - EventItem.ReservedSpots);
         public int MaxSelectableSpots => Math.Min(6, Math.Max(1, RemainingSpots));
 
@@ -42,6 +44,7 @@ namespace TasteOfHome.Pages.Events
             !string.IsNullOrWhiteSpace(_stripeOptions.Currency);
 
         public bool CanReserve =>
+            EventBookingsEnabled &&
             EventItem.Id > 0 &&
             EventItem.IsActive &&
             EventItem.EventDate.Date >= DateTime.Today &&
@@ -82,10 +85,20 @@ namespace TasteOfHome.Pages.Events
             if (EventItem.Id == 0)
                 return RedirectToPage("/Error");
 
+            var adminSettings = await GetAdminSettingsAsync();
+            EventBookingsEnabled = adminSettings.EnableEventBookings;
+
+            var userEmail = GetCurrentEmail();
+            var userSettings = await GetUserSettingsAsync(userEmail);
+
             Input.CulturalEventId = eventId;
-            Input.CustomerName = User.FindFirstValue(ClaimTypes.Name) ?? "";
-            Input.Email = User.FindFirstValue(ClaimTypes.Email) ?? "";
+            Input.CustomerName = !string.IsNullOrWhiteSpace(userSettings?.FullName)
+                ? userSettings!.FullName
+                : (User.FindFirstValue(ClaimTypes.Name) ?? "");
+            Input.Email = userEmail;
+            Input.PhoneNumber = userSettings?.PhoneNumber ?? "";
             Input.NumberOfSpots = 1;
+            Input.Notes = BuildSuggestedEventNote(userSettings);
 
             return Page();
         }
@@ -97,6 +110,12 @@ namespace TasteOfHome.Pages.Events
 
             if (EventItem.Id == 0)
                 return RedirectToPage("/Error");
+
+            var adminSettings = await GetAdminSettingsAsync();
+            EventBookingsEnabled = adminSettings.EnableEventBookings;
+
+            if (!EventBookingsEnabled)
+                ModelState.AddModelError(string.Empty, "Event bookings are currently paused by admin.");
 
             if (!IsStripeConfigured)
                 ModelState.AddModelError(string.Empty, "Payment is not configured yet. Please add Stripe keys first.");
@@ -190,6 +209,40 @@ namespace TasteOfHome.Pages.Events
                 ModelState.AddModelError(string.Empty, "We could not open the payment page. Please try again.");
                 return Page();
             }
+        }
+
+        private async Task<TasteOfHome.Models.AdminSettings> GetAdminSettingsAsync()
+        {
+            var settings = await _db.AdminSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+            return settings ?? new TasteOfHome.Models.AdminSettings();
+        }
+
+        private async Task<UserSettings?> GetUserSettingsAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            return await _db.UserSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email);
+        }
+
+        private string GetCurrentEmail()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
+
+            if (string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(FakeUsers.LoggedInEmail))
+            {
+                email = FakeUsers.LoggedInEmail;
+            }
+
+            return email.Trim();
+        }
+
+        private static string? BuildSuggestedEventNote(UserSettings? userSettings)
+        {
+            if (userSettings == null || string.IsNullOrWhiteSpace(userSettings.DietaryPreference))
+                return null;
+
+            return $"Dietary preference: {userSettings.DietaryPreference}";
         }
     }
 }

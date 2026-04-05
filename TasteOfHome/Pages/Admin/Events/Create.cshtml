@@ -130,7 +130,10 @@
 
                         <div class="col-md-4">
                             <label asp-for="Input.ImageUrl" class="form-label">Image URL</label>
-                            <input asp-for="Input.ImageUrl" class="form-control premium-input" placeholder="https://..." />
+                            <input asp-for="Input.ImageUrl" class="form-control premium-input" placeholder="Leave blank for AI-generated image" />
+                            <div class="form-text text-light opacity-75">
+                                If left empty, TasteOfHome will generate an event image automatically.
+                            </div>
                         </div>
 
                         <div class="col-md-4">

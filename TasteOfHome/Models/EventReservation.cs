@@ -51,5 +51,36 @@ namespace TasteOfHome.Models
 
         [StringLength(150)]
         public string? StripePaymentIntentId { get; set; }
+
+        [StringLength(80)]
+        public string? TicketCode { get; set; }
+
+        public DateTime? TicketIssuedAt { get; set; }
+
+        public bool IsCheckedIn { get; set; } = false;
+
+        public DateTime? CheckedInAt { get; set; }
+
+        [StringLength(150)]
+        public string? CheckedInByEmail { get; set; }
+
+        [NotMapped]
+        public bool HasValidTicket =>
+            PaymentStatus == "Paid" &&
+            Status != "Cancelled" &&
+            !string.IsNullOrWhiteSpace(TicketCode);
+
+        [NotMapped]
+        public string TicketStatusText
+        {
+            get
+            {
+                if (Status == "Cancelled") return "Cancelled";
+                if (PaymentStatus != "Paid") return "Payment Pending";
+                if (IsCheckedIn) return "Checked In";
+                if (!string.IsNullOrWhiteSpace(TicketCode)) return "Ticket Ready";
+                return "Processing";
+            }
+        }
     }
 }

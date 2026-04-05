@@ -8,7 +8,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
             <h2 class="fw-bold mb-1">My Hosted Event Bookings</h2>
-            <p class="text-muted mb-0">Manage your TasteOfHome hosted event reservations and payment status.</p>
+            <p class="text-muted mb-0">Manage your TasteOfHome hosted event reservations, ticket QR, and payment status.</p>
         </div>
 
         <a asp-page="/Events/Index" class="btn btn-outline-dark">
@@ -28,9 +28,15 @@
             {
                 var statusClass = booking.Status == "Cancelled"
                 ? "bg-danger"
+                : booking.IsCheckedIn
+                ? "bg-primary"
                 : booking.PaymentStatus == "Paid"
                 ? "bg-success"
                 : "bg-warning text-dark";
+
+                var qrPayload = !string.IsNullOrWhiteSpace(booking.TicketCode)
+                ? $"{Model.QrPayloadPrefix}{booking.TicketCode}"
+                : "";
 
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -41,7 +47,7 @@
                                     <div class="text-muted small">@booking.CulturalEvent?.Category • @booking.CulturalEvent?.City</div>
                                 </div>
 
-                                <span class="badge @statusClass px-3 py-2">@booking.Status / @booking.PaymentStatus</span>
+                                <span class="badge @statusClass px-3 py-2">@booking.TicketStatusText</span>
                             </div>
 
                             <div class="mb-2"><strong>Date:</strong> @booking.CulturalEvent?.EventDate.ToString("MMMM dd, yyyy")</div>
@@ -60,16 +66,60 @@
                                 </div>
                             }
 
+                            @if (booking.HasValidTicket)
+                            {
+                                <div class="mt-4 p-3 rounded-4 border bg-light">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                                        <div>
+                                            <div class="fw-bold mb-1">Digital Event Ticket</div>
+                                            <div class="text-muted small mb-2">Show this QR at check-in.</div>
+                                            <div class="small"><strong>Ticket Code:</strong> @booking.TicketCode</div>
+
+                                            @if (booking.TicketIssuedAt.HasValue)
+                                            {
+                                                <div class="small text-muted">Issued: @booking.TicketIssuedAt.Value.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</div>
+                                            }
+
+                                            @if (booking.IsCheckedIn && booking.CheckedInAt.HasValue)
+                                            {
+                                                <div class="small text-success fw-semibold mt-2">
+                                                    Checked in on @booking.CheckedInAt.Value.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")
+                                                </div>
+                                            }
+                                        </div>
+
+                                        <div class="text-center">
+                                            <div class="qr-ticket-box bg-white border rounded-4 p-2 shadow-sm"
+                                                 data-ticket="@qrPayload"
+                                                 id="qr-@booking.Id"
+                                                 style="width: 180px; min-height: 180px;"></div>
+                                            <div class="small text-muted mt-2">Secure QR Ticket</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else if (booking.PaymentStatus != "Paid" && booking.Status != "Cancelled")
+                            {
+                                <div class="mt-4">
+                                    <span class="badge bg-warning text-dark align-self-center px-3 py-2">
+                                        Payment still pending
+                                    </span>
+                                </div>
+                            }
+
                             <div class="mt-4 d-flex gap-2 flex-wrap">
                                 <a asp-page="/Events/Index" class="btn btn-outline-dark btn-sm">
                                     View Events
                                 </a>
 
-                                @if (booking.PaymentStatus != "Paid" && booking.Status != "Cancelled")
+                                @if (booking.Status != "Cancelled" && !booking.IsCheckedIn)
                                 {
-                                    <span class="badge bg-warning text-dark align-self-center px-3 py-2">
-                                        Payment still pending
-                                    </span>
+                                    <form method="post" asp-page-handler="Cancel" asp-route-id="@booking.Id"
+                                          onsubmit="return confirm('Cancel this booking?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            Cancel Booking
+                                        </button>
+                                    </form>
                                 }
                             </div>
                         </div>
@@ -89,3 +139,22 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.querySelectorAll(".qr-ticket-box").forEach(function (box) {
+            var payload = box.getAttribute("data-ticket");
+            if (!payload) {
+                box.innerHTML = "<div class='small text-muted p-3'>QR not ready</div>";
+                return;
+            }
+
+            new QRCode(box, {
+                text: payload,
+                width: 160,
+                height: 160
+            });
+        });
+    </script>
+}

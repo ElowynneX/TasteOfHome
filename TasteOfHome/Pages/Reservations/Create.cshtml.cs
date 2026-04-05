@@ -35,6 +35,9 @@ namespace TasteOfHome.Pages.Reservations
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
+        public int MaxGuestsAllowed { get; set; } = 12;
+        public bool ReservationsEnabled { get; set; } = true;
+
         public List<string> TimeSlots { get; } = new()
         {
             "5:00 PM",
@@ -89,11 +92,22 @@ namespace TasteOfHome.Pages.Reservations
             if (Restaurant.Id == 0)
                 return RedirectToPage("/Error");
 
+            var adminSettings = await GetAdminSettingsAsync();
+            ReservationsEnabled = adminSettings.EnableRestaurantReservations;
+            MaxGuestsAllowed = adminSettings.MaxGuestsPerReservation;
+
+            var userEmail = GetCurrentEmail();
+            var userSettings = await GetUserSettingsAsync(userEmail);
+
             Input.RestaurantId = restaurantId;
             Input.ReservationDate = DateTime.Today.AddDays(1);
             Input.ReservationTime = "7:00 PM";
-            Input.NumberOfGuests = 2;
-            Input.CustomerName = User.FindFirstValue(ClaimTypes.Name) ?? "";
+            Input.NumberOfGuests = Math.Clamp(userSettings?.DefaultGuestCount ?? 2, 1, MaxGuestsAllowed);
+            Input.CustomerName = !string.IsNullOrWhiteSpace(userSettings?.FullName)
+                ? userSettings!.FullName
+                : (User.FindFirstValue(ClaimTypes.Name) ?? "");
+            Input.PhoneNumber = userSettings?.PhoneNumber ?? "";
+            Input.SpecialRequest = BuildSuggestedReservationNote(userSettings);
 
             return Page();
         }
@@ -106,6 +120,15 @@ namespace TasteOfHome.Pages.Reservations
             if (Restaurant.Id == 0)
                 return RedirectToPage("/Error");
 
+            var adminSettings = await GetAdminSettingsAsync();
+            ReservationsEnabled = adminSettings.EnableRestaurantReservations;
+            MaxGuestsAllowed = adminSettings.MaxGuestsPerReservation;
+
+            if (!ReservationsEnabled)
+            {
+                ModelState.AddModelError(string.Empty, "Restaurant reservations are currently paused by admin.");
+            }
+
             if (Input.ReservationDate.Date < DateTime.Today)
             {
                 ModelState.AddModelError("Input.ReservationDate", "Reservation date cannot be in the past.");
@@ -116,13 +139,19 @@ namespace TasteOfHome.Pages.Reservations
                 ModelState.AddModelError("Input.ReservationTime", "Please select a valid time slot.");
             }
 
+            if (Input.NumberOfGuests > MaxGuestsAllowed)
+            {
+                ModelState.AddModelError("Input.NumberOfGuests", $"You can reserve up to {MaxGuestsAllowed} guest(s) right now.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "";
+            var userEmail = GetCurrentEmail();
+            var userSettings = await GetUserSettingsAsync(userEmail);
 
             var reservation = new Reservation
             {
@@ -141,7 +170,7 @@ namespace TasteOfHome.Pages.Reservations
             _db.Reservations.Add(reservation);
             await _db.SaveChangesAsync();
 
-            await TrySendRestaurantReservationNotificationsAsync(userEmail, reservation);
+            await TrySendRestaurantReservationNotificationsAsync(userEmail, reservation, userSettings);
 
             TempData["StatusMessage"] =
                 $"Reservation request submitted for {Restaurant.Name} on {reservation.ReservationDate:MMMM dd, yyyy} at {reservation.ReservationTime}.";
@@ -149,18 +178,18 @@ namespace TasteOfHome.Pages.Reservations
             return RedirectToPage("/Reservations/MyReservations");
         }
 
-        private async Task TrySendRestaurantReservationNotificationsAsync(string userEmail, Reservation reservation)
+        private async Task TrySendRestaurantReservationNotificationsAsync(string userEmail, Reservation reservation, UserSettings? userSettings)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(userEmail))
+                if (!string.IsNullOrWhiteSpace(userEmail) && (userSettings?.EmailNotificationsEnabled ?? true))
                 {
                     var subject = $"TasteOfHome Reservation Received - {Restaurant.Name}";
                     var htmlBody = $@"
                         <div style='font-family:Arial,sans-serif;line-height:1.6;color:#222'>
                             <h2 style='color:#ff6b35;'>Reservation Received</h2>
                             <p>Hi {reservation.CustomerName},</p>
-                            <p>Congrats! Your restaurant reservation request has been received by <strong>TasteOfHome</strong>.</p>
+                            <p>Your restaurant reservation request has been received by <strong>TasteOfHome</strong>.</p>
 
                             <div style='background:#fff4ef;padding:16px;border-radius:12px;border:1px solid #ffd8c7;'>
                                 <p><strong>Restaurant:</strong> {Restaurant.Name}</p>
@@ -170,14 +199,13 @@ namespace TasteOfHome.Pages.Reservations
                                 <p><strong>Status:</strong> {reservation.Status}</p>
                             </div>
 
-                            <p style='margin-top:16px;'>We’ll keep your booking details ready in your TasteOfHome account.</p>
-                            <p>Thank you for using TasteOfHome.</p>
+                            <p style='margin-top:16px;'>Thank you for using TasteOfHome.</p>
                         </div>";
 
                     await _emailSender.SendAsync(userEmail, subject, htmlBody);
                 }
 
-                if (!string.IsNullOrWhiteSpace(reservation.PhoneNumber))
+                if (!string.IsNullOrWhiteSpace(reservation.PhoneNumber) && (userSettings?.SmsNotificationsEnabled ?? true))
                 {
                     var sms =
                         $"TasteOfHome: Hi {reservation.CustomerName}, your reservation request for {Restaurant.Name} on " +
@@ -191,6 +219,48 @@ namespace TasteOfHome.Pages.Reservations
                 _logger.LogError(ex, "Failed to send restaurant reservation notification for reservation {ReservationId}", reservation.Id);
                 TempData["NotificationWarning"] = "Reservation saved, but confirmation email/SMS could not be sent.";
             }
+        }
+
+        private async Task<TasteOfHome.Models.AdminSettings> GetAdminSettingsAsync()
+        {
+            var settings = await _db.AdminSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
+            return settings ?? new TasteOfHome.Models.AdminSettings();
+        }
+
+        private async Task<UserSettings?> GetUserSettingsAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            return await _db.UserSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Email == email);
+        }
+
+        private string GetCurrentEmail()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
+
+            if (string.IsNullOrWhiteSpace(email) && !string.IsNullOrWhiteSpace(FakeUsers.LoggedInEmail))
+            {
+                email = FakeUsers.LoggedInEmail;
+            }
+
+            return email.Trim();
+        }
+
+        private static string? BuildSuggestedReservationNote(UserSettings? userSettings)
+        {
+            if (userSettings == null)
+                return null;
+
+            var parts = new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(userSettings.DietaryPreference))
+                parts.Add($"Dietary preference: {userSettings.DietaryPreference}");
+
+            if (!string.IsNullOrWhiteSpace(userSettings.SeatingPreference))
+                parts.Add($"Seating preference: {userSettings.SeatingPreference}");
+
+            return parts.Count == 0 ? null : string.Join(" | ", parts);
         }
 
         public string GetImageFileName(int id)

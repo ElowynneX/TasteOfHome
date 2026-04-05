@@ -5,6 +5,7 @@ using Stripe;
 using Stripe.Checkout;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
+using TasteOfHome.Services;
 
 namespace TasteOfHome.Controllers
 {
@@ -67,6 +68,12 @@ namespace TasteOfHome.Controllers
                         reservation.StripeCheckoutSessionId = session.Id;
                         reservation.StripePaymentIntentId = session.PaymentIntentId;
 
+                        if (string.IsNullOrWhiteSpace(reservation.TicketCode))
+                        {
+                            reservation.TicketCode = await GenerateUniqueTicketCodeAsync();
+                            reservation.TicketIssuedAt = DateTime.UtcNow;
+                        }
+
                         if (reservation.CulturalEvent != null)
                         {
                             var newReservedSpots = reservation.CulturalEvent.ReservedSpots + reservation.NumberOfSpots;
@@ -79,6 +86,19 @@ namespace TasteOfHome.Controllers
             }
 
             return Ok();
+        }
+
+        private async Task<string> GenerateUniqueTicketCodeAsync()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var code = EventTicketCodeGenerator.Generate();
+                var exists = await _db.EventReservations.AnyAsync(r => r.TicketCode == code);
+                if (!exists)
+                    return code;
+            }
+
+            return $"{EventTicketCodeGenerator.Generate()}-{DateTime.UtcNow.Ticks}";
         }
     }
 }

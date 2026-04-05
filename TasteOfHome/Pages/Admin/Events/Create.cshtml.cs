@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using TasteOfHome.Data;
 using TasteOfHome.Models;
+using TasteOfHome.Services;
 
 namespace TasteOfHome.Pages.Admin.Events
 {
@@ -11,11 +12,19 @@ namespace TasteOfHome.Pages.Admin.Events
     {
         private readonly AppDbContext _db;
         private readonly IConfiguration _configuration;
+        private readonly IAiEventImageService _aiEventImageService;
+        private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(AppDbContext db, IConfiguration configuration)
+        public CreateModel(
+            AppDbContext db,
+            IConfiguration configuration,
+            IAiEventImageService aiEventImageService,
+            ILogger<CreateModel> logger)
         {
             _db = db;
             _configuration = configuration;
+            _aiEventImageService = aiEventImageService;
+            _logger = logger;
         }
 
         [BindProperty]
@@ -70,6 +79,38 @@ namespace TasteOfHome.Pages.Admin.Events
             if (!ModelState.IsValid)
                 return Page();
 
+            string? finalImageUrl = string.IsNullOrWhiteSpace(Input.ImageUrl)
+                ? null
+                : Input.ImageUrl.Trim();
+
+            var aiImageGenerated = false;
+
+            if (string.IsNullOrWhiteSpace(finalImageUrl))
+            {
+                try
+                {
+                    finalImageUrl = await _aiEventImageService.GenerateEventImageAsync(
+                        new EventImageGenerationRequest
+                        {
+                            Title = Input.Title.Trim(),
+                            Category = Input.Category.Trim(),
+                            CultureTag = Input.CultureTag.Trim(),
+                            VenueName = Input.VenueName.Trim(),
+                            City = Input.City.Trim(),
+                            Description = Input.Description.Trim(),
+                            FoodDetails = Input.FoodDetails,
+                            EntertainmentDetails = Input.EntertainmentDetails,
+                            DressCode = Input.DressCode
+                        });
+
+                    aiImageGenerated = !string.IsNullOrWhiteSpace(finalImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "AI event image generation failed for event title {Title}", Input.Title);
+                }
+            }
+
             var eventItem = new CulturalEvent
             {
                 Title = Input.Title.Trim(),
@@ -86,7 +127,7 @@ namespace TasteOfHome.Pages.Admin.Events
                 DressCode = string.IsNullOrWhiteSpace(Input.DressCode) ? null : Input.DressCode.Trim(),
                 FoodDetails = string.IsNullOrWhiteSpace(Input.FoodDetails) ? null : Input.FoodDetails.Trim(),
                 EntertainmentDetails = string.IsNullOrWhiteSpace(Input.EntertainmentDetails) ? null : Input.EntertainmentDetails.Trim(),
-                ImageUrl = string.IsNullOrWhiteSpace(Input.ImageUrl) ? null : Input.ImageUrl.Trim(),
+                ImageUrl = finalImageUrl,
                 PricePerPerson = Input.PricePerPerson,
                 Capacity = Input.Capacity,
                 ReservedSpots = 0,
@@ -99,7 +140,10 @@ namespace TasteOfHome.Pages.Admin.Events
             _db.CulturalEvents.Add(eventItem);
             await _db.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Event created successfully.";
+            TempData["SuccessMessage"] = aiImageGenerated
+                ? "Event created successfully with an AI-generated image."
+                : "Event created successfully.";
+
             return RedirectToPage("/Admin/Events/Index");
         }
 

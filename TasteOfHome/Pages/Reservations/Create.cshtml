@@ -28,6 +28,13 @@
         </div>
     </div>
 
+    @if (!Model.ReservationsEnabled)
+    {
+        <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4">
+            Restaurant reservations are currently paused by admin.
+        </div>
+    }
+
     <div class="row g-4">
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm rounded-4">
@@ -75,7 +82,7 @@
                             <div class="col-md-6">
                                 <label asp-for="Input.NumberOfGuests" class="form-label fw-semibold">Number of Guests</label>
                                 <select asp-for="Input.NumberOfGuests" class="form-select form-select-lg">
-                                    @for (int i = 1; i <= 12; i++)
+                                    @for (int i = 1; i <= Model.MaxGuestsAllowed; i++)
                                     {
                                         <option value="@i">@i</option>
                                     }
@@ -94,10 +101,19 @@
                         </div>
 
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-lg text-white fw-semibold"
-                                    style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
-                                Confirm Reservation
-                            </button>
+                            @if (Model.ReservationsEnabled)
+                            {
+                                <button type="submit" class="btn btn-lg text-white fw-semibold"
+                                        style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
+                                    Confirm Reservation
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-lg btn-secondary" style="border-radius: 14px;" disabled>
+                                    Reservations Unavailable
+                                </button>
+                            }
                         </div>
                     </form>
                 </div>
@@ -120,8 +136,11 @@
                         <span class="badge bg-primary">Authenticity @Model.Restaurant.Authenticity%</span>
                     </div>
 
+                    <p class="text-muted mb-2">
+                        Your saved settings can auto-fill guest count, phone number, dietary notes, and seating preference.
+                    </p>
                     <p class="text-muted mb-0">
-                        Reservations are saved with <strong>Pending</strong> status first. This keeps the experience realistic for your capstone without requiring live seat inventory.
+                        Reservations are saved with <strong>Pending</strong> status first to keep the experience realistic.
                     </p>
                 </div>
             </div>

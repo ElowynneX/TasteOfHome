@@ -15,6 +15,9 @@ namespace TasteOfHome.Data
         public DbSet<Reservation> Reservations => Set<Reservation>();
         public DbSet<CulturalEvent> CulturalEvents => Set<CulturalEvent>();
         public DbSet<EventReservation> EventReservations => Set<EventReservation>();
+        public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+        public DbSet<UserSettings> UserSettings => Set<UserSettings>();
+        public DbSet<AdminSettings> AdminSettings => Set<AdminSettings>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +46,23 @@ namespace TasteOfHome.Data
             modelBuilder.Entity<EventReservation>()
                 .Property(r => r.AmountPaid)
                 .HasPrecision(10, 2);
+
+            modelBuilder.Entity<UserProfile>()
+                .HasIndex(p => p.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<UserSettings>()
+                .ToTable("UserSettings");
+
+            modelBuilder.Entity<UserSettings>()
+                .HasIndex(s => s.Email)
+                .IsUnique();
+
+            modelBuilder.Entity<AdminSettings>()
+                .ToTable("AdminSettings");
+
+            modelBuilder.Entity<AdminSettings>()
+                .HasKey(s => s.Id);
         }
     }
 }

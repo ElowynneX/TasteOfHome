@@ -48,19 +48,51 @@ namespace TasteOfHome.Pages
                 return;
             }
 
-            DisplayName = BuildDisplayName(Email);
+            var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.Email == Email);
+
+            if (profile != null)
+            {
+                DisplayName = profile.DisplayName;
+                LocationLabel = string.IsNullOrWhiteSpace(profile.Location) ? "TasteOfHome Member" : profile.Location;
+            }
+            else
+            {
+                DisplayName = BuildDisplayName(Email);
+                LocationLabel = "TasteOfHome Member";
+            }
+
             DisplayInitial = DisplayName.Substring(0, 1).ToUpper();
 
-            // Safe defaults until reservation/event ownership fields are confirmed
-            RestaurantReservationCount = 0;
-            EventBookingCount = 0;
+            RestaurantReservationCount = await _db.Reservations
+                .CountAsync(r => r.UserId == Email);
+
+            EventBookingCount = await _db.EventReservations
+                .CountAsync(r => r.Email == Email || r.UserId == Email);
 
             HiddenGemSubmissionCount = await _db.HiddenGems
                 .CountAsync(h => h.SubmittedByEmail == Email);
 
-            RecentReservations = new List<ProfileListItem>();
+            RecentReservations = await _db.Reservations
+                .Where(r => r.UserId == Email)
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(5)
+                .Select(r => new ProfileListItem
+                {
+                    Title = r.Restaurant != null ? r.Restaurant.Name : "Restaurant Reservation",
+                    Subtitle = $"{r.ReservationDate:MMM dd, yyyy} • {r.ReservationTime} • {r.NumberOfGuests} guest(s) • {r.Status}"
+                })
+                .ToListAsync();
 
-            RecentEventBookings = new List<ProfileListItem>();
+            RecentEventBookings = await _db.EventReservations
+                .Where(r => r.Email == Email || r.UserId == Email)
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(5)
+                .Select(r => new ProfileListItem
+                {
+                    Title = r.CulturalEvent != null ? r.CulturalEvent.Title : "Event Booking",
+                    Subtitle = $"{r.NumberOfSpots} spot(s) • {r.PaymentStatus} • {r.Status}"
+                })
+                .ToListAsync();
 
             RecentHiddenGems = await _db.HiddenGems
                 .Where(h => h.SubmittedByEmail == Email)

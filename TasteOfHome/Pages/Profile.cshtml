@@ -23,11 +23,7 @@
 
                     <div class="profile-meta-row">
                         <span><i class="bi bi-envelope me-2"></i>@Model.Email</span>
-
-                        @if (!string.IsNullOrWhiteSpace(Model.LocationLabel))
-                        {
-                            <span><i class="bi bi-geo-alt me-2"></i>@Model.LocationLabel</span>
-                        }
+                        <span><i class="bi bi-geo-alt me-2"></i>@Model.LocationLabel</span>
                     </div>
 
                     <div class="profile-badge-row">
@@ -118,7 +114,7 @@
             <div class="profile-content-card">
                 <div class="content-card-header">
                     <h3>Restaurant Reservations</h3>
-                    <p>Your reservation activity on the platform.</p>
+                    <p>Your latest table bookings on the platform.</p>
                 </div>
 
                 @if (Model.RecentReservations.Any())
@@ -135,11 +131,19 @@
                             </div>
                         }
                     </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/Reservations/MyReservations" class="secondary-open-btn">Open All Reservations</a>
+                    </div>
                 }
                 else
                 {
                     <div class="empty-profile-state">
                         No restaurant reservations yet.
+                    </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/Reservations/MyReservations" class="secondary-open-btn">Go to Reservations</a>
                     </div>
                 }
             </div>
@@ -149,7 +153,7 @@
             <div class="profile-content-card">
                 <div class="content-card-header">
                     <h3>Event Bookings</h3>
-                    <p>Your booked events and cultural experiences.</p>
+                    <p>Your booked cultural events and hosted experiences.</p>
                 </div>
 
                 @if (Model.RecentEventBookings.Any())
@@ -166,11 +170,19 @@
                             </div>
                         }
                     </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/Events/MyBookings" class="secondary-open-btn">Open All Event Bookings</a>
+                    </div>
                 }
                 else
                 {
                     <div class="empty-profile-state">
                         No event bookings yet.
+                    </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/Events/MyBookings" class="secondary-open-btn">Go to My Events</a>
                     </div>
                 }
             </div>
@@ -197,11 +209,19 @@
                             </div>
                         }
                     </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/HiddenGems/MySubmissions" class="secondary-open-btn">Open All My Gems</a>
+                    </div>
                 }
                 else
                 {
                     <div class="empty-profile-state">
                         No hidden gem submissions yet.
+                    </div>
+
+                    <div class="tab-footer-link">
+                        <a asp-page="/HiddenGems/MySubmissions" class="secondary-open-btn">Go to My Gems</a>
                     </div>
                 }
             </div>
@@ -411,6 +431,7 @@
         .profile-tab.active {
             background: linear-gradient(135deg, #ff8a00, #ff4d6d);
             color: white;
+            box-shadow: inset 0 0 0 2px #1f2937;
         }
 
     .profile-tab-panel {
@@ -498,7 +519,8 @@
         font-size: 0.95rem;
     }
 
-    .mini-view-btn {
+    .mini-view-btn,
+    .secondary-open-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -511,9 +533,14 @@
         background: linear-gradient(135deg, #ff8a00, #ff4d6d);
     }
 
-        .mini-view-btn:hover {
+        .mini-view-btn:hover,
+        .secondary-open-btn:hover {
             color: white;
         }
+
+    .tab-footer-link {
+        margin-top: 16px;
+    }
 
     .empty-profile-state {
         color: #7a8597;

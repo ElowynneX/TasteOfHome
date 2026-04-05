@@ -7,20 +7,18 @@ using TasteOfHome.Services;
 using TasteOfHome.Models;
 using Stripe;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 
-
-
-
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection("OpenAI"));
 builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
+builder.Services.AddHttpClient<IAiEventImageService, AiEventImageService>();
 builder.Services.AddHttpClient<ILiveEventsService, TicketmasterLiveEventsService>();
+
 builder.Services.Configure<SmtpOptions>(
     builder.Configuration.GetSection("Smtp"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();

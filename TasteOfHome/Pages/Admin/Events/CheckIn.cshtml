@@ -1,0 +1,129 @@
+﻿@page
+@model TasteOfHome.Pages.Admin.Events.CheckInModel
+@{
+    ViewData["Title"] = "Event Check-In";
+    Layout = "/Pages/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid p-4 p-lg-5">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold text-white mb-1">Event Ticket Check-In</h2>
+            <p class="text-light opacity-75 mb-0">Scan or paste a QR ticket code to validate guest entry.</p>
+        </div>
+        <a asp-page="/Admin/Events/Index" class="btn btn-light rounded-pill px-4">
+            Back to Events
+        </a>
+    </div>
+
+    @if (TempData["CheckInSuccess"] != null)
+    {
+        <div class="alert alert-success rounded-4 border-0 shadow-sm">@TempData["CheckInSuccess"]</div>
+    }
+
+    @if (TempData["CheckInError"] != null)
+    {
+        <div class="alert alert-danger rounded-4 border-0 shadow-sm">@TempData["CheckInError"]</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3">Scan Ticket</h4>
+                    <div id="reader" class="rounded-4 overflow-hidden border mb-3" style="background:#fff;"></div>
+
+                    <div class="small text-muted mb-4">
+                        Camera scan works best on HTTPS or localhost.
+                    </div>
+
+                    <form method="post" asp-page-handler="Lookup">
+                        <label class="form-label fw-semibold">Ticket Code</label>
+                        <input asp-for="TicketCode" class="form-control form-control-lg mb-3" placeholder="TOH-EVT-XXXXXXXXXXXX" />
+                        <button type="submit" class="btn text-white rounded-pill px-4"
+                                style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0;">
+                            Lookup Ticket
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-3">Ticket Result</h4>
+
+                    @if (Model.Reservation == null)
+                    {
+                        <div class="text-muted">No ticket loaded yet. Scan or search a ticket code.</div>
+                    }
+                    else
+                    {
+                        <div class="mb-2"><strong>Guest:</strong> @Model.Reservation.CustomerName</div>
+                        <div class="mb-2"><strong>Email:</strong> @Model.Reservation.Email</div>
+                        <div class="mb-2"><strong>Phone:</strong> @Model.Reservation.PhoneNumber</div>
+                        <div class="mb-2"><strong>Event:</strong> @Model.Reservation.CulturalEvent?.Title</div>
+                        <div class="mb-2"><strong>Date:</strong> @Model.Reservation.CulturalEvent?.EventDate.ToString("MMMM dd, yyyy")</div>
+                        <div class="mb-2"><strong>Venue:</strong> @Model.Reservation.CulturalEvent?.VenueName</div>
+                        <div class="mb-2"><strong>Spots:</strong> @Model.Reservation.NumberOfSpots</div>
+                        <div class="mb-2"><strong>Payment:</strong> @Model.Reservation.PaymentStatus</div>
+                        <div class="mb-2"><strong>Booking Status:</strong> @Model.Reservation.Status</div>
+                        <div class="mb-3"><strong>Ticket Code:</strong> @Model.Reservation.TicketCode</div>
+
+                        @if (Model.Reservation.IsCheckedIn && Model.Reservation.CheckedInAt.HasValue)
+                        {
+                            <div class="alert alert-info rounded-4 border-0">
+                                Already checked in on @Model.Reservation.CheckedInAt.Value.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")
+                            </div>
+                        }
+                        else if (Model.Reservation.Status == "Cancelled")
+                        {
+                            <div class="alert alert-danger rounded-4 border-0">
+                                This booking is cancelled.
+                            </div>
+                        }
+                        else if (Model.Reservation.PaymentStatus != "Paid")
+                        {
+                            <div class="alert alert-warning rounded-4 border-0">
+                                This ticket cannot be checked in because payment is not completed.
+                            </div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-page-handler="ConfirmCheckIn">
+                                <input type="hidden" asp-for="TicketCode" value="@Model.Reservation.TicketCode" />
+                                <button type="submit" class="btn btn-success rounded-pill px-4">
+                                    Confirm Check-In
+                                </button>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        function onScanSuccess(decodedText) {
+            const input = document.getElementById("TicketCode");
+            if (input) {
+                input.value = decodedText;
+            }
+        }
+
+        window.addEventListener("load", function () {
+            if (window.Html5QrcodeScanner) {
+                const scanner = new Html5QrcodeScanner("reader", {
+                    fps: 10,
+                    qrbox: 220
+                });
+
+                scanner.render(onScanSuccess);
+            }
+        });
+    </script>
+}

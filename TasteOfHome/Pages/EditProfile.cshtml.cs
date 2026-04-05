@@ -1,14 +1,23 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using TasteOfHome.Data;
+using TasteOfHome.Models;
 
 namespace TasteOfHome.Pages
 {
     [Authorize]
     public class EditProfileModel : PageModel
     {
+        private readonly AppDbContext _db;
+
+        public EditProfileModel(AppDbContext db)
+        {
+            _db = db;
+        }
+
         [BindProperty]
         public InputModel Input { get; set; } = new();
 
@@ -16,13 +25,77 @@ namespace TasteOfHome.Pages
         {
             [Required]
             [Display(Name = "Display Name")]
+            [MaxLength(100)]
             public string DisplayName { get; set; } = "";
 
             [Display(Name = "Location")]
+            [MaxLength(100)]
             public string Location { get; set; } = "";
         }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var email = GetCurrentEmail();
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToPage("/Login");
+            }
+
+            var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.Email == email);
+
+            if (profile != null)
+            {
+                Input.DisplayName = profile.DisplayName;
+                Input.Location = profile.Location ?? "";
+            }
+            else
+            {
+                Input.DisplayName = BuildDisplayName(email);
+                Input.Location = "";
+            }
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            var email = GetCurrentEmail();
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return RedirectToPage("/Login");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var profile = await _db.UserProfiles.FirstOrDefaultAsync(p => p.Email == email);
+
+            if (profile == null)
+            {
+                profile = new UserProfile
+                {
+                    Email = email,
+                    DisplayName = Input.DisplayName.Trim(),
+                    Location = string.IsNullOrWhiteSpace(Input.Location) ? null : Input.Location.Trim()
+                };
+
+                _db.UserProfiles.Add(profile);
+            }
+            else
+            {
+                profile.DisplayName = Input.DisplayName.Trim();
+                profile.Location = string.IsNullOrWhiteSpace(Input.Location) ? null : Input.Location.Trim();
+            }
+
+            await _db.SaveChangesAsync();
+
+            TempData["ProfileMessage"] = "Profile updated successfully.";
+            return RedirectToPage("/Profile");
+        }
+
+        private string GetCurrentEmail()
         {
             var email = User.Identity?.Name ?? "";
 
@@ -31,19 +104,7 @@ namespace TasteOfHome.Pages
                 email = FakeUsers.LoggedInEmail;
             }
 
-            Input.DisplayName = BuildDisplayName(email);
-            Input.Location = "TasteOfHome Member";
-        }
-
-        public IActionResult OnPost()
-        {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            TempData["ProfileMessage"] = "Profile updated successfully.";
-            return RedirectToPage("/Profile");
+            return email;
         }
 
         private static string BuildDisplayName(string email)

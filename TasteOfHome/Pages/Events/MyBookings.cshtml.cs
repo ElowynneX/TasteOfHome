@@ -19,6 +19,7 @@ namespace TasteOfHome.Pages.Events
         }
 
         public List<EventReservation> Bookings { get; set; } = new();
+        public string QrPayloadPrefix => "TOH-TICKET::";
 
         public async Task OnGetAsync()
         {

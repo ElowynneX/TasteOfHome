@@ -1,0 +1,149 @@
+﻿@page
+@model TasteOfHome.Pages.SettingsModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<div class="container py-4 py-lg-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+        <div>
+            <h1 class="fw-bold mb-1">Settings</h1>
+            <p class="text-muted mb-0">Manage your account preferences, notifications, and dining defaults.</p>
+        </div>
+        <a asp-page="/Profile" class="btn btn-outline-dark rounded-pill px-4">
+            <i class="bi bi-arrow-left me-2"></i>Back to Profile
+        </a>
+    </div>
+
+    @if (TempData["SettingsMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4">
+            @TempData["SettingsMessage"]
+        </div>
+    }
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Account</h4>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.FullName" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.FullName" class="form-control form-control-lg" placeholder="Your full name" />
+                            <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input value="@Model.Email" class="form-control form-control-lg bg-light" readonly />
+                            <div class="form-text">Your account email is used for login and booking confirmation.</div>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.PhoneNumber" class="form-control form-control-lg" placeholder="+1 416 555 1234" />
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Dining Preferences</h4>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.DefaultGuestCount" class="form-label fw-semibold"></label>
+                            <select asp-for="Input.DefaultGuestCount" class="form-select form-select-lg">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@i guest(s)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Input.DefaultGuestCount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.DietaryPreference" class="form-label fw-semibold"></label>
+                            <input asp-for="Input.DietaryPreference" class="form-control form-control-lg" placeholder="Vegetarian, Halal, Vegan, Jain..." />
+                            <span asp-validation-for="Input.DietaryPreference" class="text-danger"></span>
+                        </div>
+
+                        <div>
+                            <label asp-for="Input.SeatingPreference" class="form-label fw-semibold"></label>
+                            <select asp-for="Input.SeatingPreference" class="form-select form-select-lg">
+                                <option value="">No preference</option>
+                                <option value="Indoor">Indoor</option>
+                                <option value="Outdoor">Outdoor</option>
+                                <option value="Window">Window</option>
+                                <option value="Quiet Corner">Quiet Corner</option>
+                            </select>
+                            <span asp-validation-for="Input.SeatingPreference" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <h4 class="fw-bold mb-3">Notifications</h4>
+                        <p class="text-muted mb-4">These settings affect how TasteOfHome contacts you for reservations and updates.</p>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch fs-5">
+                                    <input asp-for="Input.EmailNotificationsEnabled" class="form-check-input" />
+                                    <label asp-for="Input.EmailNotificationsEnabled" class="form-check-label fw-semibold"></label>
+                                </div>
+                                <div class="text-muted small">Receive reservation confirmations and important account updates by email.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch fs-5">
+                                    <input asp-for="Input.SmsNotificationsEnabled" class="form-check-input" />
+                                    <label asp-for="Input.SmsNotificationsEnabled" class="form-check-label fw-semibold"></label>
+                                </div>
+                                <div class="text-muted small">Receive reservation status updates by SMS if a phone number is saved.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch fs-5">
+                                    <input asp-for="Input.EventAnnouncementsEnabled" class="form-check-input" />
+                                    <label asp-for="Input.EventAnnouncementsEnabled" class="form-check-label fw-semibold"></label>
+                                </div>
+                                <div class="text-muted small">Hear about new cultural events and hosted experiences.</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch fs-5">
+                                    <input asp-for="Input.MarketingEmailsEnabled" class="form-check-input" />
+                                    <label asp-for="Input.MarketingEmailsEnabled" class="form-check-label fw-semibold"></label>
+                                </div>
+                                <div class="text-muted small">Receive curated recommendations and promotional content.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-lg text-white px-5 rounded-pill shadow-sm"
+                            style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border: 0;">
+                        Save Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -13,7 +13,11 @@
             </p>
         </div>
 
-        <div class="events-admin-actions">
+        <div class="events-admin-actions d-flex gap-2 flex-wrap">
+            <a asp-page="/Admin/Events/CheckIn" class="btn-checkin-scanner">
+                <i class="bi bi-qr-code-scan me-2"></i>Check-In Scanner
+            </a>
+
             <a asp-page="/Admin/Events/Create" class="btn-create-event">
                 <i class="bi bi-calendar2-plus me-2"></i>Create Event
             </a>
@@ -65,6 +69,16 @@
             <div>
                 <div class="stat-label">Total Reservations</div>
                 <div class="stat-value">@Model.TotalBookings</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon stat-icon-teal">
+                <i class="bi bi-person-check-fill"></i>
+            </div>
+            <div>
+                <div class="stat-label">Checked-In Guests</div>
+                <div class="stat-value">@Model.CheckedInGuests</div>
             </div>
         </div>
 
@@ -211,6 +225,9 @@
                                         <a asp-page="/Events/Reserve" asp-route-eventId="@item.Id" class="btn-action btn-view">
                                             View
                                         </a>
+                                        <a asp-page="/Admin/Events/CheckIn" class="btn-action btn-checkin">
+                                            Check-In
+                                        </a>
                                         <a href="#" class="btn-action btn-edit">
                                             Edit
                                         </a>
@@ -277,6 +294,26 @@
             box-shadow: 0 14px 28px rgba(255, 110, 77, 0.35);
         }
 
+    .btn-checkin-scanner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(59, 130, 246, 0.16);
+        color: #9fc7ff;
+        text-decoration: none;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        border-radius: 14px;
+        padding: 12px 18px;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+        .btn-checkin-scanner:hover {
+            transform: translateY(-1px);
+            color: white;
+            background: rgba(59, 130, 246, 0.28);
+        }
+
     .events-alert-success {
         background: rgba(25, 135, 84, 0.16);
         border: 1px solid rgba(25, 135, 84, 0.35);
@@ -341,6 +378,10 @@
 
     .stat-icon-gold {
         background: linear-gradient(135deg, #f59e0b, #ef4444);
+    }
+
+    .stat-icon-teal {
+        background: linear-gradient(135deg, #14b8a6, #0f766e);
     }
 
     .stat-label {
@@ -574,6 +615,12 @@
         background: rgba(59, 130, 246, 0.16);
         color: #9fc7ff;
         border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .btn-checkin {
+        background: rgba(20, 184, 166, 0.16);
+        color: #7ce7dc;
+        border: 1px solid rgba(20, 184, 166, 0.25);
     }
 
     .btn-edit {

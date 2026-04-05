@@ -5,19 +5,35 @@
 }
 
 <div class="submit-wrapper">
-
     <div class="submit-card">
-
         <div class="submit-header">
             <h2>Submit a Hidden Gem</h2>
             <p>
-                Hidden Gems are small home-based food providers (family-run kitchens, couple-run services, home chefs, tiffin).
-                They often have higher authenticity than restaurants.
+                Hidden Gems are small home-based food providers like family-run kitchens, couple-run services, home chefs, and tiffin providers.
             </p>
+
+            @if (Model.RequireApprovalWorkflow)
+            {
+                <div class="alert alert-info mt-3 mb-0 rounded-4 border-0 shadow-sm">
+                    Submissions will stay pending until admin review.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-success mt-3 mb-0 rounded-4 border-0 shadow-sm">
+                    Hidden gems can be published immediately after submission.
+                </div>
+            }
         </div>
 
-        <form method="post" class="submit-form">
+        @if (!Model.HiddenGemSubmissionsEnabled)
+        {
+            <div class="alert alert-warning mt-4 rounded-4 border-0 shadow-sm">
+                Hidden gem submissions are currently paused by admin.
+            </div>
+        }
 
+        <form method="post" class="submit-form">
             <div asp-validation-summary="All" class="validation-box"></div>
 
             <div class="form-group-modern">
@@ -46,7 +62,7 @@
 
             <div class="form-group-modern">
                 <label asp-for="HiddenGem.ContactInfo">Contact / Order method (optional)</label>
-                <input asp-for="HiddenGem.ContactInfo" placeholder="PhoneX / WhatsApp / Instagram / Email" />
+                <input asp-for="HiddenGem.ContactInfo" placeholder="Phone / WhatsApp / Instagram / Email" />
                 <span asp-validation-for="HiddenGem.ContactInfo"></span>
             </div>
 
@@ -63,19 +79,25 @@
             </div>
 
             <div class="submit-actions">
-                <button type="submit" class="btn-submit-modern">
-                    Submit Hidden Gem
-                </button>
+                @if (Model.HiddenGemSubmissionsEnabled)
+                {
+                    <button type="submit" class="btn-submit-modern">
+                        Submit Hidden Gem
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn-submit-modern" disabled style="opacity:.65; cursor:not-allowed;">
+                        Submissions Unavailable
+                    </button>
+                }
 
                 <a href="/HiddenGems/Index" class="btn-back-modern">
                     Cancel
                 </a>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
 @section Scripts {
