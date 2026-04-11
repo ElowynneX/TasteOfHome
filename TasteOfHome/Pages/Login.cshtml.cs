@@ -43,9 +43,7 @@ namespace TasteOfHome.Pages
 
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
 
-            Console.WriteLine($"[LOGIN] email={email}, found={(user != null)}");
-            if (user != null)
-                Console.WriteLine($"[LOGIN] hashFormatHasDot={user.PasswordHash.Contains('.')}");
+           
 
             if (user == null || !PasswordHasher.Verify(password, user.PasswordHash))
             {

@@ -61,23 +61,22 @@ namespace TasteOfHome.Controllers
             };
 
             _db.Feedback.Add(feedback);
-            Console.WriteLine(feedback.ToString());
             await _db.SaveChangesAsync();
 
             //Update restaurant rating & authenticity
             var feedbackList = await _db.Feedback.Where(f => f.RestaurantId.Equals(dto.RestaurantId)).ToListAsync();
             float totalRating = 0;
-            int totalAuthenticity = 0; 
+            int totalAuthenticity = 0;
 
-            foreach(var f in feedbackList)
+            foreach (var f in feedbackList)
             {
                 totalRating += f.Rating;
                 totalAuthenticity += f.Authenticity;
             }
 
             restaurant.NumberOfReviews = feedbackList.Count;
-            restaurant.Rating = MathF.Round(totalRating/restaurant.NumberOfReviews, 1);
-            restaurant.Authenticity = totalAuthenticity/restaurant.NumberOfReviews;
+            restaurant.Rating = MathF.Round(totalRating / restaurant.NumberOfReviews, 1);
+            restaurant.Authenticity = (int)Math.Round((double)totalAuthenticity / restaurant.NumberOfReviews);
 
             await _db.SaveChangesAsync();
 

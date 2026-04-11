@@ -39,13 +39,13 @@ else
         <div class="card border-0 shadow-sm overflow-hidden mb-4 rounded-4">
             <div class="position-relative">
                 <img src="@(string.IsNullOrWhiteSpace(Model.Restaurant.ImageUrl)
-                                ? $"/images/restaurants/{Model.GetImageFileName(Model.Restaurant.Id)}"
-                                : Model.Restaurant.ImageUrl)"
-                     alt="@Model.Restaurant.Name"
-                     loading="lazy"
-                     onerror="this.src='/images/restaurants/default.jpg'"
-                     class="w-100"
-                     style="height: 360px; object-fit: cover;" />
+                                                     ? $"/images/restaurants/{Model.GetImageFileName(Model.Restaurant.Id)}"
+                                                     : Model.Restaurant.ImageUrl)"
+                 alt="@Model.Restaurant.Name"
+                 loading="lazy"
+                 onerror="this.onerror=null;this.src='/images/restaurants/default.svg'"
+                 class="w-100"
+                 style="height: 360px; object-fit: cover;" />
 
                 <div class="position-absolute top-0 start-0 w-100 h-100"
                      style="background: linear-gradient(to top, rgba(0,0,0,.76), rgba(0,0,0,.2));"></div>
@@ -105,7 +105,7 @@ else
                                 <i class="bi bi-calendar-check"></i> Reserve a Table
                             </a>
 
-                            @if (User.Identity?.IsAuthenticated ?? false)
+                        @if (User.Identity?.IsAuthenticated ?? false)
                             {
                                 <a asp-page="/Restaurants/Feedback"
                                    asp-route-id="@Model.Restaurant.Id"
@@ -166,7 +166,9 @@ else
 
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width:40px;height:40px;background:#fff2e8;">📖</div>
+                                 style="width:40px;height:40px;background:#fff2e8;">
+                                📖
+                            </div>
                             <h4 class="fw-bold mb-0">Our Story & Heritage</h4>
                         </div>
 
@@ -219,7 +221,9 @@ else
 
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center"
-                         style="width:40px;height:40px;background:#fff2e8;">🍽</div>
+                         style="width:40px;height:40px;background:#fff2e8;">
+                        🍽
+                    </div>
                     <h4 class="fw-bold mb-0">Signature Dishes</h4>
                 </div>
 
@@ -270,7 +274,7 @@ else
                             <p>@review.Review</p>
 
                             @if (User.Identity?.IsAuthenticated == true &&
-                                 review.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                                            review.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
                             {
                                 <div class="mt-2">
                                     <a asp-page="/Reviews/Edit"

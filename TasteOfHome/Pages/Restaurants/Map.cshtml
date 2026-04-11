@@ -318,7 +318,7 @@
 
         function buildTohPopupHtml(r) {
             const imageHtml = r.imageUrl
-                ? `<img src="${escapeHtml(r.imageUrl)}" alt="${escapeHtml(r.name)}" class="popup-image" />`
+                ? `<img src="${escapeHtml(r.imageUrl)}" alt="${escapeHtml(r.name)}" class="popup-image" onerror="this.onerror=null;this.outerHTML='<div class=\\'popup-image popup-image-fallback\\'>TasteOfHome</div>'" />`
                 : `<div class="popup-image popup-image-fallback">TasteOfHome</div>`;
 
             const tags = (r.dietaryTags || []).slice(0, 3).map(tag =>
@@ -337,7 +337,7 @@
                         ${tags ? `<div class="popup-tags">${tags}</div>` : ""}
                         <div class="popup-actions">
                             <a href="/Restaurants/Details?id=${r.id}" class="popup-link popup-link-secondary">View Details</a>
-                            <a href="/Reservations/Create?restaurantId=${r.id}" class="popup-link popup-link-primary">Reserve Table</a>
+                            <a href="/Reservations/Create/${r.id}" class="popup-link popup-link-primary">Reserve Table</a>
                         </div>
                     </div>
                 </div>
@@ -346,7 +346,7 @@
 
         function buildLivePopupHtml(p) {
             const imageHtml = p.imageUrl
-                ? `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" class="popup-image" />`
+                ? `<img src="${escapeHtml(p.imageUrl)}" alt="${escapeHtml(p.name)}" class="popup-image" onerror="this.onerror=null;this.outerHTML='<div class=\\'popup-image popup-image-fallback\\'>Nearby Place</div>'" />`
                 : `<div class="popup-image popup-image-fallback">Nearby Place</div>`;
 
             const payload = encodeURIComponent(JSON.stringify({
@@ -688,6 +688,12 @@
         }
 
         document.addEventListener("DOMContentLoaded", initCultureMap);
+
+        window.addEventListener("pageshow", function (e) {
+            if (e.persisted && map) {
+                setTimeout(function () { map.invalidateSize(); }, 100);
+            }
+        });
     </script>
 }
 
@@ -1263,6 +1269,11 @@
             max-height: none;
             overflow: visible;
             padding-right: 0;
+            order: 2;
+        }
+
+        .map-stage-card {
+            order: 1;
         }
 
         .restaurant-list {
@@ -1291,4 +1302,4 @@
             width: 270px !important;
         }
     }
-</style>
+</style>    

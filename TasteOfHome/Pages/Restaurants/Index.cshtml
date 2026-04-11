@@ -200,9 +200,9 @@
                     <div class="restaurant-card">
                         <div class="restaurant-image">
                             <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
-                                                                 ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
-                                                                 : r.ImageUrl)"
-                         onerror="this.src='/images/restaurants/default.jpg'"
+                                                                     ? $"/images/restaurants/{Model.GetImageFileName(r.Id)}"
+                                                                     : r.ImageUrl)"
+                         onerror="this.onerror=null;this.src='/images/restaurants/default.svg'"
                          alt="@r.Name"
                          loading="lazy" />
 
@@ -305,9 +305,9 @@
                     <div class="restaurant-card live-result-card">
                         <div class="restaurant-image">
                             <img src="@(string.IsNullOrWhiteSpace(r.ImageUrl)
-                                                                 ? "/images/restaurants/default.jpg"
-                                                                 : r.ImageUrl)"
-                         onerror="this.src='/images/restaurants/default.jpg'"
+                                                                     ? "/images/restaurants/default.svg"
+                                                                     : r.ImageUrl)"
+                         onerror="this.onerror=null;this.src='/images/restaurants/default.svg'"
                          alt="@r.Name"
                          loading="lazy" />
 
@@ -363,8 +363,7 @@
                                     <input type="hidden" name="imageUrl" value="@r.ImageUrl" />
                                     <input type="hidden" name="servesVegetarianFood" value="@r.ServesVegetarianFood.ToString().ToLower()" />
 
-                                    <button type="submit"
-                                            class="btn btn-outline-dark">
+                                    <button type="submit" class="btn btn-outline-dark">
                                         <i class="bi bi-eye"></i> View Details
                                     </button>
                                 </form>

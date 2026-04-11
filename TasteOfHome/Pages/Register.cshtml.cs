@@ -70,7 +70,7 @@ namespace TasteOfHome.Pages
 
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
-            Console.WriteLine($"[REGISTER] saved user email={email}");
+            
 
             FakeUsers.Users.Add((email, password));
 

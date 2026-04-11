@@ -27,8 +27,6 @@ builder.Services.AddHttpClient<ILiveMapPlacesService, GoogleLiveMapPlacesService
 builder.Services.Configure<StripeOptions>(
     builder.Configuration.GetSection("Stripe"));
 
-builder.Services.AddControllers();
-
 builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -38,10 +36,15 @@ builder.Services.Configure<GooglePlacesOptions>(
     builder.Configuration.GetSection("GooglePlaces"));
 builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
 
-builder.Services.AddAuthentication(options =>
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+var hasGoogleAuth = !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret);
+
+var authBuilder = builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    if (hasGoogleAuth)
+        options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
 })
 .AddCookie(options =>
 {
@@ -49,13 +52,17 @@ builder.Services.AddAuthentication(options =>
     options.LogoutPath = "/logout";
     options.ExpireTimeSpan = TimeSpan.FromHours(12);
     options.SlidingExpiration = true;
-})
-.AddGoogle(options =>
-{
-    options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
-    options.SaveTokens = true;
 });
+
+if (hasGoogleAuth)
+{
+    authBuilder.AddGoogle(options =>
+    {
+        options.ClientId = googleClientId!;
+        options.ClientSecret = googleClientSecret!;
+        options.SaveTokens = true;
+    });
+}
 
 builder.Services.AddAuthorization();
 
@@ -105,8 +112,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
-app.MapRazorPages();
 app.MapControllers();
 app.MapRazorPages();
 app.Run();

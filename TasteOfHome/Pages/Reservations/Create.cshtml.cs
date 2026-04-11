@@ -221,10 +221,10 @@ namespace TasteOfHome.Pages.Reservations
             }
         }
 
-        private async Task<TasteOfHome.Models.AdminSettings> GetAdminSettingsAsync()
+        private async Task<AdminSettings> GetAdminSettingsAsync()
         {
             var settings = await _db.AdminSettings.AsNoTracking().FirstOrDefaultAsync(s => s.Id == 1);
-            return settings ?? new TasteOfHome.Models.AdminSettings();
+            return settings ?? new AdminSettings();
         }
 
         private async Task<UserSettings?> GetUserSettingsAsync(string email)
@@ -287,7 +287,7 @@ namespace TasteOfHome.Pages.Reservations
                 18 => "la-creperie.jpg",
                 19 => "caribbean-flavors.jpg",
                 20 => "mama-africa.jpg",
-                _ => "default.jpg"
+                _ => "default.svg"
             };
         }
     }

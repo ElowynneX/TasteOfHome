@@ -94,7 +94,7 @@ namespace TasteOfHome.Pages.Restaurants
                 18 => "la-creperie.jpg",
                 19 => "caribbean-flavors.jpg",
                 20 => "mama-africa.jpg",
-                _ => "default.jpg"
+                _ => "default.svg"
             };
         }
 

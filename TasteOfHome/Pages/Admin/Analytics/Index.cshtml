@@ -394,7 +394,7 @@
         border-radius: 24px;
         padding: 20px;
         box-shadow: 0 18px 36px rgba(0,0,0,0.22);
-        min-height: 100%;
+        min-heightmin-height: 100%;
     }
 
     .panel-header h3 {
@@ -534,13 +534,7 @@
                 datasets: [{
                     label: 'Reserved Spots',
                     data: cityData,
-                    backgroundColor: [
-                        '#3b82f6',
-                        '#8b5cf6',
-                        '#14b8a6',
-                        '#f59e0b',
-                        '#ec4899'
-                    ],
+                    backgroundColor: ['#3b82f6','#8b5cf6','#14b8a6','#f59e0b','#ec4899'],
                     borderRadius: 10,
                     borderSkipped: false
                 }]
@@ -548,21 +542,10 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { color: '#dbe7ff' }
-                    }
-                },
+                plugins: { legend: { labels: { color: '#dbe7ff' } } },
                 scales: {
-                    x: {
-                        ticks: { color: '#9eb0d0' },
-                        grid: { color: 'rgba(255,255,255,0.06)' }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: { color: '#9eb0d0' },
-                        grid: { color: 'rgba(255,255,255,0.06)' }
-                    }
+                    x: { ticks: { color: '#9eb0d0' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                    y: { beginAtZero: true, ticks: { color: '#9eb0d0' }, grid: { color: 'rgba(255,255,255,0.06)' } }
                 }
             }
         });
@@ -583,21 +566,10 @@
                 indexAxis: 'y',
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        labels: { color: '#dbe7ff' }
-                    }
-                },
+                plugins: { legend: { labels: { color: '#dbe7ff' } } },
                 scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: { color: '#9eb0d0' },
-                        grid: { color: 'rgba(255,255,255,0.06)' }
-                    },
-                    y: {
-                        ticks: { color: '#9eb0d0' },
-                        grid: { color: 'rgba(255,255,255,0.03)' }
-                    }
+                    x: { beginAtZero: true, ticks: { color: '#9eb0d0' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                    y: { ticks: { color: '#9eb0d0' }, grid: { color: 'rgba(255,255,255,0.03)' } }
                 }
             }
         });
@@ -618,13 +590,7 @@
                 maintainAspectRatio: false,
                 cutout: '68%',
                 plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#dbe7ff',
-                            padding: 16
-                        }
-                    }
+                    legend: { position: 'bottom', labels: { color: '#dbe7ff', padding: 16 } }
                 }
             }
         });
@@ -632,20 +598,10 @@
         function updateLastUpdatedTime() {
             const el = document.getElementById('lastUpdatedText');
             if (!el) return;
-
             const now = new Date();
-            const timeText = now.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-
-            el.textContent = `Last updated at ${timeText}`;
+            el.textContent = `Last updated at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         }
 
         updateLastUpdatedTime();
-
-        setInterval(function () {
-            window.location.reload();
-        }, 30000);
     </script>
 }

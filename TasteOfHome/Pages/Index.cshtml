@@ -42,7 +42,7 @@
                         <div class="widget-badge">New</div>
                         <h3 class="widget-title">Ask TasteOfHome AI</h3>
                         <p class="widget-subtitle">
-                            Example: “I want something spicy and halal under $20”
+                            Example: "I want something spicy and halal under $20"
                         </p>
 
                         <form id="aiAskForm" class="ai-widget-form">
@@ -62,7 +62,7 @@
                         <div id="aiResponseBox" class="ai-chat-container mt-3">
                             <div class="ai-chat-bubble ai-chat-ai">
                                 <div class="ai-bubble-label">TasteOfHome AI</div>
-                                👋 Hi! Tell me what you're craving and I’ll find the best spots for you.
+                                👋 Hi! Tell me what you're craving and I'll find the best spots for you.
                             </div>
                         </div>
                     </div>
@@ -74,6 +74,13 @@
 
 @section Scripts {
     <script>
+        function escapeHtml(text) {
+            if (!text) return "";
+            const div = document.createElement("div");
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
         document.getElementById("aiAskForm")?.addEventListener("submit", async function (e) {
             e.preventDefault();
 
@@ -91,7 +98,7 @@
 
             box.innerHTML = `
                 <div class="ai-chat-bubble ai-chat-user">
-                    ${prompt}
+                    ${escapeHtml(prompt)}
                 </div>
                 <div class="ai-chat-bubble ai-chat-ai ai-thinking">
                     <div class="ai-bubble-label">TasteOfHome AI</div>
@@ -123,32 +130,35 @@
                     return;
                 }
 
-                box.innerHTML = `
+                let html = `
                     <div class="ai-chat-bubble ai-chat-user">
-                        ${prompt}
+                        ${escapeHtml(prompt)}
                     </div>
                     <div class="ai-chat-bubble ai-chat-ai">
                         <div class="ai-bubble-label">TasteOfHome AI</div>
-                        <div class="ai-intro">${data.intro || "Here are the best matches I found for you:"}</div>
+                        <div class="ai-intro">${escapeHtml(data.intro || "Here are the best matches I found for you:")}</div>
                     </div>
                 `;
 
                 if (data.suggestions.length === 0) {
-                    box.innerHTML += `<div class="ai-error">No good matches found for that request.</div>`;
-                    return;
+                    html += `<div class="ai-error">No good matches found for that request.</div>`;
+                } else {
+                    data.suggestions.forEach(item => {
+                        const rid = parseInt(item.restaurantId, 10);
+                        if (isNaN(rid)) return;
+                        html += `
+                            <a href="/Restaurants/Details?id=${rid}" class="ai-chat-card">
+                                <div class="ai-chat-card-top">
+                                    <strong>${escapeHtml(item.name)}</strong>
+                                    <span class="ai-chat-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+                                </div>
+                                <p>${escapeHtml(item.reason)}</p>
+                            </a>
+                        `;
+                    });
                 }
 
-                data.suggestions.forEach(item => {
-                    box.innerHTML += `
-                        <a href="/Restaurants/Details?id=${item.restaurantId}" class="ai-chat-card">
-                            <div class="ai-chat-card-top">
-                                <strong>${item.name}</strong>
-                                <span class="ai-chat-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
-                            </div>
-                            <p>${item.reason}</p>
-                        </a>
-                    `;
-                });
+                box.innerHTML = html;
             } catch {
                 box.innerHTML = `<div class="ai-error">Unable to contact the recommendation service right now.</div>`;
             }
