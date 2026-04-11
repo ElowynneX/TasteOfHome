@@ -4,73 +4,490 @@
     ViewData["Title"] = "Home";
 }
 
-<section class="home-hero">
-    <div class="hero-inner">
-        <h1 class="hero-title">TasteOfHome</h1>
-        <div class="hero-underline"></div>
-        <p class="hero-subtitle">
-            Discover authentic restaurants by cuisine, culture, and dietary needs — all in one place.
-        </p>
-        <a asp-page="/Restaurants/Index" class="hero-btn">Browse Restaurants</a>
-        <div class="hero-meta">Filter by cuisine • dietary preferences • culture</div>
-    </div>
-</section>
+<div class="premium-home-page">
+    <section class="home-hero-section">
+        <div class="container">
+            <div class="home-hero-grid">
+                <div class="hero-left">
+                    <div class="hero-kicker">TasteOfHome • Multicultural Discovery</div>
+                    <h1 class="hero-title">Find authentic food experiences across cultures, communities, and cities.</h1>
+                    <p class="hero-subtitle">
+                        Discover restaurants, reserve tables, explore cultural events, and get AI-powered suggestions tailored to your craving.
+                    </p>
+
+                    <div class="hero-actions">
+                        <a asp-page="/Restaurants/Index" class="hero-primary-btn">
+                            <i class="bi bi-search-heart me-2"></i>Browse Restaurants
+                        </a>
+                    </div>
+
+                    <div class="hero-metrics">
+                        <div class="metric-card">
+                            <div class="metric-number">AI</div>
+                            <div class="metric-label">Smart recommendations</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number">Real</div>
+                            <div class="metric-label">Restaurant database</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-number">3</div>
+                            <div class="metric-label">Best-fit suggestions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <div class="ai-widget-card">
+                        <div class="widget-badge">New</div>
+                        <h3 class="widget-title">Ask TasteOfHome AI</h3>
+                        <p class="widget-subtitle">
+                            Example: “I want something spicy and halal under $20”
+                        </p>
+
+                        <form id="aiAskForm" class="ai-widget-form">
+                            @Html.AntiForgeryToken()
+
+                            <textarea id="aiPrompt"
+                                      name="AiPrompt"
+                                      class="ai-widget-input"
+                                      rows="4"
+                                      placeholder="Tell TasteOfHome AI what kind of food experience you want..."></textarea>
+
+                            <button type="submit" class="hero-primary-btn w-100 justify-content-center">
+                                <i class="bi bi-stars me-2"></i>Get Recommendations
+                            </button>
+                        </form>
+
+                        <div id="aiResponseBox" class="ai-chat-container mt-3">
+                            <div class="ai-chat-bubble ai-chat-ai">
+                                <div class="ai-bubble-label">TasteOfHome AI</div>
+                                👋 Hi! Tell me what you're craving and I’ll find the best spots for you.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("aiAskForm")?.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const promptInput = document.getElementById("aiPrompt");
+            const prompt = promptInput.value.trim();
+            const box = document.getElementById("aiResponseBox");
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
+
+            if (!prompt) {
+                box.innerHTML = `
+                    <div class="ai-error">Please enter what kind of restaurant you want.</div>
+                `;
+                return;
+            }
+
+            box.innerHTML = `
+                <div class="ai-chat-bubble ai-chat-user">
+                    ${prompt}
+                </div>
+                <div class="ai-chat-bubble ai-chat-ai ai-thinking">
+                    <div class="ai-bubble-label">TasteOfHome AI</div>
+                    <div class="ai-loading-inline">
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                        <span class="typing-dot"></span>
+                    </div>
+                    <div class="ai-loading-text-small">Thinking about the best matches from TasteOfHome...</div>
+                </div>
+            `;
+
+            const formData = new FormData();
+            formData.append("AiPrompt", prompt);
+
+            try {
+                const response = await fetch("/?handler=AskAi", {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": token
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data || !data.suggestions) {
+                    box.innerHTML = `<div class="ai-error">Something went wrong while getting recommendations.</div>`;
+                    return;
+                }
+
+                box.innerHTML = `
+                    <div class="ai-chat-bubble ai-chat-user">
+                        ${prompt}
+                    </div>
+                    <div class="ai-chat-bubble ai-chat-ai">
+                        <div class="ai-bubble-label">TasteOfHome AI</div>
+                        <div class="ai-intro">${data.intro || "Here are the best matches I found for you:"}</div>
+                    </div>
+                `;
+
+                if (data.suggestions.length === 0) {
+                    box.innerHTML += `<div class="ai-error">No good matches found for that request.</div>`;
+                    return;
+                }
+
+                data.suggestions.forEach(item => {
+                    box.innerHTML += `
+                        <a href="/Restaurants/Details?id=${item.restaurantId}" class="ai-chat-card">
+                            <div class="ai-chat-card-top">
+                                <strong>${item.name}</strong>
+                                <span class="ai-chat-card-arrow"><i class="bi bi-arrow-up-right"></i></span>
+                            </div>
+                            <p>${item.reason}</p>
+                        </a>
+                    `;
+                });
+            } catch {
+                box.innerHTML = `<div class="ai-error">Unable to contact the recommendation service right now.</div>`;
+            }
+        });
+    </script>
+}
 
 <style>
-    .home-hero {
-        padding: 64px 20px 56px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        background: #f6f3f1;
+    .premium-home-page {
+        background: linear-gradient(180deg, #f8f5f2 0%, #fcfbf9 100%);
+        min-height: calc(100vh - 72px);
     }
 
-    .hero-inner {
-        max-width: 760px;
-        width: 100%;
+    .home-hero-section {
+        padding: 42px 0 32px;
+    }
+
+    .home-hero-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 28px;
+        align-items: center;
+        min-height: 74vh;
+    }
+
+    .hero-left,
+    .ai-widget-card {
+        background: rgba(255,255,255,0.88);
+        border: 1px solid rgba(24, 39, 75, 0.08);
+        box-shadow: 0 16px 38px rgba(24, 39, 75, 0.08);
+        border-radius: 28px;
+    }
+
+    .hero-left {
+        padding: 42px;
+    }
+
+    .hero-kicker {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #ff7a2f;
+        background: #fff1ea;
+        padding: 8px 12px;
+        border-radius: 999px;
+        margin-bottom: 16px;
     }
 
     .hero-title {
-        font-size: clamp(3rem, 7vw, 4.5rem);
+        font-size: clamp(2.4rem, 5vw, 4.3rem);
         font-weight: 900;
-        color: #222;
-        margin-bottom: 10px;
-    }
-
-    .hero-underline {
-        width: 60px;
-        height: 4px;
-        border-radius: 999px;
-        background: #ff6b2c;
-        margin: 0 auto 20px;
+        color: #152033;
+        line-height: 1.05;
+        margin-bottom: 16px;
     }
 
     .hero-subtitle {
-        font-size: 1.35rem;
-        color: #5c6678;
-        line-height: 1.6;
-        margin-bottom: 22px;
+        font-size: 1.08rem;
+        color: #667085;
+        line-height: 1.8;
+        max-width: 760px;
+        margin-bottom: 0;
     }
 
-    .hero-btn {
-        display: inline-block;
-        padding: 14px 28px;
-        border-radius: 999px;
-        background: linear-gradient(135deg, #ff8a00, #ff6b2c);
-        color: white;
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+        margin-bottom: 28px;
+    }
+
+    .hero-primary-btn {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 14px;
+        padding: 13px 18px;
         font-weight: 700;
         text-decoration: none;
-        box-shadow: 0 10px 24px rgba(255, 107, 44, 0.22);
+        border: 0;
+        background: linear-gradient(135deg, #ff8a00, #ff5a3d);
+        color: white;
+        box-shadow: 0 10px 20px rgba(255, 106, 61, 0.22);
+        transition: all 0.2s ease;
     }
 
-        .hero-btn:hover {
+        .hero-primary-btn:hover {
             color: white;
+            transform: translateY(-1px);
         }
 
-    .hero-meta {
-        margin-top: 14px;
-        color: #8a93a3;
-        font-size: 0.95rem;
+    .hero-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .metric-card {
+        background: #f8fafc;
+        border-radius: 20px;
+        padding: 18px;
+    }
+
+    .metric-number {
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #18233c;
+    }
+
+    .metric-label {
+        color: #667085;
+        font-size: 0.92rem;
+    }
+
+    .ai-widget-card {
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .widget-badge {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+    }
+
+    .widget-title {
+        font-size: 1.75rem;
+        font-weight: 900;
+        color: #152033;
+        margin-bottom: 8px;
+    }
+
+    .widget-subtitle {
+        color: #667085;
+        margin-bottom: 18px;
+        line-height: 1.6;
+    }
+
+    .ai-widget-form {
+        display: grid;
+        gap: 14px;
+    }
+
+    .ai-widget-input {
+        width: 100%;
+        border-radius: 18px;
+        border: 1px solid rgba(24, 39, 75, 0.12);
+        padding: 16px;
+        resize: vertical;
+        min-height: 120px;
+        background: #f8fafc;
+        font-size: 1rem;
+        color: #152033;
+    }
+
+        .ai-widget-input:focus {
+            outline: none;
+            border-color: #ff8a00;
+            box-shadow: 0 0 0 4px rgba(255, 138, 0, 0.12);
+        }
+
+    .ai-chat-container {
+        min-height: 280px;
+        border-radius: 20px;
+        background: #f8fafc;
+        padding: 16px;
+        border: 1px solid rgba(24, 39, 75, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ai-chat-bubble {
+        padding: 14px 16px;
+        border-radius: 18px;
+        max-width: 86%;
+        line-height: 1.6;
+    }
+
+    .ai-chat-user {
+        background: linear-gradient(135deg, #ff8a00, #ff5a3d);
+        color: white;
+        align-self: flex-end;
+        box-shadow: 0 10px 18px rgba(255, 106, 61, 0.18);
+    }
+
+    .ai-chat-ai {
+        background: white;
+        border: 1px solid rgba(24, 39, 75, 0.08);
+        color: #334155;
+        align-self: flex-start;
+    }
+
+    .ai-thinking {
+        min-width: 240px;
+    }
+
+    .ai-bubble-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #7c3aed;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+    }
+
+    .ai-intro {
+        color: #334155;
+        font-weight: 600;
+        line-height: 1.7;
+    }
+
+    .ai-loading-inline {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #7c3aed;
+        animation: bounceDot 1.2s infinite ease-in-out;
+    }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+    .ai-loading-text-small {
+        color: #667085;
+        font-size: 0.92rem;
+    }
+
+    @@keyframes bounceDot {
+        0%, 80%, 100% {
+            transform: scale(0.8);
+            opacity: 0.5;
+        }
+
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .ai-chat-card {
+        display: block;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: white;
+        border: 1px solid rgba(24, 39, 75, 0.08);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+        .ai-chat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(18, 30, 48, 0.08);
+        }
+
+    .ai-chat-card-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+        color: #152033;
+    }
+
+        .ai-chat-card-top strong {
+            font-size: 1rem;
+        }
+
+    .ai-chat-card-arrow {
+        color: #ff7a2f;
+        font-size: 1rem;
+    }
+
+    .ai-chat-card p {
+        margin: 0;
+        color: #667085;
+        line-height: 1.6;
+    }
+
+    .ai-error {
+        background: #fff1f2;
+        color: #be123c;
+        padding: 14px;
+        border-radius: 14px;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 1100px) {
+        .home-hero-grid {
+            grid-template-columns: 1fr;
+            min-height: auto;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .home-hero-section {
+            padding: 20px 0 24px;
+        }
+
+        .hero-left,
+        .ai-widget-card {
+            padding: 22px;
+        }
+
+        .hero-metrics {
+            grid-template-columns: 1fr;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .ai-chat-container {
+            min-height: 240px;
+        }
+
+        .ai-chat-bubble {
+            max-width: 100%;
+        }
     }
 </style>

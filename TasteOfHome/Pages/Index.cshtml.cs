@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using TasteOfHome.Data;
@@ -9,20 +10,18 @@ namespace TasteOfHome.Pages
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _db;
-        private readonly IGooglePlacesService _googlePlacesService;
-        private readonly IAiRestaurantEnrichmentService _aiRestaurantEnrichmentService;
+        private readonly IAiRecommendationService _aiService;
 
-        public IndexModel(
-            AppDbContext db,
-            IGooglePlacesService googlePlacesService,
-            IAiRestaurantEnrichmentService aiRestaurantEnrichmentService)
+        public IndexModel(AppDbContext db, IAiRecommendationService aiService)
         {
             _db = db;
-            _googlePlacesService = googlePlacesService;
-            _aiRestaurantEnrichmentService = aiRestaurantEnrichmentService;
+            _aiService = aiService;
         }
 
         public List<HiddenGem> ApprovedHiddenGems { get; set; } = new();
+
+        [BindProperty]
+        public string AiPrompt { get; set; } = "";
 
         public async Task OnGetAsync()
         {
@@ -32,18 +31,35 @@ namespace TasteOfHome.Pages
 
             var showHiddenGems = adminSettings?.ShowHiddenGemsOnHomepage ?? false;
 
-            if (!showHiddenGems)
+            if (showHiddenGems)
             {
-                ApprovedHiddenGems = new List<HiddenGem>();
-                return;
+                ApprovedHiddenGems = await _db.HiddenGems
+                    .AsNoTracking()
+                    .Where(h => h.Status == "Approved")
+                    .OrderByDescending(h => h.CreatedAt)
+                    .Take(3)
+                    .ToListAsync();
+            }
+        }
+
+        public async Task<JsonResult> OnPostAskAiAsync()
+        {
+            if (string.IsNullOrWhiteSpace(AiPrompt))
+            {
+                return new JsonResult(new
+                {
+                    intro = "Please tell me what kind of food you want.",
+                    suggestions = new object[0]
+                });
             }
 
-            ApprovedHiddenGems = await _db.HiddenGems
+            var restaurants = await _db.Restaurants
                 .AsNoTracking()
-                .Where(h => h.Status == "Approved")
-                .OrderByDescending(h => h.CreatedAt)
-                .Take(6)
                 .ToListAsync();
+
+            var result = await _aiService.GetRecommendationsAsync(AiPrompt.Trim(), restaurants);
+
+            return new JsonResult(result);
         }
     }
 }

@@ -18,12 +18,12 @@ builder.Services.Configure<OpenAiOptions>(
 builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
 builder.Services.AddHttpClient<IAiEventImageService, AiEventImageService>();
 builder.Services.AddHttpClient<ILiveEventsService, TicketmasterLiveEventsService>();
-
+builder.Services.AddHttpClient<IAiRecommendationService, AiRecommendationService>();
 builder.Services.Configure<SmtpOptions>(
     builder.Configuration.GetSection("Smtp"));
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<PasswordResetService>();
-
+builder.Services.AddHttpClient<ILiveMapPlacesService, GoogleLiveMapPlacesService>();
 builder.Services.Configure<StripeOptions>(
     builder.Configuration.GetSection("Stripe"));
 
@@ -70,6 +70,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
     DbSeeder.Seed(db);
+
+    var coordinateBackfill = new TasteOfHome.Services.RestaurantCoordinateBackfillService(db);
+    await coordinateBackfill.BackfillAsync();
 }
 
 if (!app.Environment.IsDevelopment())

@@ -52,6 +52,26 @@ namespace TasteOfHome.Pages.Admin.Events
             return Page();
         }
 
+        // ✅ NEW — paste this method here
+        public async Task<IActionResult> OnPostDeleteAsync(int id)
+        {
+            if (!IsAdminUser())
+                return RedirectToPage("/Index");
+
+            var ev = await _db.CulturalEvents.FindAsync(id);
+            if (ev != null)
+            {
+                var reservations = _db.EventReservations.Where(r => r.CulturalEventId == id);
+                _db.EventReservations.RemoveRange(reservations);
+
+                _db.CulturalEvents.Remove(ev);
+                await _db.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Event '{ev.Title}' was deleted successfully.";
+            }
+
+            return RedirectToPage();
+        }
+
         private bool IsAdminUser()
         {
             var userEmail = User.FindFirstValue(ClaimTypes.Email);

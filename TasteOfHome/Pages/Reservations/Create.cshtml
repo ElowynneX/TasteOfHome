@@ -2,75 +2,62 @@
 @model TasteOfHome.Pages.Reservations.CreateModel
 @{
     ViewData["Title"] = "Reserve a Table";
+
+    var heroImage = !string.IsNullOrWhiteSpace(Model.RestaurantImageUrl)
+        ? Model.RestaurantImageUrl
+        : "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80";
 }
 
 <div class="container py-4">
-    <div class="mb-3">
-        <a asp-page="/Restaurants/Details" asp-route-id="@Model.Restaurant.Id" class="text-decoration-none fw-semibold">
-            <i class="bi bi-arrow-left"></i> Back to Restaurant
-        </a>
-    </div>
+    <a asp-page="/Restaurants/Details" asp-route-id="@Model.Restaurant.Id" class="text-decoration-none d-inline-block mb-3">
+        ← Back to Restaurant
+    </a>
 
-    <div class="position-relative overflow-hidden rounded-4 shadow-sm mb-4" style="min-height: 240px;">
-        <img src="@Model.RestaurantImageUrl"
+    <div class="reservation-hero shadow-sm mb-4">
+        <img src="@heroImage"
              alt="@Model.Restaurant.Name"
-             class="w-100 h-100 position-absolute top-0 start-0"
-             style="object-fit: cover;" />
-
-        <div class="position-absolute top-0 start-0 w-100 h-100"
-             style="background: linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,.22));"></div>
-
-        <div class="position-relative text-white p-4" style="z-index: 2;">
-            <span class="badge bg-warning text-dark mb-3">Premium Reservation</span>
-            <h1 class="fw-bold mb-2">Reserve a Table</h1>
-            <p class="mb-1 fs-5">@Model.Restaurant.Name</p>
-            <p class="mb-0 opacity-75">@Model.Restaurant.Cuisine • @Model.Restaurant.Location</p>
+             onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1400&q=80';" />
+        <div class="reservation-hero-overlay">
+            <span class="hero-badge">Premium Reservation</span>
+            <h1>Reserve a Table</h1>
+            <h4>@Model.Restaurant.Name</h4>
+            <p>@Model.Restaurant.Cuisine • @Model.Restaurant.Location</p>
         </div>
     </div>
 
-    @if (!Model.ReservationsEnabled)
-    {
-        <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4">
-            Restaurant reservations are currently paused by admin.
-        </div>
-    }
-
-    <div class="row g-4">
+    <div class="row g-3">
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <h4 class="fw-bold mb-4">Booking Details</h4>
+                    <h3 class="mb-4">Booking Details</h3>
 
                     <form method="post">
-                        <input asp-for="Input.RestaurantId" type="hidden" />
+                        <input type="hidden" asp-for="Input.RestaurantId" />
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="Input.CustomerName" class="form-label fw-semibold"></label>
-                                <input asp-for="Input.CustomerName" class="form-control form-control-lg" placeholder="Your full name" />
+                                <label asp-for="Input.CustomerName" class="form-label"></label>
+                                <input asp-for="Input.CustomerName" class="form-control form-control-lg rounded-3" />
                                 <span asp-validation-for="Input.CustomerName" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Input.PhoneNumber" class="form-label fw-semibold"></label>
-                                <input asp-for="Input.PhoneNumber" class="form-control form-control-lg" placeholder="Phone number" />
+                                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                                <input asp-for="Input.PhoneNumber" class="form-control form-control-lg rounded-3" placeholder="Phone number" />
                                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Input.ReservationDate" class="form-label fw-semibold">Date</label>
-                                <input asp-for="Input.ReservationDate"
-                                       type="date"
-                                       min="@DateTime.Today.ToString("yyyy-MM-dd")"
-                                       class="form-control form-control-lg" />
+                                <label asp-for="Input.ReservationDate" class="form-label">Date</label>
+                                <input asp-for="Input.ReservationDate" type="date" class="form-control form-control-lg rounded-3" />
                                 <span asp-validation-for="Input.ReservationDate" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Input.ReservationTime" class="form-label fw-semibold">Time</label>
-                                <select asp-for="Input.ReservationTime" class="form-select form-select-lg">
+                                <label asp-for="Input.ReservationTime" class="form-label">Time</label>
+                                <select asp-for="Input.ReservationTime" class="form-select form-select-lg rounded-3">
                                     @foreach (var slot in Model.TimeSlots)
                                     {
                                         <option value="@slot">@slot</option>
@@ -80,8 +67,8 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Input.NumberOfGuests" class="form-label fw-semibold">Number of Guests</label>
-                                <select asp-for="Input.NumberOfGuests" class="form-select form-select-lg">
+                                <label asp-for="Input.NumberOfGuests" class="form-label">Number of Guests</label>
+                                <select asp-for="Input.NumberOfGuests" class="form-select form-select-lg rounded-3">
                                     @for (int i = 1; i <= Model.MaxGuestsAllowed; i++)
                                     {
                                         <option value="@i">@i</option>
@@ -91,55 +78,39 @@
                             </div>
 
                             <div class="col-12">
-                                <label asp-for="Input.SpecialRequest" class="form-label fw-semibold">Special Request</label>
+                                <label asp-for="Input.SpecialRequest" class="form-label">Special Request</label>
                                 <textarea asp-for="Input.SpecialRequest"
+                                          class="form-control rounded-3"
                                           rows="4"
-                                          class="form-control"
                                           placeholder="Any dietary restrictions, seating request, or special occasion?"></textarea>
                                 <span asp-validation-for="Input.SpecialRequest" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <div class="d-grid mt-4">
-                            @if (Model.ReservationsEnabled)
-                            {
-                                <button type="submit" class="btn btn-lg text-white fw-semibold"
-                                        style="background: linear-gradient(90deg, #ff7a00, #ff3d54); border:0; border-radius: 14px;">
-                                    Confirm Reservation
-                                </button>
-                            }
-                            else
-                            {
-                                <button type="button" class="btn btn-lg btn-secondary" style="border-radius: 14px;" disabled>
-                                    Reservations Unavailable
-                                </button>
-                            }
-                        </div>
+                        <button type="submit" class="btn btn-lg w-100 rounded-4 mt-4 reserve-btn">
+                            Confirm Reservation
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">Restaurant Summary</h5>
+                    <h3 class="mb-4">Restaurant Summary</h3>
 
-                    <div class="mb-3">
-                        <div class="fw-semibold">@Model.Restaurant.Name</div>
-                        <div class="text-muted">@Model.Restaurant.Address</div>
-                    </div>
+                    <h5 class="mb-2">@Model.Restaurant.Name</h5>
+                    <p class="text-muted mb-3">@Model.Restaurant.Address</p>
 
                     <div class="d-flex flex-wrap gap-2 mb-3">
-                        <span class="badge bg-light text-dark">@Model.Restaurant.Cuisine</span>
-                        <span class="badge bg-success">⭐ @Model.Restaurant.Rating.ToString("0.0")</span>
-                        <span class="badge bg-primary">Authenticity @Model.Restaurant.Authenticity%</span>
+                        <span class="summary-badge summary-badge-cuisine">@Model.Restaurant.Cuisine</span>
+                        <span class="summary-badge summary-badge-rating">⭐ @Model.Restaurant.Rating.ToString("0.0")</span>
+                        <span class="summary-badge summary-badge-auth">Authenticity @Model.Restaurant.Authenticity%</span>
                     </div>
 
-                    <p class="text-muted mb-2">
-                        Your saved settings can auto-fill guest count, phone number, dietary notes, and seating preference.
-                    </p>
                     <p class="text-muted mb-0">
+                        Your saved settings can auto-fill guest count, phone number, dietary notes, and seating preference.
                         Reservations are saved with <strong>Pending</strong> status first to keep the experience realistic.
                     </p>
                 </div>
@@ -151,3 +122,89 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .reservation-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 24px;
+        min-height: 280px;
+        background: #111827;
+    }
+
+        .reservation-hero img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+        }
+
+    .reservation-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.65));
+        color: white;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+    }
+
+        .reservation-hero-overlay h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .reservation-hero-overlay h4 {
+            margin-bottom: 6px;
+        }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        background: #facc15;
+        color: #111827;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 14px;
+    }
+
+    .reserve-btn {
+        background: linear-gradient(135deg, #ff8a00, #ff4d6d);
+        color: white;
+        border: none;
+    }
+
+        .reserve-btn:hover {
+            color: white;
+            opacity: 0.95;
+        }
+
+    .summary-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+
+    .summary-badge-cuisine {
+        background: #f3f4f6;
+        color: #111827;
+    }
+
+    .summary-badge-rating {
+        background: #16a34a;
+        color: white;
+    }
+
+    .summary-badge-auth {
+        background: #2563eb;
+        color: white;
+    }
+</style>
