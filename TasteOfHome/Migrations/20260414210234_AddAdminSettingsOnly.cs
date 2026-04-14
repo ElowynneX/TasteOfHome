@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TasteOfHome.Migrations
 {
     /// <inheritdoc />
-    public partial class AddAdminSettingsTable : Migration
+    public partial class AddAdminSettingsOnly : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

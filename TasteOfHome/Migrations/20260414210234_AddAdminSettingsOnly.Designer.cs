@@ -11,8 +11,8 @@ using TasteOfHome.Data;
 namespace TasteOfHome.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260414203609_AddAdminSettingsTable")]
-    partial class AddAdminSettingsTable
+    [Migration("20260414210234_AddAdminSettingsOnly")]
+    partial class AddAdminSettingsOnly
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
