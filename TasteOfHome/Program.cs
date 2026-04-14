@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.EntityFrameworkCore;
-using TasteOfHome.Data;
-using TasteOfHome.Services;
-using TasteOfHome.Models;
 using Stripe;
+using TasteOfHome.Data;
+using TasteOfHome.Models;
+using TasteOfHome.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,36 +15,43 @@ builder.Services.AddHttpClient();
 
 builder.Services.Configure<OpenAiOptions>(
     builder.Configuration.GetSection("OpenAI"));
+
+builder.Services.Configure<SmtpOptions>(
+    builder.Configuration.GetSection("Smtp"));
+
+builder.Services.Configure<StripeOptions>(
+    builder.Configuration.GetSection("Stripe"));
+
+builder.Services.Configure<GooglePlacesOptions>(
+    builder.Configuration.GetSection("GooglePlaces"));
+
 builder.Services.AddHttpClient<IAiRestaurantEnrichmentService, AiRestaurantEnrichmentService>();
 builder.Services.AddHttpClient<IAiEventImageService, AiEventImageService>();
 builder.Services.AddHttpClient<ILiveEventsService, TicketmasterLiveEventsService>();
 builder.Services.AddHttpClient<IAiRecommendationService, AiRecommendationService>();
-builder.Services.Configure<SmtpOptions>(
-    builder.Configuration.GetSection("Smtp"));
+builder.Services.AddHttpClient<ILiveMapPlacesService, GoogleLiveMapPlacesService>();
+builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
+builder.Services.AddHttpClient<ISmsSender, SmsSender>();
+
 builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<PasswordResetService>();
-builder.Services.AddHttpClient<ILiveMapPlacesService, GoogleLiveMapPlacesService>();
-builder.Services.Configure<StripeOptions>(
-    builder.Configuration.GetSection("Stripe"));
-
-builder.Services.AddHttpClient<ISmsSender, SmsSender>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=tasteofhome.db"));
 
-builder.Services.Configure<GooglePlacesOptions>(
-    builder.Configuration.GetSection("GooglePlaces"));
-builder.Services.AddHttpClient<IGooglePlacesService, GooglePlacesService>();
-
 var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
 var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-var hasGoogleAuth = !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret);
+var hasGoogleAuth =
+    !string.IsNullOrWhiteSpace(googleClientId) &&
+    !string.IsNullOrWhiteSpace(googleClientSecret);
 
 var authBuilder = builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     if (hasGoogleAuth)
+    {
         options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+    }
 })
 .AddCookie(options =>
 {
@@ -67,19 +74,33 @@ if (hasGoogleAuth)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
 var stripeOptions = builder.Configuration.GetSection("Stripe").Get<StripeOptions>();
 if (stripeOptions != null && !string.IsNullOrWhiteSpace(stripeOptions.SecretKey))
 {
     StripeConfiguration.ApiKey = stripeOptions.SecretKey;
 }
+
+// Apply migrations + seed database safely on startup
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-    DbSeeder.Seed(db);
+    var services = scope.ServiceProvider;
 
-    var coordinateBackfill = new TasteOfHome.Services.RestaurantCoordinateBackfillService(db);
-    await coordinateBackfill.BackfillAsync();
+    try
+    {
+        var db = services.GetRequiredService<AppDbContext>();
+
+        db.Database.Migrate();
+        DbSeeder.Seed(db);
+
+        var coordinateBackfill = new RestaurantCoordinateBackfillService(db);
+        await coordinateBackfill.BackfillAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while applying database migrations/seeding.");
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -114,4 +135,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapRazorPages();
+
 app.Run();
